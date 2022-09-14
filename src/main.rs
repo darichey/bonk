@@ -2,9 +2,8 @@ use std::{fs::File, str::FromStr};
 
 use anyhow::Result;
 use chrono::NaiveDate;
-use futures_util::TryFutureExt;
 use serde::Deserialize;
-use sqlx::{sqlite::SqliteConnectOptions, ConnectOptions, Connection, Row, SqliteConnection};
+use sqlx::{sqlite::SqliteConnectOptions, ConnectOptions, Connection, Row};
 
 #[derive(Debug, sqlx::Type)]
 #[repr(transparent)]
@@ -27,8 +26,8 @@ struct Transaction {
     id: TransactionId,
     date: NaiveDate,
     description: String,
-    from: AccountId,
-    to: AccountId,
+    source: AccountId,
+    destination: AccountId,
     amount: u64,
 }
 
@@ -50,11 +49,11 @@ async fn main() -> Result<()> {
         .execute(&mut conn)
         .await?;
 
-    sqlx::query(r#"insert into "account" values (0, 'From')"#)
+    sqlx::query(r#"insert into "account" values (0, 'Source')"#)
         .execute(&mut conn)
         .await?;
 
-    sqlx::query(r#"insert into "account" values (1, 'To')"#)
+    sqlx::query(r#"insert into "account" values (1, 'Destination')"#)
         .execute(&mut conn)
         .await?;
 
@@ -64,7 +63,7 @@ async fn main() -> Result<()> {
 
     for result in rdr.deserialize() {
         let record: Record = result?;
-        sqlx::query(r#"insert into "transaction" ("date", "description", "from", "to", "amount") values (?, ?, ?, ?, ?)"#)
+        sqlx::query(r#"insert into "transaction" ("date", "description", "source", "destination", "amount") values (?, ?, ?, ?, ?)"#)
             .bind(record.date)
             .bind(record.description)
             .bind(0)
