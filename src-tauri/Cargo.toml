@@ -1,8 +1,8 @@
 [package]
-name = "test-app"
-version = "0.0.0"
-description = "A Tauri App"
-authors = ["you"]
+name = "finance-app"
+version = "0.0.1"
+description = "finance-app"
+authors = ["David Richey"]
 license = ""
 repository = ""
 edition = "2021"
