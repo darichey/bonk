@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { invoke } from "@tauri-apps/api/tauri";
+import Link from "next/link";
 
 function App() {
   const [greetMsg, setGreetMsg] = useState("");
@@ -13,6 +14,10 @@ function App() {
   return (
     <div className="container">
       <h1>Welcome to Tauri!</h1>
+
+      <div className="row">
+        <Link href="/test">Test</Link>
+      </div>
 
       <div className="row">
         <div>
