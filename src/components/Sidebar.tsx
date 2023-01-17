@@ -6,6 +6,7 @@ export default function Sidebar() {
       <div>Finance App</div>
       <Link href="/">Home</Link>
       <Link href="/chart">Chart</Link>
+      <Link href="/log">Log</Link>
     </div>
   );
 }
