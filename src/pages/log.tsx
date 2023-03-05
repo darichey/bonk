@@ -1,3 +1,22 @@
+import { useEffect, useState } from "react";
+import { fetchAllTransactions } from "../db/database";
+import { Transaction } from "../db/model";
+
 export default function Log() {
-  return <div>Log</div>;
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+
+  useEffect(() => {
+    fetchAllTransactions().then(setTransactions);
+  }, [setTransactions]);
+
+  return (
+    <div>
+      <div>Log</div>
+      <div>
+        {transactions.map((transaction) => (
+          <div>{transaction.id}</div>
+        ))}
+      </div>
+    </div>
+  );
 }

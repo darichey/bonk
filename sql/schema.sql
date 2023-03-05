@@ -1,4 +1,4 @@
-create table account (id integer primary key, "name" text);
+create table account (id integer primary key, "name" text not null);
 
 create table "transaction" (
     id integer primary key,
