@@ -1,6 +1,6 @@
+import { faker } from "@faker-js/faker";
 import "chart.js/auto";
 import { Line } from "react-chartjs-2";
-import { faker } from "@faker-js/faker";
 
 export const options = {
   responsive: true,
