@@ -1,3 +1,4 @@
+import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import { useDb } from "../db/context";
 import { useQuery } from "../util/useQuery";
 
@@ -22,14 +23,18 @@ export default function Log() {
     );
   }
 
+  const columns: GridColDef[] = [
+    { field: "id" },
+    { field: "date" },
+    { field: "description" },
+    { field: "account" },
+    { field: "amount" },
+  ];
+
   return (
     <div>
       <div>Log</div>
-      <div>
-        {transactions.map((transaction) => (
-          <div key={transaction.id}>{transaction.id}</div>
-        ))}
-      </div>
+      <DataGrid rows={transactions} columns={columns} />
     </div>
   );
 }
