@@ -7,7 +7,6 @@ export interface Transaction {
   id: number;
   date: string;
   description: string | null;
-  source: number;
-  destination: number;
+  account: number;
   amount: number;
 }
