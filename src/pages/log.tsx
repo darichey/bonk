@@ -4,21 +4,17 @@ import { useQuery } from "../util/useQuery";
 
 export default function Log() {
   const db = useDb();
-  const {
-    isLoading,
-    result: transactions,
-    error,
-  } = useQuery(() => db.fetchAllTransactions());
+  const result = useQuery(() => db.fetchAllTransactions());
 
-  if (isLoading) {
+  if (result.type === "loading") {
     return <div>Loading...</div>;
   }
 
-  if (error) {
+  if (result.type === "error") {
     return (
       <div>
         <div>Error:</div>
-        {JSON.stringify(error)}
+        {JSON.stringify(result.error)}
       </div>
     );
   }
@@ -34,7 +30,7 @@ export default function Log() {
   return (
     <div>
       <div>Log</div>
-      <DataGrid rows={transactions} columns={columns} />
+      <DataGrid rows={result.ok} columns={columns} />
     </div>
   );
 }

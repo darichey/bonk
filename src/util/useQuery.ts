@@ -1,25 +1,31 @@
 import { useEffect, useState } from "react";
 
+export type QueryResult<T> =
+  | {
+      type: "ok";
+      ok: T;
+    }
+  | {
+      type: "error";
+      error: any;
+    }
+  | {
+      type: "loading";
+    };
+
 export function useQuery<T>(f: () => Promise<T>) {
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [result, setResult] = useState<T>(undefined);
-  const [error, setError] = useState<any>(undefined);
+  const [result, setResult] = useState<QueryResult<T>>({ type: "loading" });
 
   useEffect(() => {
-    async function g() {
+    (async () => {
       try {
-        const p = f();
-        setIsLoading(true);
-        const r = await p;
-        setIsLoading(false);
-        setResult(r);
-      } catch (e) {
-        setIsLoading(false);
-        setError(e);
+        const ok = await f();
+        setResult({ type: "ok", ok });
+      } catch (error) {
+        setResult({ type: "error", error });
       }
-    }
-    g();
-  }, [setIsLoading, setResult, setError]);
+    })();
+  }, [setResult]);
 
-  return { isLoading, result, error };
+  return result;
 }

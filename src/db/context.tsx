@@ -12,7 +12,6 @@ export function DatabaseProvider({ children }) {
     })();
 
     return () => {
-      console.log("closing");
       dbRef.current?.close();
     };
   }, [dbRef]);
