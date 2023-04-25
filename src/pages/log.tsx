@@ -1,7 +1,5 @@
 import { useDb } from "../db/context";
-import { Transaction } from "../db/model";
 import { useQuery } from "../util/useQuery";
-import { useContext, useEffect, useState } from "react";
 
 export default function Log() {
   const db = useDb();

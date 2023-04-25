@@ -1,7 +1,7 @@
-import { Transaction } from "./model";
 import { readTextFile } from "@tauri-apps/api/fs";
 import { resolveResource } from "@tauri-apps/api/path";
 import { default as TauriDatabase } from "tauri-plugin-sql-api";
+import { Transaction } from "./model";
 
 export class Database {
   static async withDummyData(): Promise<Database> {

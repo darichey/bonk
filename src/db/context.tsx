@@ -1,5 +1,5 @@
+import { createContext, useContext, useEffect, useRef } from "react";
 import { Database } from "./database";
-import { createContext, useContext, useEffect, useRef, useState } from "react";
 
 const DatabaseContext = createContext<Database>(null);
 

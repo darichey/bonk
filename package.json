@@ -17,6 +17,7 @@
     "@tauri-apps/api": "^1.2.0",
     "chart.js": "^4.0.1",
     "next": "^13.3.1",
+    "prettier-plugin-organize-imports": "^3.2.2",
     "react": "^18.2.0",
     "react-chartjs-2": "^5.0.1",
     "react-dom": "^18.2.0",
@@ -24,7 +25,6 @@
   },
   "devDependencies": {
     "@tauri-apps/cli": "^1.1.0",
-    "@trivago/prettier-plugin-sort-imports": "^4.1.1",
     "@types/node": "^18.7.11",
     "@types/react": "^18.0.17",
     "@types/react-dom": "^18.0.6",
