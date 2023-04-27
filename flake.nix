@@ -52,6 +52,8 @@
         devShell = pkgs.mkShell {
           buildInputs = packages;
 
+          RUST_SRC_PATH = "${pkgs.rust.packages.stable.rustPlatform.rustLibSrc}";
+
           shellHook =
             ''
               export LD_LIBRARY_PATH=${pkgs.lib.makeLibraryPath libraries}:$LD_LIBRARY_PATH
