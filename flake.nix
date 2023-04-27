@@ -43,7 +43,7 @@
           sqlite
 
           # javascript dev
-          yarn
+          nodejs
         ];
       in
       {
