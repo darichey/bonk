@@ -46,7 +46,8 @@
         "../sql/*"
       ],
       "shortDescription": "",
-      "targets": "all",
+      // Can't build appimage: https://github.com/tauri-apps/tauri/issues/3323
+      "targets": ["deb", "msi", "app", "dmg", "updater"],
       "windows": {
         "certificateThumbprint": null,
         "digestAlgorithm": "sha256",

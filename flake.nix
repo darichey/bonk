@@ -15,9 +15,10 @@
           gtk3
           cairo
           gdk-pixbuf
-          glib.out
-          dbus.lib
-          openssl_3.out
+          glib
+          dbus
+          openssl_3
+          librsvg
         ];
 
         packages = with pkgs; [
@@ -31,6 +32,7 @@
           gtk3
           libsoup
           webkitgtk
+          librsvg
 
           # Rust dev
           rustc
@@ -51,12 +53,8 @@
           buildInputs = packages;
 
           shellHook =
-            let
-              joinLibs = libs: builtins.concatStringsSep ":" (builtins.map (x: "${x}/lib") libs);
-              libs = joinLibs libraries;
-            in
             ''
-              export LD_LIBRARY_PATH=${libs}:$LD_LIBRARY_PATH
+              export LD_LIBRARY_PATH=${pkgs.lib.makeLibraryPath libraries}:$LD_LIBRARY_PATH
             '';
         };
       });
