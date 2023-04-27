@@ -1,3 +1,5 @@
+"use client";
+
 import { faker } from "@faker-js/faker";
 import "chart.js/auto";
 import { Line } from "react-chartjs-2";
