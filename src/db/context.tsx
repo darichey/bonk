@@ -3,7 +3,7 @@ import { Database } from "./database";
 
 const DatabaseContext = createContext<Database>(null);
 
-export function DatabaseProvider({ children }) {
+export function DatabaseProvider({ children }: { children: React.ReactNode }) {
   const dbRef = useRef<Database>();
 
   useEffect(() => {

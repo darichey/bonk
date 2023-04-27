@@ -1,5 +1,6 @@
 /** @type {import('next').NextConfig} */
-module.exports = nextConfig = {
+/* eslint-env node */
+module.exports = {
   reactStrictMode: true,
   swcMinify: true,
   images: {

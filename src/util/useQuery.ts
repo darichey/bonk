@@ -7,7 +7,7 @@ export type QueryResult<T> =
     }
   | {
       type: "error";
-      error: any;
+      error: unknown;
     }
   | {
       type: "loading";

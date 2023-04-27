@@ -2,7 +2,7 @@ import { Divider } from "@mui/material";
 import Stack from "@mui/material/Stack";
 import Link from "./Link";
 
-export default function Layout({ children }) {
+export default function Layout({ children }: { children: React.ReactNode }) {
   return (
     <Stack
       direction="row"
