@@ -1,8 +1,8 @@
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
-import { Database } from "../../db/database";
+import { getDatabase } from "../../db/database";
 
 export default async function Log() {
-  const db = await Database.withDummyData();
+  const db = await getDatabase();
   const rows = await db.fetchAllTransactions();
 
   const columns: GridColDef[] = [
