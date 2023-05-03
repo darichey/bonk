@@ -4,7 +4,7 @@ import { Button, TextField } from "@mui/material";
 import { useState } from "react";
 import { getDatabase } from "../../db/database";
 
-export default function Query() {
+export default function QueryPage() {
   const [query, setQuery] = useState("");
   const [result, setResult] = useState("");
 
