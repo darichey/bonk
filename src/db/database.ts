@@ -4,6 +4,8 @@ import { cache } from "react";
 import { default as TauriDatabase } from "tauri-plugin-sql-api";
 import { Transaction } from "./model";
 
+import "server-only";
+
 export class Database {
   _db: TauriDatabase;
 
