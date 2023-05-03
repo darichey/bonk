@@ -1,7 +1,6 @@
 "use client";
 
 import Button from "@mui/material/Button";
-import "../style/style.css";
 
 export default function RootPage() {
   return (

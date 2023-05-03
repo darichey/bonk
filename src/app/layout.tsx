@@ -28,6 +28,7 @@ export default function RootLayout({
               <Link href="/">Home</Link>
               <Link href="/chart">Chart</Link>
               <Link href="/log">Log</Link>
+              <Link href="/query">Query</Link>
             </Stack>
             <Box width={"100%"}>
               <main>{children}</main>

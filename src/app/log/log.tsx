@@ -3,7 +3,7 @@ import { getDatabase } from "../../db/database";
 
 export default async function Log() {
   const db = await getDatabase();
-  const rows = await db.fetchAllTransactions();
+  const rows = await db.allTransactions();
 
   const columns: GridColDef[] = [
     { field: "id" },

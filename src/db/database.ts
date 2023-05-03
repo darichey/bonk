@@ -11,8 +11,12 @@ export class Database {
     this._db = _db;
   }
 
-  fetchAllTransactions(): Promise<Transaction[]> {
-    return this._db.select<Transaction[]>(`SELECT * FROM "transaction"`);
+  allTransactions(): Promise<Transaction[]> {
+    return this.query(`SELECT * FROM "transaction"`);
+  }
+
+  query<T>(query: string, bindValues?: unknown[]): Promise<T> {
+    return this._db.select<T>(query, bindValues);
   }
 
   close(): Promise<boolean> {
