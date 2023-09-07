@@ -1,8 +1,8 @@
-"use client";
+"use server";
 
 import Log from "./log";
 
-export default function LogPage() {
+export default async function LogPage() {
   return (
     <div>
       <div>Log</div>

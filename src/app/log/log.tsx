@@ -1,9 +1,12 @@
-import { DataGrid, GridColDef } from "@mui/x-data-grid";
+"use server";
+
+import { GridColDef } from "@mui/x-data-grid";
 import { getDatabase } from "../../db/database";
+import DataGrid from "./DataGrid";
 
 export default async function Log() {
   const db = await getDatabase();
-  const rows = await db.allTransactions();
+  // const rows = await db.allTransactions();
 
   const columns: GridColDef[] = [
     { field: "id" },
@@ -13,5 +16,5 @@ export default async function Log() {
     { field: "amount" },
   ];
 
-  return <DataGrid rows={rows} columns={columns} />;
+  return <DataGrid rows={[]} columns={columns} />;
 }
