@@ -5,12 +5,14 @@ use sqlite::{Connection, State, Value};
 
 use anyhow::{Context, Result};
 
+use crate::import::Importer;
+
 pub struct Db {
     con: Connection,
 }
 
 impl Db {
-    pub fn new<P: AsRef<Path>>(path_to_schema: P, path_to_transactions: P) -> Result<Db> {
+    pub fn new<P: AsRef<Path>>(path_to_schema: P, importers: Vec<Box<dyn Importer>>) -> Result<Db> {
         // open db connection
         let con = sqlite::open(":memory:")?;
 
@@ -21,26 +23,28 @@ impl Db {
         // insert some transactions
         con.execute("BEGIN TRANSACTION")?;
 
-        let mut csv_reader = csv::Reader::from_path(path_to_transactions)?;
-        for result in csv_reader.records() {
-            let row = result?;
+        for importer in importers {
+            let transactions = importer.get_transactions()?;
 
-            let date = row.get(0).context("Date not present")?;
-            let description = row.get(1).context("Description not present")?;
-            let amount = DollarAmount::parse(row.get(2).context("Amount not present")?)?.cents;
+            for Transaction {
+                date,
+                description,
+                amount,
+            } in transactions
+            {
+                let mut stmt =
+                    con.prepare("INSERT INTO transactions VAlUES (:date, :description, :amount)")?;
 
-            let mut stmt =
-                con.prepare("INSERT INTO transactions VAlUES (:date, :description, :amount)")?;
+                stmt.bind::<&[(_, Value)]>(
+                    &[
+                        (":date", date.to_string().into()),
+                        (":description", description.into()),
+                        (":amount", amount.cents.into()),
+                    ][..],
+                )?;
 
-            stmt.bind::<&[(_, Value)]>(
-                &[
-                    (":date", date.into()),
-                    (":description", description.into()),
-                    (":amount", amount.into()),
-                ][..],
-            )?;
-
-            while let Ok(State::Row) = stmt.next() {}
+                while let Ok(State::Row) = stmt.next() {}
+            }
         }
         con.execute("COMMIT")?;
 
@@ -49,7 +53,7 @@ impl Db {
 
     pub fn get_transactions(&self) -> Result<Vec<Transaction>> {
         let query = "
-            SELECT * FROM transactions;
+            SELECT * FROM transactions ORDER BY date;
         ";
         let mut stmt = self.con.prepare(query)?;
         let mut vec = Vec::new();
