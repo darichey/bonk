@@ -31,6 +31,11 @@ pub fn import_all(path_to_data: &str) -> Result<Vec<Transaction>> {
     for cfg_path in cfg_paths {
         let cfg_path = cfg_path?;
         let cfg: ImporterConfig = serde_json::from_reader(File::open(&cfg_path)?)?;
+
+        if cfg.ignore {
+            continue;
+        }
+
         let importer = IMPORTERS
             .get(cfg.importer.as_str())
             .with_context(|| format!("Couldn't find importer with name: {}", cfg.importer))?;
@@ -95,7 +100,6 @@ fn import_old_usaa_csv(path: &str) -> Result<Vec<Transaction>> {
 }
 
 fn import_new_usaa_csv(path: &str) -> Result<Vec<Transaction>> {
-    println!("{path}");
     let mut csv_reader = csv::Reader::from_path(path)?;
 
     csv_reader
@@ -118,4 +122,5 @@ fn import_new_usaa_csv(path: &str) -> Result<Vec<Transaction>> {
 #[derive(Serialize, Deserialize, Debug)]
 struct ImporterConfig {
     importer: String,
+    ignore: bool,
 }
