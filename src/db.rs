@@ -1,5 +1,6 @@
-use std::{fs, path::Path};
+use std::{fmt::Display, fs, path::Path};
 
+use chrono::NaiveDate;
 use sqlite::{Connection, State, Value};
 
 use anyhow::{Context, Result};
@@ -26,7 +27,7 @@ impl Db {
 
             let date = row.get(0).context("Date not present")?;
             let description = row.get(1).context("Description not present")?;
-            let amount = parse_amount(row.get(2).context("Amount not present")?)?;
+            let amount = DollarAmount::parse(row.get(2).context("Amount not present")?)?.cents;
 
             let mut stmt =
                 con.prepare("INSERT INTO transactions VAlUES (:date, :description, :amount)")?;
@@ -46,32 +47,50 @@ impl Db {
         Ok(Db { con })
     }
 
-    pub fn get_transactions(&self) -> Result<Vec<(String, String, i64)>> {
+    pub fn get_transactions(&self) -> Result<Vec<Transaction>> {
         let query = "
             SELECT * FROM transactions;
         ";
         let mut stmt = self.con.prepare(query)?;
         let mut vec = Vec::new();
         while let Ok(sqlite::State::Row) = stmt.next() {
-            vec.push((
-                stmt.read::<String, _>("date")?,
-                stmt.read::<String, _>("description")?,
-                stmt.read::<i64, _>("amount")?,
-            ))
+            vec.push(Transaction {
+                date: NaiveDate::parse_from_str(&stmt.read::<String, _>("date")?, "%Y-%m-%d")?,
+                description: stmt.read::<String, _>("description")?,
+                amount: DollarAmount {
+                    cents: stmt.read::<i64, _>("amount")?,
+                },
+            })
         }
         Ok(vec)
     }
 }
 
-fn parse_amount(s: &str) -> Result<i64> {
-    let negative = s.starts_with('-');
-    let (dollars, cents) = s.split_once('.').context("Couldn't split")?;
-    let dollars: i64 = str::parse(&dollars.replace('-', ""))?;
-    let cents: i64 = str::parse(cents)?;
-    let amt = dollars * 100 + cents;
-    if negative {
-        Ok(-amt)
-    } else {
-        Ok(amt)
+pub struct Transaction {
+    pub date: NaiveDate,
+    pub description: String,
+    pub amount: DollarAmount,
+}
+
+pub struct DollarAmount {
+    pub cents: i64,
+}
+
+impl DollarAmount {
+    // TODO: replace with TryFrom<&str>, need to enumerate error cases which is good anyways
+    pub fn parse(s: &str) -> Result<DollarAmount> {
+        let negative = s.starts_with('-');
+        let (dollars, cents) = s.split_once('.').context("Couldn't split")?;
+        let dollars: i64 = str::parse(&dollars.replace('-', ""))?;
+        let cents: i64 = str::parse(cents)?;
+        let cents = dollars * 100 + cents;
+        let cents = if negative { -cents } else { cents };
+        Ok(DollarAmount { cents })
+    }
+}
+
+impl Display for DollarAmount {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.cents)
     }
 }
