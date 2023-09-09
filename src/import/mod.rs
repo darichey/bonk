@@ -1,3 +1,5 @@
+mod import_csv;
+
 use std::{
     collections::HashMap,
     fs::{self, File},
@@ -9,6 +11,8 @@ use csv::ReaderBuilder;
 use serde::{Deserialize, Serialize};
 
 use crate::db::{DollarAmount, Transaction};
+
+use self::import_csv::{import_csv, TransactionRowParser};
 
 type Importer = fn(&str) -> Result<Vec<Transaction>>;
 
@@ -62,61 +66,40 @@ pub fn import_all(path_to_data: &str) -> Result<Vec<Transaction>> {
 
 fn import_id_csv(path: &str) -> Result<Vec<Transaction>> {
     let mut csv_reader = csv::Reader::from_path(path)?;
-    csv_reader
-        .records()
-        .map(|result| {
-            let row = result?;
-
-            Ok(Transaction {
-                date: NaiveDate::parse_from_str(
-                    row.get(0).context("Date not present")?,
-                    "%Y-%m-%d",
-                )?,
-                description: row.get(1).context("Description not present")?.to_owned(),
-                amount: DollarAmount::parse(row.get(2).context("Amount not present")?)?,
-            })
-        })
-        .collect::<Result<Vec<Transaction>>>()
+    import_csv(
+        &mut csv_reader,
+        TransactionRowParser {
+            date: (0, |s| Ok(NaiveDate::parse_from_str(s, "%Y-%m-%d")?)),
+            description: (1, |s| Ok(s.to_string())),
+            amount: (2, DollarAmount::parse),
+        },
+    )
 }
 
 fn import_old_usaa_csv(path: &str) -> Result<Vec<Transaction>> {
     let mut csv_reader = ReaderBuilder::new().has_headers(false).from_path(path)?;
 
-    csv_reader
-        .records()
-        .map(|result| {
-            let row = result?;
-
-            Ok(Transaction {
-                date: NaiveDate::parse_from_str(
-                    row.get(2).context("Date not present")?,
-                    "%m/%d/%Y",
-                )?,
-                description: row.get(4).context("Description not present")?.to_owned(),
-                amount: DollarAmount::parse(row.get(6).context("Amount not present")?)?,
-            })
-        })
-        .collect::<Result<Vec<Transaction>>>()
+    import_csv(
+        &mut csv_reader,
+        TransactionRowParser {
+            date: (2, |s| Ok(NaiveDate::parse_from_str(s, "%m/%d/%Y")?)),
+            description: (4, |s| Ok(s.to_string())),
+            amount: (6, DollarAmount::parse),
+        },
+    )
 }
 
 fn import_new_usaa_csv(path: &str) -> Result<Vec<Transaction>> {
     let mut csv_reader = csv::Reader::from_path(path)?;
 
-    csv_reader
-        .records()
-        .map(|result| {
-            let row = result?;
-
-            Ok(Transaction {
-                date: NaiveDate::parse_from_str(
-                    row.get(0).context("Date not present")?,
-                    "%Y-%m-%d",
-                )?,
-                description: row.get(1).context("Description not present")?.to_owned(),
-                amount: DollarAmount::parse(row.get(4).context("Amount not present")?)?,
-            })
-        })
-        .collect::<Result<Vec<Transaction>>>()
+    import_csv(
+        &mut csv_reader,
+        TransactionRowParser {
+            date: (0, |s| Ok(NaiveDate::parse_from_str(s, "%Y-%m-%d")?)),
+            description: (1, |s| Ok(s.to_string())),
+            amount: (4, DollarAmount::parse),
+        },
+    )
 }
 
 #[derive(Serialize, Deserialize, Debug)]
