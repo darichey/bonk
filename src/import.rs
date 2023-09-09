@@ -17,6 +17,7 @@ lazy_static! {
         let mut m: HashMap<&'static str, Importer> = HashMap::new();
         m.insert("IdCsvImporter", import_id_csv);
         m.insert("OldUsaaCsvImporter", import_old_usaa_csv);
+        m.insert("NewUsaaCsvImporter", import_new_usaa_csv);
         m
     };
 }
@@ -74,7 +75,6 @@ fn import_id_csv(path: &str) -> Result<Vec<Transaction>> {
 }
 
 fn import_old_usaa_csv(path: &str) -> Result<Vec<Transaction>> {
-    println!("{path}");
     let mut csv_reader = ReaderBuilder::new().has_headers(false).from_path(path)?;
 
     csv_reader
@@ -89,6 +89,27 @@ fn import_old_usaa_csv(path: &str) -> Result<Vec<Transaction>> {
                 )?,
                 description: row.get(4).context("Description not present")?.to_owned(),
                 amount: DollarAmount::parse(row.get(6).context("Amount not present")?)?,
+            })
+        })
+        .collect::<Result<Vec<Transaction>>>()
+}
+
+fn import_new_usaa_csv(path: &str) -> Result<Vec<Transaction>> {
+    println!("{path}");
+    let mut csv_reader = csv::Reader::from_path(path)?;
+
+    csv_reader
+        .records()
+        .map(|result| {
+            let row = result?;
+
+            Ok(Transaction {
+                date: NaiveDate::parse_from_str(
+                    row.get(0).context("Date not present")?,
+                    "%Y-%m-%d",
+                )?,
+                description: row.get(1).context("Description not present")?.to_owned(),
+                amount: DollarAmount::parse(row.get(4).context("Amount not present")?)?,
             })
         })
         .collect::<Result<Vec<Transaction>>>()
