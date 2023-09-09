@@ -84,7 +84,7 @@ impl DollarAmount {
     // TODO: replace with TryFrom<&str>, need to enumerate error cases which is good anyways
     pub fn parse(s: &str) -> Result<DollarAmount> {
         let negative = s.starts_with('-');
-        let (dollars, cents) = s.split_once('.').context("Couldn't split")?;
+        let (dollars, cents) = s.split_once('.').unwrap_or((s, "0"));
         let dollars: i64 = str::parse(&dollars.replace('-', ""))?;
         let cents: i64 = str::parse(cents)?;
         let cents = dollars * 100 + cents;

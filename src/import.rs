@@ -60,3 +60,18 @@ impl Importer for UsaaCsvImporter {
             .collect::<Result<Vec<Transaction>>>()
     }
 }
+
+pub struct MultiImporter {
+    pub new_importer: fn(String) -> Box<dyn Importer>,
+    pub paths: Vec<String>,
+}
+
+impl Importer for MultiImporter {
+    fn get_transactions(&self) -> Result<Vec<Transaction>> {
+        let mut transactions = Vec::new();
+        for path in &self.paths {
+            transactions.extend((self.new_importer)(path.clone()).get_transactions()?)
+        }
+        Ok(transactions)
+    }
+}
