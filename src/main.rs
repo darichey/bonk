@@ -1,30 +1,16 @@
 #![feature(iterator_try_collect)]
+#![feature(try_find)]
+
+#[macro_use]
+extern crate lazy_static;
 
 mod db;
 mod import;
 
 use anyhow::Result;
-use db::Transaction;
-use glob::glob;
-use import::{Importer, MultiImporter, UsaaCsvImporter};
 
 fn main() -> Result<()> {
-    // let importers: Vec<Box<dyn Importer>> = vec![
-    //     Box::new(import::UsaaCsvImporter {
-    //         path: "./data/raw/2022-01-01 USAA Platinum Visa.csv".to_owned(),
-    //     }),
-    //     Box::new(import::IdCsvImporter {
-    //         path: "./data/transactions.csv".to_owned(),
-    //     }),
-    // ];
-
-    let importers: Vec<Box<dyn Importer>> = vec![Box::new(MultiImporter {
-        new_importer: |path| Box::new(UsaaCsvImporter { path }),
-        paths: glob("./data/raw/*.csv")?
-            .map(|path| Ok(String::from(path?.to_string_lossy())))
-            .collect::<Result<Vec<_>>>()?,
-    })];
-    let db = db::Db::new("./db/schema.sql", importers)?;
+    let db = db::Db::new("./db/schema.sql", "./data")?;
     // for Transaction {
     //     date,
     //     description,

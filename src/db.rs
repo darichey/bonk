@@ -1,18 +1,18 @@
-use std::{fmt::Display, fs, path::Path};
+use std::{fmt::Display, fs};
 
 use chrono::NaiveDate;
 use sqlite::{Connection, State, Value};
 
-use anyhow::{Context, Result};
+use anyhow::Result;
 
-use crate::import::Importer;
+use crate::import::import_all;
 
 pub struct Db {
     con: Connection,
 }
 
 impl Db {
-    pub fn new<P: AsRef<Path>>(path_to_schema: P, importers: Vec<Box<dyn Importer>>) -> Result<Db> {
+    pub fn new(path_to_schema: &str, path_to_data: &str) -> Result<Db> {
         // open db connection
         let con = sqlite::open(":memory:")?;
 
@@ -23,29 +23,26 @@ impl Db {
         // insert some transactions
         con.execute("BEGIN TRANSACTION")?;
 
-        for importer in importers {
-            let transactions = importer.get_transactions()?;
+        for Transaction {
+            date,
+            description,
+            amount,
+        } in import_all(path_to_data)?
+        {
+            let mut stmt =
+                con.prepare("INSERT INTO transactions VAlUES (:date, :description, :amount)")?;
 
-            for Transaction {
-                date,
-                description,
-                amount,
-            } in transactions
-            {
-                let mut stmt =
-                    con.prepare("INSERT INTO transactions VAlUES (:date, :description, :amount)")?;
+            stmt.bind::<&[(_, Value)]>(
+                &[
+                    (":date", date.to_string().into()),
+                    (":description", description.into()),
+                    (":amount", amount.cents.into()),
+                ][..],
+            )?;
 
-                stmt.bind::<&[(_, Value)]>(
-                    &[
-                        (":date", date.to_string().into()),
-                        (":description", description.into()),
-                        (":amount", amount.cents.into()),
-                    ][..],
-                )?;
-
-                while let Ok(State::Row) = stmt.next() {}
-            }
+            while let Ok(State::Row) = stmt.next() {}
         }
+
         con.execute("COMMIT")?;
 
         Ok(Db { con })

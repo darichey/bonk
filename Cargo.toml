@@ -6,8 +6,11 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-anyhow = "1.0.75"
+anyhow = { version = "1.0.75", features = ["backtrace"] }
 chrono = "0.4.30"
 csv = "1.2.2"
 glob = "0.3.1"
+lazy_static = "1.4.0"
+serde = { version = "1.0.188", features = ["derive"] }
+serde_json = "1.0.106"
 sqlite = "0.31.1"
