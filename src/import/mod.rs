@@ -1,6 +1,7 @@
 mod id;
 mod import_csv;
 mod usaa;
+mod venmo;
 
 use std::{
     collections::HashMap,
@@ -20,6 +21,7 @@ lazy_static! {
         m.insert("IdCsvImporter", id::import_id_csv);
         m.insert("OldUsaaCsvImporter", usaa::import_old_usaa_csv);
         m.insert("NewUsaaCsvImporter", usaa::import_new_usaa_csv);
+        m.insert("VenmoCsvImporter", venmo::import_venmo_csv);
         m
     };
 }
