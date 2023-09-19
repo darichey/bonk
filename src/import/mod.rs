@@ -13,7 +13,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::db::Transaction;
 
-type Importer = fn(&str) -> Result<Vec<Transaction>>;
+type Importer = fn(account: &str, path: &str) -> Result<Vec<Transaction>>;
 
 lazy_static! {
     static ref IMPORTERS: HashMap<&'static str, Importer> = {
@@ -34,7 +34,8 @@ pub fn import_all(path_to_data: &str) -> Result<Vec<Transaction>> {
 
     for cfg_path in cfg_paths {
         let cfg_path = cfg_path?;
-        let cfg: ImporterConfig = serde_json::from_reader(File::open(&cfg_path)?)?;
+        let cfg: ImporterConfig = serde_json::from_reader(File::open(&cfg_path)?)
+            .with_context(|| format!("Failed to read {}", cfg_path.display()))?;
 
         if cfg.ignore {
             continue;
@@ -56,6 +57,7 @@ pub fn import_all(path_to_data: &str) -> Result<Vec<Transaction>> {
             }
 
             transactions.extend(importer(
+                &cfg.account,
                 entry.path().to_str().context("Couldn't convert path")?,
             )?);
         }
@@ -67,5 +69,6 @@ pub fn import_all(path_to_data: &str) -> Result<Vec<Transaction>> {
 #[derive(Serialize, Deserialize, Debug)]
 struct ImporterConfig {
     importer: String,
+    account: String,
     ignore: bool,
 }

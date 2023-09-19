@@ -27,16 +27,19 @@ impl Db {
             date,
             description,
             amount,
+            account,
         } in import_all(path_to_data)?
         {
-            let mut stmt =
-                con.prepare("INSERT INTO transactions VAlUES (:date, :description, :amount)")?;
+            let mut stmt = con.prepare(
+                "INSERT INTO transactions VAlUES (:date, :description, :amount, :account)",
+            )?;
 
             stmt.bind::<&[(_, Value)]>(
                 &[
                     (":date", date.to_string().into()),
                     (":description", description.into()),
                     (":amount", amount.cents.into()),
+                    (":account", account.into()),
                 ][..],
             )?;
 
@@ -61,6 +64,7 @@ impl Db {
                 amount: DollarAmount {
                     cents: stmt.read::<i64, _>("amount")?,
                 },
+                account: stmt.read::<String, _>("account")?,
             })
         }
         Ok(vec)
@@ -71,6 +75,7 @@ pub struct Transaction {
     pub date: NaiveDate,
     pub description: String,
     pub amount: DollarAmount,
+    pub account: String,
 }
 
 pub struct DollarAmount {

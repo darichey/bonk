@@ -7,7 +7,7 @@ use crate::db::{DollarAmount, Transaction};
 use super::import_csv::{import_csv_reader, ColParser, TransactionRowParser};
 
 /// Imports the old usaa csv format that doesn't include a header
-pub fn import_old_usaa_csv(path: &str) -> Result<Vec<Transaction>> {
+pub fn import_old_usaa_csv(account: &str, path: &str) -> Result<Vec<Transaction>> {
     let mut csv_reader = ReaderBuilder::new().has_headers(false).from_path(path)?;
 
     import_csv_reader(
@@ -17,11 +17,12 @@ pub fn import_old_usaa_csv(path: &str) -> Result<Vec<Transaction>> {
             description: ColParser::Field(4, |s| Ok(s.to_string())),
             amount: ColParser::Field(6, DollarAmount::parse),
         },
+        account,
     )
 }
 
 /// Imports the new usaa csv format that does include a header
-pub fn import_new_usaa_csv(path: &str) -> Result<Vec<Transaction>> {
+pub fn import_new_usaa_csv(account: &str, path: &str) -> Result<Vec<Transaction>> {
     let mut csv_reader = csv::Reader::from_path(path)?;
 
     import_csv_reader(
@@ -31,5 +32,6 @@ pub fn import_new_usaa_csv(path: &str) -> Result<Vec<Transaction>> {
             description: ColParser::Field(1, |s| Ok(s.to_string())),
             amount: ColParser::Field(4, DollarAmount::parse),
         },
+        account,
     )
 }

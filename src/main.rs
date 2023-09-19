@@ -8,17 +8,19 @@ mod db;
 mod import;
 
 use anyhow::Result;
+use db::Transaction;
 
 fn main() -> Result<()> {
     let db = db::Db::new("./db/schema.sql", "./data")?;
-    // for Transaction {
-    //     date,
-    //     description,
-    //     amount,
-    // } in db.get_transactions()?
-    // {
-    //     println!("{},{},{}", date, description, amount);
-    // }
-    println!("{}", db.get_transactions()?.len());
+    for Transaction {
+        date,
+        description,
+        amount,
+        account,
+    } in db.get_transactions()?
+    {
+        println!("{},{},{},{}", date, description, amount, account);
+    }
+    // println!("{}", db.get_transactions()?.len());
     Ok(())
 }

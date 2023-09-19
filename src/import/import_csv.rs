@@ -20,13 +20,15 @@ pub struct TransactionRowParser {
 pub fn import_csv_reader(
     csv_reader: &mut csv::Reader<File>,
     row_parser: TransactionRowParser,
+    account: &str,
 ) -> Result<Vec<Transaction>> {
-    import_csv_records(csv_reader.records(), row_parser)
+    import_csv_records(csv_reader.records(), row_parser, account)
 }
 
 pub fn import_csv_records(
     records: impl Iterator<Item = Result<StringRecord, csv::Error>>,
     row_parser: TransactionRowParser,
+    account: &str,
 ) -> Result<Vec<Transaction>> {
     records
         .map(|result| {
@@ -35,6 +37,7 @@ pub fn import_csv_records(
                 date: parse_col("date", &row, &row_parser.date)?,
                 description: parse_col("description", &row, &row_parser.description)?,
                 amount: parse_col("amount", &row, &row_parser.amount)?,
+                account: account.to_string(),
             })
         })
         .collect()

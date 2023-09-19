@@ -3,12 +3,12 @@ use crate::{
     import::import_csv::{import_csv_records, TransactionRowParser},
 };
 use anyhow::{Context, Result};
-use chrono::{DateTime, NaiveDateTime};
+use chrono::NaiveDateTime;
 use csv::ReaderBuilder;
 
 use super::import_csv::ColParser;
 
-pub fn import_venmo_csv(path: &str) -> Result<Vec<Transaction>> {
+pub fn import_venmo_csv(account: &str, path: &str) -> Result<Vec<Transaction>> {
     let mut csv_reader = ReaderBuilder::new().has_headers(false).from_path(path)?;
     let records = {
         let mut records: Vec<_> = csv_reader.records().skip(4).collect();
@@ -27,5 +27,6 @@ pub fn import_venmo_csv(path: &str) -> Result<Vec<Transaction>> {
             description: ColParser::Field(5, |s| Ok(s.to_string())),
             amount: ColParser::Field(8, |s| DollarAmount::parse(&s.replace(" $", ""))),
         },
+        account,
     )
 }
