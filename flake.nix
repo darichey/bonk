@@ -12,6 +12,16 @@
         pkgs = import nixpkgs {
           inherit system overlays;
         };
+        libraries = with pkgs;[
+          webkitgtk
+          gtk3
+          cairo
+          gdk-pixbuf
+          glib
+          dbus
+          openssl_3
+          librsvg
+        ];
       in
       with pkgs;
       {
@@ -21,13 +31,27 @@
             (rust-bin.selectLatestNightlyWith (toolchain: toolchain.default.override {
               extensions = [ "rust-src" ];
             }))
-            
-            # rustc
-            # cargo
-            # rust-analyzer
-            # rustfmt
-            # clippy
+
+            # JS dev
+            nodejs_20
+
+            # Tauri deps
+            curl
+            wget
+            pkg-config
+            dbus
+            openssl_3
+            glib
+            gtk3
+            libsoup
+            webkitgtk
+            librsvg
           ];
+
+          shellHook =
+            ''
+              export LD_LIBRARY_PATH=${pkgs.lib.makeLibraryPath libraries}:$LD_LIBRARY_PATH
+            '';
         };
       }
     );
