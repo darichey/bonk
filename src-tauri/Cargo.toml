@@ -12,7 +12,7 @@ tauri-build = { version = "1.4.0", features = [] }
 serde_json = "1.0.106"
 serde = { version = "1.0.188", features = ["derive"] }
 anyhow = { version = "1.0.75", features = ["backtrace"] }
-chrono = "0.4.30"
+chrono = { version = "0.4.30", features = ["serde"] }
 csv = "1.2.2"
 glob = "0.3.1"
 lazy_static = "1.4.0"

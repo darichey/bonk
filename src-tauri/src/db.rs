@@ -1,6 +1,7 @@
 use std::{fmt::Display, fs};
 
 use chrono::NaiveDate;
+use serde::{Deserialize, Serialize};
 use sqlite::{Connection, State, Value};
 
 use anyhow::Result;
@@ -97,6 +98,7 @@ impl Db {
     }
 }
 
+#[derive(Serialize, Deserialize)]
 pub struct Transaction {
     pub date: NaiveDate,
     pub description: String,
@@ -104,6 +106,7 @@ pub struct Transaction {
     pub account: String,
 }
 
+#[derive(Serialize, Deserialize)]
 pub struct DollarAmount {
     pub cents: i64,
 }
