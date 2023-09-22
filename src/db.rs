@@ -56,24 +56,20 @@ impl Db {
     }
 
     pub fn get_transactions(&self) -> Result<Vec<Transaction>> {
-        Ok(self
-            .query(
-                self.prepare("SELECT * FROM transactions ORDER BY date;")?,
-                |row| {
-                    Ok(Transaction {
-                        date: NaiveDate::parse_from_str(
-                            row.try_read::<&str, _>("date")?,
-                            "%Y-%m-%d",
-                        )?,
-                        description: row.try_read::<&str, _>("description")?.to_string(),
-                        amount: DollarAmount {
-                            cents: row.try_read::<i64, _>("amount")?,
-                        },
-                        account: row.try_read::<&str, _>("account")?.to_string(),
-                    })
-                },
-            )?
-            .collect())
+        self.query(
+            self.prepare("SELECT * FROM transactions ORDER BY date;")?,
+            |row| {
+                Ok(Transaction {
+                    date: NaiveDate::parse_from_str(row.try_read::<&str, _>("date")?, "%Y-%m-%d")?,
+                    description: row.try_read::<&str, _>("description")?.to_string(),
+                    amount: DollarAmount {
+                        cents: row.try_read::<i64, _>("amount")?,
+                    },
+                    account: row.try_read::<&str, _>("account")?.to_string(),
+                })
+            },
+        )
+        .collect()
     }
 
     pub fn prepare(&self, query: &str) -> Result<Statement<'_>> {
@@ -96,14 +92,11 @@ impl Db {
         &'a self,
         stmt: Statement<'a>,
         row_mapper: F,
-    ) -> Result<impl Iterator<Item = T> + 'a>
+    ) -> impl Iterator<Item = Result<T>> + 'a
     where
-        F: Fn(sqlite::Row) -> Result<T> + 'static,
+        F: Fn(sqlite::Row) -> Result<T> + 'a,
     {
-        Ok(stmt
-            .stmt
-            .into_iter()
-            .map(move |row| row_mapper(row.unwrap()).unwrap())) // TODO: unwrap
+        stmt.stmt.into_iter().map(move |row| row_mapper(row?))
     }
 }
 
