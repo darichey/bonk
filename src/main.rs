@@ -17,7 +17,7 @@ fn main() -> Result<()> {
         description,
         amount,
         account,
-    } in db.get_transactions()?
+    } in db.get_transactions(db.prepare("SELECT * FROM transactions ORDER BY date;")?)?
     {
         println!("{},{},{},{}", date, description, amount, account);
     }

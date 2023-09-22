@@ -55,20 +55,17 @@ impl Db {
         Ok(Db { con })
     }
 
-    pub fn get_transactions(&self) -> Result<Vec<Transaction>> {
-        self.query(
-            self.prepare("SELECT * FROM transactions ORDER BY date;")?,
-            |row| {
-                Ok(Transaction {
-                    date: NaiveDate::parse_from_str(row.try_read::<&str, _>("date")?, "%Y-%m-%d")?,
-                    description: row.try_read::<&str, _>("description")?.to_string(),
-                    amount: DollarAmount {
-                        cents: row.try_read::<i64, _>("amount")?,
-                    },
-                    account: row.try_read::<&str, _>("account")?.to_string(),
-                })
-            },
-        )
+    pub fn get_transactions(&self, stmt: Statement<'_>) -> Result<Vec<Transaction>> {
+        self.query(stmt, |row| {
+            Ok(Transaction {
+                date: NaiveDate::parse_from_str(row.try_read::<&str, _>("date")?, "%Y-%m-%d")?,
+                description: row.try_read::<&str, _>("description")?.to_string(),
+                amount: DollarAmount {
+                    cents: row.try_read::<i64, _>("amount")?,
+                },
+                account: row.try_read::<&str, _>("account")?.to_string(),
+            })
+        })
         .collect()
     }
 
