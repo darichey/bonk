@@ -11,6 +11,10 @@ pub struct Db {
     con: Connection,
 }
 
+pub struct Statement<'a> {
+    stmt: sqlite::Statement<'a>,
+}
+
 impl Db {
     pub fn new(path_to_schema: &str, path_to_data: &str) -> Result<Db> {
         // open db connection
@@ -52,22 +56,54 @@ impl Db {
     }
 
     pub fn get_transactions(&self) -> Result<Vec<Transaction>> {
-        let query = "
-            SELECT * FROM transactions ORDER BY date;
-        ";
-        let mut stmt = self.con.prepare(query)?;
-        let mut vec = Vec::new();
-        while let Ok(sqlite::State::Row) = stmt.next() {
-            vec.push(Transaction {
-                date: NaiveDate::parse_from_str(&stmt.read::<String, _>("date")?, "%Y-%m-%d")?,
-                description: stmt.read::<String, _>("description")?,
-                amount: DollarAmount {
-                    cents: stmt.read::<i64, _>("amount")?,
+        Ok(self
+            .query(
+                self.prepare("SELECT * FROM transactions ORDER BY date;")?,
+                |row| {
+                    Ok(Transaction {
+                        date: NaiveDate::parse_from_str(
+                            row.try_read::<&str, _>("date")?,
+                            "%Y-%m-%d",
+                        )?,
+                        description: row.try_read::<&str, _>("description")?.to_string(),
+                        amount: DollarAmount {
+                            cents: row.try_read::<i64, _>("amount")?,
+                        },
+                        account: row.try_read::<&str, _>("account")?.to_string(),
+                    })
                 },
-                account: stmt.read::<String, _>("account")?,
-            })
-        }
-        Ok(vec)
+            )?
+            .collect())
+    }
+
+    pub fn prepare(&self, query: &str) -> Result<Statement<'_>> {
+        Ok(Statement {
+            stmt: self.con.prepare(query)?,
+        })
+    }
+
+    pub fn prepare_bind<T: sqlite::Bindable>(
+        &self,
+        query: &str,
+        value: T,
+    ) -> Result<Statement<'_>> {
+        let mut stmt = self.prepare(query)?;
+        stmt.stmt.bind(value)?;
+        Ok(stmt)
+    }
+
+    pub fn query<'a, T, F>(
+        &'a self,
+        stmt: Statement<'a>,
+        row_mapper: F,
+    ) -> Result<impl Iterator<Item = T> + 'a>
+    where
+        F: Fn(sqlite::Row) -> Result<T> + 'static,
+    {
+        Ok(stmt
+            .stmt
+            .into_iter()
+            .map(move |row| row_mapper(row.unwrap()).unwrap())) // TODO: unwrap
     }
 }
 
