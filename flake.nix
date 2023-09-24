@@ -46,6 +46,10 @@
             libsoup
             webkitgtk
             librsvg
+
+            # just for debugging
+            sqlite
+            rlwrap
           ];
 
           shellHook =
