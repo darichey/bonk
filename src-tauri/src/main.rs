@@ -3,10 +3,12 @@
 #![feature(iterator_try_collect)]
 #![feature(try_find)]
 
-use std::sync::Mutex;
+use std::{collections::HashMap, sync::Mutex};
 
 use anyhow::Result;
 use db::{Db, Transaction};
+use serde::{Deserialize, Serialize};
+use sqlite::Row;
 use tauri::State;
 
 #[macro_use]
@@ -40,21 +42,51 @@ fn get_all_transactions(db: State<Mutex<Db>>) -> Result<Vec<Transaction>, String
     db.get_transactions(stmt).map_err(|err| err.to_string())
 }
 
+struct Value(sqlite::Value);
+
+impl Serialize for Value {
+    fn serialize<S>(&self, serializer: S) -> std::result::Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        match &self.0 {
+            sqlite::Value::Binary(b) => serializer.serialize_bytes(b),
+            sqlite::Value::Float(f) => serializer.serialize_f64(*f),
+            sqlite::Value::Integer(i) => serializer.serialize_i64(*i),
+            sqlite::Value::String(s) => serializer.serialize_str(s),
+            sqlite::Value::Null => serializer.serialize_unit(),
+        }
+    }
+}
+
 #[tauri::command]
 fn query_transactions_for_chart(
     query: String,
     db: State<Mutex<Db>>,
-) -> Result<Vec<(String, i64)>, String> {
+) -> Result<HashMap<String, Vec<Value>>, String> {
     let db = db.lock().unwrap();
 
     let stmt = db.prepare(&query).map_err(|err| err.to_string())?;
 
-    db.query(stmt, |row| {
-        let x = row.try_read::<&str, _>("x")?.to_string();
-        let y = row.try_read::<i64, _>("y")?;
-        Ok((x, y))
-    })
-    // TODO: this is ugly because of mixing anyhow result and result
-    .collect::<Result<Vec<(String, i64)>>>()
-    .map_err(|err| format!("{:#}", err))
+    let column_names = stmt.column_names();
+
+    let data = db
+        .query(stmt)
+        .map(|row| {
+            let values: Vec<sqlite::Value> = row?.into();
+            let values: Vec<Value> = values.into_iter().map(Value).collect();
+            Ok(values)
+        })
+        .collect::<Result<Vec<Vec<Value>>>>()
+        .map_err(|err| err.to_string())?;
+
+    let mut data_iters: Vec<_> = data.into_iter().map(Vec::into_iter).collect();
+
+    let columns: Vec<Vec<Value>> = (0..column_names.len())
+        .map(|_| data_iters.iter_mut().map(|it| it.next().unwrap()).collect())
+        .collect();
+
+    let map: HashMap<String, Vec<Value>> = column_names.into_iter().zip(columns).collect();
+
+    Ok(map)
 }

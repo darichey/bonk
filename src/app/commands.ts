@@ -7,7 +7,7 @@ export function useGetAllTransactions() {
 }
 
 export function useQueryTransactionsForChart(query: string) {
-  return useSWR<[string, number][]>(
+  return useSWR<Record<string, (number | string | null)[]>>(
     ["query_transactions_for_chart", query],
     ([cmd, arg]) => {
       return invoke(cmd, { query: arg });

@@ -10,11 +10,11 @@ import { useQueryTransactionsForChart } from "./commands";
 
 export default function QueryLineChart({
   title,
-  dataLabel,
+  xAxis,
   query,
 }: {
   title: string;
-  dataLabel: string;
+  xAxis: string;
   query: string;
 }) {
   const {
@@ -45,27 +45,17 @@ export default function QueryLineChart({
     animation: false,
   };
 
-  const [foo, bar] = getFooBar(chartData);
-
-  const data: ChartData<"line", number[], unknown> = {
-    labels: foo,
-    datasets: [
-      {
-        label: dataLabel,
-        data: bar,
-      },
-    ],
+  const data: ChartData<"line", (number | string | null)[], unknown> = {
+    labels: chartData[xAxis],
+    datasets: Object.keys(chartData)
+      .filter((key) => key != xAxis)
+      .map((key) => {
+        return {
+          label: key,
+          data: chartData[key],
+        };
+      }),
   };
 
   return <Line options={options} data={data} />;
-}
-
-export function getFooBar(chartData: [string, number][]): [string[], number[]] {
-  const foo = new Array<string>();
-  const bar = new Array<number>();
-  for (const [f, b] of chartData) {
-    foo.push(f);
-    bar.push(b);
-  }
-  return [foo, bar];
 }

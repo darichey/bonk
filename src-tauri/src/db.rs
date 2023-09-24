@@ -16,6 +16,16 @@ pub struct Statement<'a> {
     stmt: sqlite::Statement<'a>,
 }
 
+impl Statement<'_> {
+    pub fn column_names(&self) -> Vec<String> {
+        self.stmt
+            .column_names()
+            .into_iter()
+            .map(|name| name.clone())
+            .collect()
+    }
+}
+
 impl Db {
     pub fn new(path_to_schema: &str, path_to_data: &str) -> Result<Db> {
         // open db connection
@@ -57,17 +67,19 @@ impl Db {
     }
 
     pub fn get_transactions(&self, stmt: Statement<'_>) -> Result<Vec<Transaction>> {
-        self.query(stmt, |row| {
-            Ok(Transaction {
-                date: NaiveDate::parse_from_str(row.try_read::<&str, _>("date")?, "%Y-%m-%d")?,
-                description: row.try_read::<&str, _>("description")?.to_string(),
-                amount: DollarAmount {
-                    cents: row.try_read::<i64, _>("amount")?,
-                },
-                account: row.try_read::<&str, _>("account")?.to_string(),
+        self.query(stmt)
+            .map(|row| {
+                let row = row?;
+                Ok(Transaction {
+                    date: NaiveDate::parse_from_str(row.try_read::<&str, _>("date")?, "%Y-%m-%d")?,
+                    description: row.try_read::<&str, _>("description")?.to_string(),
+                    amount: DollarAmount {
+                        cents: row.try_read::<i64, _>("amount")?,
+                    },
+                    account: row.try_read::<&str, _>("account")?.to_string(),
+                })
             })
-        })
-        .collect()
+            .collect()
     }
 
     pub fn prepare(&self, query: &str) -> Result<Statement<'_>> {
@@ -86,15 +98,11 @@ impl Db {
         Ok(stmt)
     }
 
-    pub fn query<'a, T, F>(
+    pub fn query<'a>(
         &'a self,
         stmt: Statement<'a>,
-        row_mapper: F,
-    ) -> impl Iterator<Item = Result<T>> + 'a
-    where
-        F: Fn(sqlite::Row) -> Result<T> + 'a,
-    {
-        stmt.stmt.into_iter().map(move |row| row_mapper(row?))
+    ) -> impl Iterator<Item = Result<sqlite::Row>> + 'a {
+        stmt.stmt.into_iter().map(|row| Ok(row?))
     }
 }
 

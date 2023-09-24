@@ -3,15 +3,14 @@
 import { Bar } from "react-chartjs-2";
 import { useQueryTransactionsForChart } from "./commands";
 import { ChartData, ChartOptions } from "chart.js";
-import { getFooBar } from "./QueryLineChart";
 
 export default function QueryBarChart({
   title,
-  dataLabel,
+  xAxis,
   query,
 }: {
   title: string;
-  dataLabel: string;
+  xAxis: string;
   query: string;
 }) {
   const {
@@ -42,16 +41,16 @@ export default function QueryBarChart({
     animation: false,
   };
 
-  const [foo, bar] = getFooBar(chartData);
-
-  const data: ChartData<"bar", number[], unknown> = {
-    labels: foo,
-    datasets: [
-      {
-        label: dataLabel,
-        data: bar,
-      },
-    ],
+  const data: ChartData<"bar", (number | string | null)[], unknown> = {
+    labels: chartData[xAxis],
+    datasets: Object.keys(chartData)
+      .filter((key) => key != xAxis)
+      .map((key) => {
+        return {
+          label: key,
+          data: chartData[key],
+        };
+      }),
   };
 
   return <Bar options={options} data={data} />;

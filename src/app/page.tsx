@@ -8,55 +8,65 @@ export default function Home() {
     <main>
       <QueryLineChart
         title="Daily Total Assets"
-        dataLabel="Total Assets"
+        xAxis="date"
         query={`
-          SELECT date as x, SUM(SUM(amount)) OVER (ORDER BY date) as y
+          SELECT
+            date,
+            SUM(SUM(amount)) OVER (ORDER BY date) as total
           FROM transactions
-          GROUP BY x
-          ORDER BY x
+          GROUP BY date
+          ORDER BY date
           `}
       />
       <QueryLineChart
         title="Monthly Total Assets"
-        dataLabel="Total Assets"
+        xAxis="month"
         query={`
-          SELECT STRFTIME('%Y-%m', DATE(date, 'start of month')) as x, SUM(SUM(amount)) OVER (ORDER BY date) as y
+          SELECT
+            STRFTIME('%Y-%m', DATE(date, 'start of month')) as month,
+            SUM(SUM(amount)) OVER (ORDER BY date) as total
           FROM transactions
-          GROUP BY x
-          ORDER BY x
+          GROUP BY month
+          ORDER BY month
           `}
       />
       {/* TODO: this query is misleading because we don't differentiate account transfers (e.g., transferring from on account to another is counted as an expenditure) */}
       <QueryBarChart
         title="Expenditures per month"
-        dataLabel="Total spent"
+        xAxis="month"
         query={`
-          SELECT STRFTIME('%Y-%m', DATE(date, 'start of month')) as x, SUM(amount) as y
+          SELECT
+            STRFTIME('%Y-%m', DATE(date, 'start of month')) as month,
+            SUM(amount) as total
           FROM transactions
           WHERE amount < 0
-          GROUP BY x
-          ORDER BY x;
+          GROUP BY month
+          ORDER BY month
           `}
       />
       <QueryBarChart
         title="Income per month"
-        dataLabel="Total gained"
+        xAxis="month"
         query={`
-          SELECT STRFTIME('%Y-%m', DATE(date, 'start of month')) as x, SUM(amount) as y
+          SELECT
+            STRFTIME('%Y-%m', DATE(date, 'start of month')) as month,
+            SUM(amount) as total
           FROM transactions
           WHERE amount > 0
-          GROUP BY x
-          ORDER BY x;
+          GROUP BY month
+          ORDER BY month
           `}
       />
       <QueryBarChart
         title="Savings per month"
-        dataLabel="Total saved"
+        xAxis="month"
         query={`
-          SELECT STRFTIME('%Y-%m', DATE(date, 'start of month')) as x, SUM(amount) as y
+          SELECT
+            STRFTIME('%Y-%m', DATE(date, 'start of month')) as month,
+            SUM(amount) as total
           FROM transactions
-          GROUP BY x
-          ORDER BY x;
+          GROUP BY month
+          ORDER BY month
           `}
       />
     </main>
