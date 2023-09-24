@@ -15,6 +15,16 @@ export default function Home() {
           ORDER BY x
           `}
       />
+      <QueryLineChart
+        title="Monthly Total Assets"
+        dataLabel="Total Assets"
+        query={`
+          SELECT STRFTIME('%Y-%m', DATE(date, 'start of month')) as x, SUM(SUM(amount)) OVER (ORDER BY date) as y
+          FROM transactions
+          GROUP BY x
+          ORDER BY x
+          `}
+      />
     </main>
   );
 }
