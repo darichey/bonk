@@ -1,6 +1,7 @@
 .direnv
 /target
 data
+*.sqlite
 
 # dependencies
 /node_modules
