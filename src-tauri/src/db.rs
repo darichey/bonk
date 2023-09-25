@@ -39,6 +39,7 @@ impl Db {
         con.execute("BEGIN TRANSACTION")?;
 
         for Transaction {
+            id,
             date,
             description,
             amount,
@@ -46,11 +47,12 @@ impl Db {
         } in import_all(path_to_data)?
         {
             let mut stmt = con.prepare(
-                "INSERT INTO transactions VAlUES (:date, :description, :amount, :account)",
+                "INSERT INTO transactions VAlUES (:id, :date, :description, :amount, :account)",
             )?;
 
             stmt.bind::<&[(_, Value)]>(
                 &[
+                    (":id", id.into()),
                     (":date", date.to_string().into()),
                     (":description", description.into()),
                     (":amount", amount.cents.into()),
@@ -71,6 +73,7 @@ impl Db {
             .map(|row| {
                 let row = row?;
                 Ok(Transaction {
+                    id: row.try_read::<i64, _>("id")?,
                     date: NaiveDate::parse_from_str(row.try_read::<&str, _>("date")?, "%Y-%m-%d")?,
                     description: row.try_read::<&str, _>("description")?.to_string(),
                     amount: DollarAmount {
@@ -108,13 +111,14 @@ impl Db {
 
 #[derive(Serialize, Deserialize)]
 pub struct Transaction {
+    pub id: i64,
     pub date: NaiveDate,
     pub description: String,
     pub amount: DollarAmount,
     pub account: String,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Hash)]
 pub struct DollarAmount {
     pub cents: i64,
 }

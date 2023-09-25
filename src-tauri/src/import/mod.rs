@@ -4,14 +4,16 @@ mod usaa;
 mod venmo;
 
 use std::{
-    collections::HashMap,
+    collections::{hash_map::DefaultHasher, HashMap},
     fs::{self, File},
+    hash::{Hash, Hasher},
 };
 
 use anyhow::{Context, Result};
+use chrono::NaiveDate;
 use serde::{Deserialize, Serialize};
 
-use crate::db::Transaction;
+use crate::db::{DollarAmount, Transaction};
 
 type Importer = fn(account: &str, path: &str) -> Result<Vec<Transaction>>;
 
@@ -71,4 +73,20 @@ struct ImporterConfig {
     importer: String,
     account: String,
     ignore: bool,
+}
+
+pub fn get_transaction_id(
+    row_index: u64,
+    date: &NaiveDate,
+    description: &String,
+    amount: &DollarAmount,
+    account: &String,
+) -> i64 {
+    let mut hasher = DefaultHasher::new();
+    row_index.hash(&mut hasher);
+    date.hash(&mut hasher);
+    description.hash(&mut hasher);
+    amount.hash(&mut hasher);
+    account.hash(&mut hasher);
+    hasher.finish() as i64
 }

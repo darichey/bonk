@@ -6,6 +6,8 @@ use csv::StringRecord;
 
 use crate::db::{DollarAmount, Transaction};
 
+use super::get_transaction_id;
+
 pub enum ColParser<T> {
     Field(usize, fn(&str) -> Result<T>),
     Row(fn(&StringRecord) -> Result<T>),
@@ -33,11 +35,20 @@ pub fn import_csv_records(
     records
         .map(|result| {
             let row = result?;
+            let row_index = row
+                .position()
+                .with_context(|| "Couldn't get row position")?
+                .record();
+            let date = parse_col("date", &row, &row_parser.date)?;
+            let description = parse_col("description", &row, &row_parser.description)?;
+            let amount = parse_col("amount", &row, &row_parser.amount)?;
+            let account = account.to_string();
             Ok(Transaction {
-                date: parse_col("date", &row, &row_parser.date)?,
-                description: parse_col("description", &row, &row_parser.description)?,
-                amount: parse_col("amount", &row, &row_parser.amount)?,
-                account: account.to_string(),
+                id: get_transaction_id(row_index, &date, &description, &amount, &account),
+                date,
+                description,
+                amount,
+                account,
             })
         })
         .collect()
