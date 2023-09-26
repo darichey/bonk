@@ -18,11 +18,7 @@ pub struct Statement<'a> {
 
 impl Statement<'_> {
     pub fn column_names(&self) -> Vec<String> {
-        self.stmt
-            .column_names()
-            .into_iter()
-            .map(|name| name.clone())
-            .collect()
+        self.stmt.column_names().to_vec()
     }
 }
 
