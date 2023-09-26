@@ -4,9 +4,9 @@ use chrono::NaiveDate;
 use serde::{Deserialize, Serialize};
 use sqlite::{Connection, State, Value};
 
-use anyhow::Result;
+use anyhow::{Context, Result};
 
-use crate::import::import_all;
+use crate::import_transactions;
 
 pub struct Db {
     con: Connection,
@@ -23,16 +23,23 @@ impl Statement<'_> {
 }
 
 impl Db {
-    pub fn new(path_to_schema: &str, path_to_data: &str) -> Result<Db> {
-        // open db connection
-        let con = sqlite::open(":memory:")?;
+    pub fn new(path_to_data: &str) -> Result<Db> {
+        let db = Db {
+            con: sqlite::open(":memory:")?,
+        };
 
+        db.import_transactions(path_to_data)?;
+        db.import_metadata(path_to_data)?;
+
+        Ok(db)
+    }
+
+    fn import_transactions(&self, path_to_data: &str) -> Result<()> {
         // create transactions table
-        let query = fs::read_to_string(path_to_schema)?;
-        con.execute(query)?;
+        self.con.execute(fs::read_to_string("transactions.sql")?)?;
 
-        // insert some transactions
-        con.execute("BEGIN TRANSACTION")?;
+        // insert transactions
+        self.con.execute("BEGIN TRANSACTION")?;
 
         for Transaction {
             id,
@@ -40,9 +47,9 @@ impl Db {
             description,
             amount,
             account,
-        } in import_all(path_to_data)?
+        } in import_transactions::import_all(path_to_data)?
         {
-            let mut stmt = con.prepare(
+            let mut stmt = self.con.prepare(
                 "INSERT INTO transactions VAlUES (:id, :date, :description, :amount, :account)",
             )?;
 
@@ -59,9 +66,55 @@ impl Db {
             while let Ok(State::Row) = stmt.next() {}
         }
 
-        con.execute("COMMIT")?;
+        self.con.execute("COMMIT")?;
 
-        Ok(Db { con })
+        Ok(())
+    }
+
+    fn import_metadata(&self, path_to_data: &str) -> Result<()> {
+        let metadata_glob = format!("{path_to_data}/metadata/**/*.csv");
+        let metadata_paths = glob::glob(&metadata_glob)?;
+
+        for metadata_path in metadata_paths {
+            let metadata_path = metadata_path?;
+
+            let foo = metadata_path.with_extension("");
+
+            let metadata_name = foo
+                .file_name()
+                .with_context(|| format!("{} has no name", metadata_path.display()))?
+                .to_str()
+                .with_context(|| {
+                    format!("Couldn't convert path to str: {}", metadata_path.display())
+                })?;
+
+            self.con.execute("BEGIN TRANSACTION")?;
+
+            let mut csv_reader = csv::Reader::from_path(metadata_path)?;
+
+            let header = csv_reader.headers()?;
+            let cols = header.iter().skip(1).collect::<Vec<_>>().join(",");
+
+            self.con.execute(format!(
+                "CREATE TABLE {}(id INTEGER PRIMARY KEY,{}, FOREIGN KEY(id) REFERENCES transactions(id))",
+                metadata_name, cols
+            ))?;
+
+            for record in csv_reader.records() {
+                let values = record?
+                    .iter()
+                    .map(|field| format!("\"{field}\""))
+                    .collect::<Vec<_>>()
+                    .join(",");
+
+                self.con
+                    .execute(format!("INSERT INTO {} VALUES({})", metadata_name, values))?;
+            }
+
+            self.con.execute("COMMIT")?;
+        }
+
+        Ok(())
     }
 
     pub fn get_transactions(&self, stmt: Statement<'_>) -> Result<Vec<Transaction>> {

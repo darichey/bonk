@@ -1,6 +1,6 @@
 use crate::{
     db::{DollarAmount, Transaction},
-    import::import_csv::{import_csv_records, TransactionRowParser},
+    import_transactions::import_csv::{import_csv_records, TransactionRowParser},
 };
 use anyhow::{Context, Result};
 use chrono::NaiveDateTime;

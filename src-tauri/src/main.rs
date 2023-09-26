@@ -15,10 +15,10 @@ use tauri::State;
 extern crate lazy_static;
 
 mod db;
-mod import;
+mod import_transactions;
 
 fn main() -> Result<()> {
-    let db = Mutex::new(Db::new("../db/schema.sql", "../data")?);
+    let db = Mutex::new(Db::new("../data")?);
 
     tauri::Builder::default()
         .manage(db)
