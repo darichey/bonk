@@ -29,7 +29,7 @@ lazy_static! {
 }
 
 pub fn import_all(path_to_data: &str) -> Result<Vec<Transaction>> {
-    let cfg_glob = format!("{path_to_data}/**/.importercfg.json");
+    let cfg_glob = format!("{path_to_data}/transactions/**/.importercfg.json");
     let cfg_paths = glob::glob(&cfg_glob)?;
 
     let mut transactions = Vec::new();
