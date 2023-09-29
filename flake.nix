@@ -47,6 +47,9 @@
             webkitgtk
             librsvg
 
+            # Python dev
+            (python3.withPackages (ps: with ps; [ pandas pytorch ]))
+
             # just for debugging
             sqlite
             rlwrap
