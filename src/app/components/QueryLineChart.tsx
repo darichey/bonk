@@ -6,7 +6,7 @@ import "chart.js/auto";
 import React from "react";
 import { ChartData, ChartOptions } from "chart.js";
 import { Line } from "react-chartjs-2";
-import { useQueryTransactionsForChart } from "./commands";
+import { useQueryTransactionsForChart } from "../commands";
 
 export default function QueryLineChart({
   title,

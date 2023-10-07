@@ -1,13 +1,12 @@
 "use client";
 
-import { useGetAllTransactions } from "./commands";
+import { useGetAllTransactions } from "../commands";
 
 export default function TransactionLog() {
   const { data: transactions, error, isLoading } = useGetAllTransactions();
 
   return (
     <div>
-      <h1 className="font-bold">Your Transaction Log</h1>
       {isLoading ? (
         <div>transactions here... loading...</div>
       ) : error ? (
