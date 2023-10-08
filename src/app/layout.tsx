@@ -19,11 +19,15 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
-      <body className={inter.className}>
-        <div className="flex flex-row h-full w-full">
-          <div className="flex flex-col border-r-2 w-1/6">
-            <Image src={financeAppSvg} alt="finance-app logo" />
+    <html lang="en" className="h-screen w-screen">
+      <body className={`${inter.className} h-screen w-screen overflow-hidden`}>
+        <div className="flex flex-row h-full w-full px-2">
+          <div className="flex flex-col border-r-2 w-1/12 px-2">
+            <Image
+              src={financeAppSvg}
+              alt="finance-app logo"
+              className="py-4"
+            />
             <ul>
               <li>
                 <Link href="/">Home</Link>
@@ -36,12 +40,12 @@ export default function RootLayout({
               </li>
             </ul>
           </div>
-          <div className="flex-auto">
+          <div className="flex flex-col flex-grow">
             <div className="flex flex-row border-b-2">
               <NavButton dir="back" className="border-r-2" />
               <NavButton dir="forward" className="border-r-2" />
             </div>
-            <main>{children}</main>
+            <main className="overflow-y-auto p-4">{children}</main>
           </div>
         </div>
       </body>
