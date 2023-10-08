@@ -5,7 +5,6 @@ import NavButton from "./components/NavButton";
 import Link from "next/link";
 import Image from "next/image";
 import financeAppSvg from "../../public/finance-app.svg";
-import PageTitle from "./components/PageTitle";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -41,7 +40,6 @@ export default function RootLayout({
             <div className="flex flex-row border-b-2">
               <NavButton dir="back" className="border-r-2" />
               <NavButton dir="forward" className="border-r-2" />
-              <PageTitle />
             </div>
             <main>{children}</main>
           </div>
