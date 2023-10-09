@@ -14,3 +14,12 @@ export function useQueryTransactionsForChart(query: string) {
     }
   );
 }
+
+export function useQueryTransactions(query: string) {
+  return useSWR<[string[], (number | string | null)[][]]>(
+    ["query_transactions", query],
+    ([cmd, arg]) => {
+      return invoke(cmd, { query: arg });
+    }
+  );
+}

@@ -46,6 +46,7 @@
             libsoup
             webkitgtk
             librsvg
+            glib-networking
 
             # Python dev
             (python3.withPackages (ps: with ps; [ pandas pytorch ]))
@@ -58,6 +59,7 @@
           shellHook =
             ''
               export LD_LIBRARY_PATH=${pkgs.lib.makeLibraryPath libraries}:$LD_LIBRARY_PATH
+              export GIO_MODULE_DIR="${pkgs.glib-networking}/lib/gio/modules/";
             '';
         };
       }

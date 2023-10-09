@@ -24,7 +24,8 @@ fn main() -> Result<()> {
         .manage(db)
         .invoke_handler(tauri::generate_handler![
             get_all_transactions,
-            query_transactions_for_chart
+            query_transactions_for_chart,
+            query_transactions
         ])
         .run(tauri::generate_context!())?;
 
@@ -89,4 +90,29 @@ fn query_transactions_for_chart(
     let map: HashMap<String, Vec<Value>> = column_names.into_iter().zip(columns).collect();
 
     Ok(map)
+}
+
+#[tauri::command]
+fn query_transactions(
+    query: String,
+    db: State<Mutex<Db>>,
+) -> Result<(Vec<String>, Vec<Vec<Value>>), String> {
+    // TODO: dedup with above
+    let db = db.lock().unwrap();
+
+    let stmt = db.prepare(&query).map_err(|err| err.to_string())?;
+
+    let column_names = stmt.column_names();
+
+    let data = db
+        .query(stmt)
+        .map(|row| {
+            let values: Vec<sqlite::Value> = row?.into();
+            let values: Vec<Value> = values.into_iter().map(Value).collect();
+            Ok(values)
+        })
+        .collect::<Result<Vec<Vec<Value>>>>()
+        .map_err(|err| err.to_string())?;
+
+    Ok((column_names, data))
 }

@@ -45,7 +45,7 @@ export default function RootLayout({
               <NavButton dir="back" className="border-r-2" />
               <NavButton dir="forward" className="border-r-2" />
             </div>
-            <main className="overflow-y-auto p-4">{children}</main>
+            <main className="h-full overflow-y-auto p-4">{children}</main>
           </div>
         </div>
       </body>
