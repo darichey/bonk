@@ -36,7 +36,7 @@ impl Db {
 
     fn import_transactions(&self, path_to_data: &str) -> Result<()> {
         // create transactions table
-        self.con.execute(fs::read_to_string("transactions.sql")?)?;
+        self.con.execute(fs::read_to_string("schema.sql")?)?;
 
         // insert transactions
         self.con.execute("BEGIN TRANSACTION")?;
@@ -90,6 +90,9 @@ impl Db {
 
             self.con.execute("BEGIN TRANSACTION")?;
 
+            self.con
+                .execute(format!("INSERT INTO metadata VALUES(\"{metadata_name}\")"))?;
+
             let mut csv_reader = csv::Reader::from_path(metadata_path)?;
 
             let header = csv_reader.headers()?;
@@ -108,7 +111,7 @@ impl Db {
                     .join(",");
 
                 self.con
-                    .execute(format!("INSERT INTO {} VALUES({})", metadata_name, values))?;
+                    .execute(format!("INSERT INTO {metadata_name} VALUES({values})"))?;
             }
 
             self.con.execute("COMMIT")?;
@@ -132,6 +135,23 @@ impl Db {
                 })
             })
             .collect()
+    }
+
+    pub fn get_metadata(&self, name: &str) -> Result<(Vec<String>, Vec<Vec<Value>>)> {
+        let query = format!("SELECT * FROM {name}");
+        let stmt = self.prepare(&query)?;
+
+        let col_names = stmt.column_names();
+
+        let data = self
+            .query(stmt)
+            .map(|row| {
+                let values: Vec<Value> = row?.into();
+                Ok(values)
+            })
+            .collect::<Result<Vec<Vec<Value>>>>()?;
+
+        Ok((col_names, data))
     }
 
     pub fn prepare(&self, query: &str) -> Result<Statement<'_>> {

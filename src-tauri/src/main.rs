@@ -25,7 +25,9 @@ fn main() -> Result<()> {
         .invoke_handler(tauri::generate_handler![
             get_all_transactions,
             query_transactions_for_chart,
-            query_transactions
+            query_transactions,
+            get_metadata_names,
+            get_metadata
         ])
         .run(tauri::generate_context!())?;
 
@@ -115,4 +117,38 @@ fn query_transactions(
         .map_err(|err| err.to_string())?;
 
     Ok((column_names, data))
+}
+
+#[tauri::command]
+fn get_metadata_names(db: State<Mutex<Db>>) -> Result<Vec<String>, String> {
+    let db = db.lock().unwrap();
+
+    let stmt = db
+        .prepare("select * from metadata order by name asc")
+        .map_err(|err| err.to_string())?;
+
+    db.query(stmt)
+        .map(|row| {
+            let row = row?;
+            Ok(row.try_read::<&str, _>("name")?.to_string())
+        })
+        .collect::<Result<Vec<String>>>()
+        .map_err(|err| err.to_string())
+}
+
+#[tauri::command]
+fn get_metadata(
+    name: String,
+    db: State<Mutex<Db>>,
+) -> Result<(Vec<String>, Vec<Vec<Value>>), String> {
+    let db = db.lock().unwrap();
+    let (col_names, data): (Vec<String>, Vec<Vec<sqlite::Value>>) =
+        db.get_metadata(&name).map_err(|err| err.to_string())?;
+
+    let data: Vec<Vec<Value>> = data
+        .into_iter()
+        .map(|row| row.into_iter().map(Value).collect())
+        .collect();
+
+    Ok((col_names, data))
 }

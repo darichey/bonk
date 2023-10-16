@@ -23,3 +23,16 @@ export function useQueryTransactions(query: string) {
     }
   );
 }
+
+export function useGetMetadataNames() {
+  return useSWR<string[]>("get_metadata_names", invoke);
+}
+
+export function useGetMetadata(name: string) {
+  return useSWR<[string[], (number | string | null)[][]]>(
+    ["get_metadata", name],
+    ([cmd, arg]) => {
+      return invoke(cmd, { name: arg });
+    }
+  );
+}
