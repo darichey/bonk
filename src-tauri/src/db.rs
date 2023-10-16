@@ -160,15 +160,15 @@ impl Db {
         })
     }
 
-    pub fn prepare_bind<T: sqlite::Bindable>(
-        &self,
-        query: &str,
-        value: T,
-    ) -> Result<Statement<'_>> {
-        let mut stmt = self.prepare(query)?;
-        stmt.stmt.bind(value)?;
-        Ok(stmt)
-    }
+    // pub fn prepare_bind<T: sqlite::Bindable>(
+    //     &self,
+    //     query: &str,
+    //     value: T,
+    // ) -> Result<Statement<'_>> {
+    //     let mut stmt = self.prepare(query)?;
+    //     stmt.stmt.bind(value)?;
+    //     Ok(stmt)
+    // }
 
     pub fn query<'a>(
         &'a self,
