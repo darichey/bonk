@@ -8,10 +8,7 @@ use crate::db::{DollarAmount, Transaction};
 
 use super::get_transaction_id;
 
-pub enum ColParser<T> {
-    Field(usize, fn(&str) -> Result<T>),
-    Row(fn(&StringRecord) -> Result<T>),
-}
+pub type ColParser<T> = (usize, fn(&str) -> Result<T>);
 
 pub struct TransactionRowParser {
     pub date: ColParser<NaiveDate>,
@@ -55,11 +52,9 @@ pub fn import_csv_records(
 }
 
 fn parse_col<T>(name: &str, row: &StringRecord, parser: &ColParser<T>) -> Result<T> {
-    match parser {
-        ColParser::Field(idx, parser) => parser(
-            row.get(*idx)
-                .with_context(|| format!("{name} not present"))?,
-        ),
-        ColParser::Row(parser) => parser(row),
-    }
+    let (idx, parser) = parser;
+    parser(
+        row.get(*idx)
+            .with_context(|| format!("{name} not present"))?,
+    )
 }

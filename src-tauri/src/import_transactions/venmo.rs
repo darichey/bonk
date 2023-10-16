@@ -6,8 +6,6 @@ use anyhow::{Context, Result};
 use chrono::NaiveDateTime;
 use csv::ReaderBuilder;
 
-use super::import_csv::ColParser;
-
 pub fn import_venmo_csv(account: &str, path: &str) -> Result<Vec<Transaction>> {
     let mut csv_reader = ReaderBuilder::new().has_headers(false).from_path(path)?;
     let records = {
@@ -19,13 +17,13 @@ pub fn import_venmo_csv(account: &str, path: &str) -> Result<Vec<Transaction>> {
     import_csv_records(
         records,
         TransactionRowParser {
-            date: ColParser::Field(2, |s| {
+            date: (2, |s| {
                 Ok(NaiveDateTime::parse_from_str(s, "%Y-%m-%dT%H:%M:%S")
                     .with_context(|| format!("Couldn't parse: {s}"))?
                     .date())
             }),
-            description: ColParser::Field(5, |s| Ok(s.to_string())),
-            amount: ColParser::Field(8, |s| DollarAmount::parse(&s.replace(" $", ""))),
+            description: (5, |s| Ok(s.to_string())),
+            amount: (8, |s| DollarAmount::parse(&s.replace(" $", ""))),
         },
         account,
     )
