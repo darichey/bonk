@@ -8,3 +8,10 @@ export interface Transaction {
 }
 
 export type SqlValue = string | number | null;
+
+export interface TableData {
+  column_names: string[];
+  data: SqlValue[][];
+}
+
+export type ChartData = Record<string, SqlValue[]>;

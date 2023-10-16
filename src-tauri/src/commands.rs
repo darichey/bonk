@@ -24,6 +24,14 @@ impl Serialize for Value {
     }
 }
 
+#[derive(Serialize)]
+pub struct TableData {
+    column_names: Vec<String>,
+    data: Vec<Vec<Value>>,
+}
+
+type ChartData = HashMap<String, Vec<Value>>;
+
 #[tauri::command]
 pub fn get_all_transactions(db: State<Mutex<Db>>) -> Result<Vec<Transaction>, String> {
     let db = db.lock().unwrap();
@@ -39,7 +47,7 @@ pub fn get_all_transactions(db: State<Mutex<Db>>) -> Result<Vec<Transaction>, St
 pub fn query_transactions_for_chart(
     query: String,
     db: State<Mutex<Db>>,
-) -> Result<HashMap<String, Vec<Value>>, String> {
+) -> Result<ChartData, String> {
     let db = db.lock().unwrap();
 
     let stmt = db.prepare(&query).map_err(|err| err.to_string())?;
@@ -68,10 +76,7 @@ pub fn query_transactions_for_chart(
 }
 
 #[tauri::command]
-pub fn query_transactions(
-    query: String,
-    db: State<Mutex<Db>>,
-) -> Result<(Vec<String>, Vec<Vec<Value>>), String> {
+pub fn query_transactions(query: String, db: State<Mutex<Db>>) -> Result<TableData, String> {
     // TODO: dedup with above
     let db = db.lock().unwrap();
 
@@ -89,7 +94,7 @@ pub fn query_transactions(
         .collect::<Result<Vec<Vec<Value>>>>()
         .map_err(|err| err.to_string())?;
 
-    Ok((column_names, data))
+    Ok(TableData { column_names, data })
 }
 
 #[tauri::command]
@@ -110,12 +115,9 @@ pub fn get_metadata_names(db: State<Mutex<Db>>) -> Result<Vec<String>, String> {
 }
 
 #[tauri::command]
-pub fn get_metadata(
-    name: String,
-    db: State<Mutex<Db>>,
-) -> Result<(Vec<String>, Vec<Vec<Value>>), String> {
+pub fn get_metadata(name: String, db: State<Mutex<Db>>) -> Result<TableData, String> {
     let db = db.lock().unwrap();
-    let (col_names, data): (Vec<String>, Vec<Vec<sqlite::Value>>) =
+    let (column_names, data): (Vec<String>, Vec<Vec<sqlite::Value>>) =
         db.get_metadata(&name).map_err(|err| err.to_string())?;
 
     let data: Vec<Vec<Value>> = data
@@ -123,5 +125,5 @@ pub fn get_metadata(
         .map(|row| row.into_iter().map(Value).collect())
         .collect();
 
-    Ok((col_names, data))
+    Ok(TableData { column_names, data })
 }

@@ -20,13 +20,13 @@ export default function MetadataTable({ name }: { name: string }) {
         <table>
           <thead>
             <tr>
-              {data[0].map((column, i) => (
+              {data.column_names.map((column, i) => (
                 <th key={i}>{column}</th>
               ))}
             </tr>
           </thead>
           <tbody>
-            {data[1].map((row, i) => (
+            {data.data.map((row, i) => (
               <tr key={i}>
                 {row.map((col, j) => (
                   <td key={j}>{col}</td>
