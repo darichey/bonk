@@ -1,13 +1,13 @@
 import { invoke } from "@tauri-apps/api/tauri";
 import useSWR from "swr";
-import { Transaction } from "./types";
+import { SqlValue, Transaction } from "./types";
 
 export function useGetAllTransactions() {
   return useSWR<Transaction[]>("get_all_transactions", invoke);
 }
 
 export function useQueryTransactionsForChart(query: string) {
-  return useSWR<Record<string, (number | string | null)[]>>(
+  return useSWR<Record<string, SqlValue[]>>(
     ["query_transactions_for_chart", query],
     ([cmd, arg]) => {
       return invoke(cmd, { query: arg });
@@ -16,7 +16,7 @@ export function useQueryTransactionsForChart(query: string) {
 }
 
 export function useQueryTransactions(query: string) {
-  return useSWR<[string[], (number | string | null)[][]]>(
+  return useSWR<[string[], SqlValue[][]]>(
     ["query_transactions", query],
     ([cmd, arg]) => {
       return invoke(cmd, { query: arg });
@@ -29,7 +29,7 @@ export function useGetMetadataNames() {
 }
 
 export function useGetMetadata(name: string) {
-  return useSWR<[string[], (number | string | null)[][]]>(
+  return useSWR<[string[], SqlValue[][]]>(
     ["get_metadata", name],
     ([cmd, arg]) => {
       return invoke(cmd, { name: arg });

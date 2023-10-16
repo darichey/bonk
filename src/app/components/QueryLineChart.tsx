@@ -7,6 +7,7 @@ import React from "react";
 import { ChartData, ChartOptions } from "chart.js";
 import { Line } from "react-chartjs-2";
 import { useQueryTransactionsForChart } from "../commands";
+import { SqlValue } from "../types";
 
 export default function QueryLineChart({
   title,
@@ -45,7 +46,7 @@ export default function QueryLineChart({
     animation: false,
   };
 
-  const data: ChartData<"line", (number | string | null)[], unknown> = {
+  const data: ChartData<"line", SqlValue[], unknown> = {
     labels: chartData[xAxis],
     datasets: Object.keys(chartData)
       .filter((key) => key != xAxis)

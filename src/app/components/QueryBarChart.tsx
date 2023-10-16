@@ -3,6 +3,7 @@
 import { Bar } from "react-chartjs-2";
 import { useQueryTransactionsForChart } from "../commands";
 import { ChartData, ChartOptions } from "chart.js";
+import { SqlValue } from "../types";
 
 export default function QueryBarChart({
   title,
@@ -41,7 +42,7 @@ export default function QueryBarChart({
     animation: false,
   };
 
-  const data: ChartData<"bar", (number | string | null)[], unknown> = {
+  const data: ChartData<"bar", SqlValue[], unknown> = {
     labels: chartData[xAxis],
     datasets: Object.keys(chartData)
       .filter((key) => key != xAxis)

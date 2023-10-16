@@ -6,3 +6,5 @@ export interface Transaction {
   };
   account: string;
 }
+
+export type SqlValue = string | number | null;
