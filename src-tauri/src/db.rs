@@ -78,9 +78,9 @@ impl Db {
         for metadata_path in metadata_paths {
             let metadata_path = metadata_path?;
 
-            let foo = metadata_path.with_extension("");
+            let path_without_extension = metadata_path.with_extension("");
 
-            let metadata_name = foo
+            let metadata_name = path_without_extension
                 .file_name()
                 .with_context(|| format!("{} has no name", metadata_path.display()))?
                 .to_str()
