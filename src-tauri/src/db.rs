@@ -6,10 +6,12 @@ use sqlite::{Connection, State, Value};
 
 use anyhow::{Context, Result};
 
-use crate::import_transactions;
+use crate::{dashboard::Dashboard, import_transactions};
 
 pub struct Db {
     con: Connection,
+    // TODO: hoist non-sql stuff out into new parent
+    pub dashboards: Vec<Dashboard>,
 }
 
 pub struct Statement<'a> {
@@ -24,12 +26,14 @@ impl Statement<'_> {
 
 impl Db {
     pub fn new(path_to_data: &str) -> Result<Db> {
-        let db = Db {
+        let mut db = Db {
             con: sqlite::open(":memory:")?,
+            dashboards: Vec::new(),
         };
 
         db.import_transactions(path_to_data)?;
         db.import_metadata(path_to_data)?;
+        db.import_dashboards(path_to_data)?;
 
         Ok(db)
     }
@@ -115,6 +119,20 @@ impl Db {
             }
 
             self.con.execute("COMMIT")?;
+        }
+
+        Ok(())
+    }
+
+    fn import_dashboards(&mut self, path_to_data: &str) -> Result<()> {
+        let dashboard_glob = format!("{path_to_data}/dashboards/**/*.toml");
+        let dashboard_paths = glob::glob(&dashboard_glob)?;
+
+        for dashboard_path in dashboard_paths {
+            let dashboard_path = dashboard_path?;
+            let contents = fs::read_to_string(dashboard_path)?;
+            let dashboard: Dashboard = toml::from_str(&contents)?;
+            self.dashboards.push(dashboard);
         }
 
         Ok(())

@@ -9,14 +9,15 @@ use anyhow::Result;
 use db::Db;
 
 use crate::commands::{
-    get_all_transactions, get_metadata, get_metadata_names, query_transactions,
-    query_transactions_for_chart,
+    get_all_transactions, get_dashboard, get_dashboard_names, get_metadata, get_metadata_names,
+    query_transactions, query_transactions_for_chart,
 };
 
 #[macro_use]
 extern crate lazy_static;
 
 mod commands;
+mod dashboard;
 mod db;
 mod import_transactions;
 
@@ -30,7 +31,9 @@ fn main() -> Result<()> {
             query_transactions_for_chart,
             query_transactions,
             get_metadata_names,
-            get_metadata
+            get_metadata,
+            get_dashboard_names,
+            get_dashboard
         ])
         .run(tauri::generate_context!())?;
 

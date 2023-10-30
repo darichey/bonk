@@ -6,6 +6,7 @@ import Link from "next/link";
 import Image from "next/image";
 import financeAppSvg from "../../public/finance-app.svg";
 import MetadataSidebar from "./components/MetadataSidebar";
+import DashboardSidebar from "./components/DashboardSidebar";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -40,7 +41,12 @@ export default function RootLayout({
                 <Link href="/query">Query</Link>
               </li>
             </ul>
-            <MetadataSidebar />
+            <div className="mb-5">
+              <MetadataSidebar />
+            </div>
+            <div className="mb-5">
+              <DashboardSidebar />
+            </div>
           </div>
           <div className="flex flex-col flex-grow">
             <div className="flex flex-row border-b-2">

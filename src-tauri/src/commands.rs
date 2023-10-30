@@ -4,7 +4,10 @@ use anyhow::Result;
 use serde::Serialize;
 use tauri::State;
 
-use crate::db::{Db, Transaction};
+use crate::{
+    dashboard::Dashboard,
+    db::{Db, Transaction},
+};
 
 /// A wrapper for seralizing sqlite Values
 pub struct Value(sqlite::Value);
@@ -126,4 +129,26 @@ pub fn get_metadata(name: String, db: State<Mutex<Db>>) -> Result<TableData, Str
         .collect();
 
     Ok(TableData { column_names, data })
+}
+
+#[tauri::command]
+pub fn get_dashboard_names(db: State<Mutex<Db>>) -> Result<Vec<String>, String> {
+    let db = db.lock().unwrap();
+
+    return Ok(db
+        .dashboards
+        .iter()
+        .map(|dashboard| dashboard.title.clone())
+        .collect());
+}
+
+#[tauri::command]
+pub fn get_dashboard(name: String, db: State<Mutex<Db>>) -> Result<Dashboard, String> {
+    let db = db.lock().unwrap();
+
+    db.dashboards
+        .iter()
+        .find(|dashboard| dashboard.title == name)
+        .cloned()
+        .ok_or("Couldn't find dashboard".to_string())
 }
