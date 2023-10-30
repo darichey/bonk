@@ -1,29 +1,23 @@
 "use client";
 
-import { useGetDashboard } from "../commands";
+import { Chart } from "../types";
 import QueryBarChart from "./QueryBarChart";
 import QueryLineChart from "./QueryLineChart";
 
-export default function QueryChart({ title }: { title: string }) {
-  const { data: dashboard, isLoading, error } = useGetDashboard(title);
-
-  return error ? (
-    <div>Encountered error: {error}</div>
-  ) : isLoading || !dashboard ? (
-    <div>Loading...</div>
-  ) : dashboard.chartType === "bar" ? (
+export default function QueryChart({ chart }: { chart: Chart }) {
+  return chart.chartType === "bar" ? (
     <QueryBarChart
-      title={title}
-      xAxis={dashboard.xAxis}
-      query={dashboard.query}
+      title={chart.title}
+      xAxis={chart.xAxis}
+      query={chart.query}
     />
-  ) : dashboard.chartType === "line" ? (
+  ) : chart.chartType === "line" ? (
     <QueryLineChart
-      title={title}
-      xAxis={dashboard.xAxis}
-      query={dashboard.query}
+      title={chart.title}
+      xAxis={chart.xAxis}
+      query={chart.query}
     />
   ) : (
-    <div>Unknown chart type: '{dashboard.chartType}'</div>
+    <div>Unknown chart type: '{chart.chartType}'</div>
   );
 }

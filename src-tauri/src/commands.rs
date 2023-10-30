@@ -132,7 +132,7 @@ pub fn get_dashboard_names(db: State<Mutex<Db>>) -> Result<Vec<String>, String> 
     return Ok(db
         .dashboards
         .iter()
-        .map(|dashboard| dashboard.title.clone())
+        .map(|dashboard| dashboard.name.clone())
         .collect());
 }
 
@@ -142,7 +142,7 @@ pub fn get_dashboard(name: String, db: State<Mutex<Db>>) -> Result<Dashboard, St
 
     db.dashboards
         .iter()
-        .find(|dashboard| dashboard.title == name)
+        .find(|dashboard| dashboard.name == name)
         .cloned()
         .ok_or("Couldn't find dashboard".to_string())
 }

@@ -1,5 +1,5 @@
 import { Metadata } from "next";
-import QueryChart from "../components/QueryChart";
+import Dashboard from "../components/Dashboard";
 
 export const metadata: Metadata = {
   title: "Dashboard",
@@ -12,9 +12,5 @@ export default function DashboardPage({
 }) {
   const name = searchParams["name"] as string; // TODO
 
-  return (
-    <div>
-      <QueryChart title={name} />
-    </div>
-  );
+  return <Dashboard name={name} />;
 }
