@@ -1,6 +1,4 @@
-"use client";
-
-import Link from "next/link";
+import { Link } from "react-router-dom";
 import { useGetMetadataNames } from "../commands";
 
 export default function MetadataSidebar() {
@@ -16,7 +14,7 @@ export default function MetadataSidebar() {
       ) : (
         <ul>
           {metadataNames.map((name, i) => (
-            <Link href={{ pathname: "/metadata", query: { name } }} key={i}>
+            <Link to={`/metadata?name=${encodeURIComponent(name)}`} key={i}>
               {name}
             </Link>
           ))}

@@ -1,6 +1,4 @@
-"use client";
-
-import Link from "next/link";
+import { Link } from "react-router-dom";
 import { useGetDashboardNames } from "../commands";
 
 export default function DashboardSidebar() {
@@ -16,7 +14,7 @@ export default function DashboardSidebar() {
       ) : (
         <ul>
           {dashboardNames.map((name, i) => (
-            <Link href={{ pathname: "/dashboard", query: { name } }} key={i}>
+            <Link to={`/dashboard?name=${encodeURIComponent(name)}`} key={i}>
               {name}
             </Link>
           ))}

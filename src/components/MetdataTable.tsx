@@ -1,5 +1,3 @@
-"use client";
-
 import { useGetMetadata } from "../commands";
 
 export default function MetadataTable({ name }: { name: string }) {

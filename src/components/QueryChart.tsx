@@ -1,5 +1,3 @@
-"use client";
-
 import { Chart } from "../types";
 import QueryBarChart from "./QueryBarChart";
 import QueryLineChart from "./QueryLineChart";

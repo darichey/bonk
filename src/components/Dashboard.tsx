@@ -1,5 +1,3 @@
-"use client";
-
 import { useGetDashboard } from "../commands";
 import QueryChart from "./QueryChart";
 

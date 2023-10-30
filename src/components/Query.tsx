@@ -1,5 +1,3 @@
-"use client";
-
 import { Editor } from "@monaco-editor/react";
 import { useState } from "react";
 import { useQueryTransactions } from "../commands";
