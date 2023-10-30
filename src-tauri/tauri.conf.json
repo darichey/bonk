@@ -28,7 +28,7 @@
         "icons/icon.icns",
         "icons/icon.ico"
       ],
-      "identifier": "com.tauri.dev",
+      "identifier": "com.darichey.finance-app",
       "longDescription": "",
       "macOS": {
         "entitlements": null,

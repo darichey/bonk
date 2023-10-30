@@ -18,6 +18,6 @@ export default function QueryChart({ chart }: { chart: Chart }) {
       query={chart.query}
     />
   ) : (
-    <div>Unknown chart type: '{chart.chartType}'</div>
+    <div>Unknown chart type: &apos;{chart.chartType}&apos;</div>
   );
 }
