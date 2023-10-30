@@ -6,11 +6,12 @@ use sqlite::{Connection, State, Value};
 
 use anyhow::{Context, Result};
 
-use crate::{dashboard::Dashboard, import_transactions};
+use crate::{dashboard::Dashboard, import_transactions, metadata::Metadata};
 
 pub struct Db {
     con: Connection,
     // TODO: hoist non-sql stuff out into new parent
+    pub metadatas: Vec<Metadata>,
     pub dashboards: Vec<Dashboard>,
 }
 
@@ -28,6 +29,7 @@ impl Db {
     pub fn new(path_to_data: &str) -> Result<Db> {
         let mut db = Db {
             con: sqlite::open(":memory:")?,
+            metadatas: Vec::new(),
             dashboards: Vec::new(),
         };
 
@@ -75,7 +77,7 @@ impl Db {
         Ok(())
     }
 
-    fn import_metadata(&self, path_to_data: &str) -> Result<()> {
+    fn import_metadata(&mut self, path_to_data: &str) -> Result<()> {
         let metadata_glob = format!("{path_to_data}/metadata/**/*.csv");
         let metadata_paths = glob::glob(&metadata_glob)?;
 
@@ -92,10 +94,11 @@ impl Db {
                     format!("Couldn't convert path to str: {}", metadata_path.display())
                 })?;
 
-            self.con.execute("BEGIN TRANSACTION")?;
+            self.metadatas.push(Metadata {
+                name: metadata_name.to_string(),
+            });
 
-            self.con
-                .execute(format!("INSERT INTO metadata VALUES(\"{metadata_name}\")"))?;
+            self.con.execute("BEGIN TRANSACTION")?;
 
             let mut csv_reader = csv::Reader::from_path(metadata_path)?;
 

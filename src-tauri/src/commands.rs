@@ -104,17 +104,11 @@ pub fn query_transactions(query: String, db: State<Mutex<Db>>) -> Result<TableDa
 pub fn get_metadata_names(db: State<Mutex<Db>>) -> Result<Vec<String>, String> {
     let db = db.lock().unwrap();
 
-    let stmt = db
-        .prepare("select * from metadata order by name asc")
-        .map_err(|err| err.to_string())?;
-
-    db.query(stmt)
-        .map(|row| {
-            let row = row?;
-            Ok(row.try_read::<&str, _>("name")?.to_string())
-        })
-        .collect::<Result<Vec<String>>>()
-        .map_err(|err| err.to_string())
+    Ok(db
+        .metadatas
+        .iter()
+        .map(|metadata| metadata.name.clone())
+        .collect())
 }
 
 #[tauri::command]

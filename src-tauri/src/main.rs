@@ -20,6 +20,7 @@ mod commands;
 mod dashboard;
 mod db;
 mod import_transactions;
+mod metadata;
 
 fn main() -> Result<()> {
     let db = Mutex::new(Db::new("../data")?);
