@@ -1,5 +1,5 @@
 import { useGetDashboard } from "../commands";
-import QueryChart from "./QueryChart";
+import QueryChart from "./chart/QueryChart";
 
 export default function Dashboard({ name }: { name: string }) {
   const { data: dashboard, isLoading, error } = useGetDashboard(name);
