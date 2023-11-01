@@ -62,6 +62,37 @@
               export GIO_MODULE_DIR="${pkgs.glib-networking}/lib/gio/modules/";
             '';
         };
+
+        packages.default = rustPlatform.buildRustPackage rec {
+          pname = "finance-app";
+          version = "0.1.0";
+
+          src = builtins.path {
+            path = ./.;
+            name = "finance-app";
+          };
+
+          sourceRoot = "finance-app/src-tauri";
+
+          cargoLock = {
+            lockFile = ./src-tauri/Cargo.lock;
+          };
+
+          nativeBuildInputs = [
+            copyDesktopItems
+            wrapGAppsHook
+            pkg-config
+          ];
+
+          buildInputs = [
+            openssl
+            dbus
+            glib
+            glib-networking
+            libayatana-appindicator
+            webkitgtk
+          ];
+        };
       }
     );
 }
