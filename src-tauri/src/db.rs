@@ -28,14 +28,17 @@ impl Statement<'_> {
 impl Db {
     pub fn new(path_to_data: &str) -> Result<Db> {
         let mut db = Db {
-            con: sqlite::open(":memory:")?,
+            con: sqlite::open(":memory:").context("Failed to open sqlite connection")?,
             metadatas: Vec::new(),
             dashboards: Vec::new(),
         };
 
-        db.import_transactions(path_to_data)?;
-        db.import_metadata(path_to_data)?;
-        db.import_dashboards(path_to_data)?;
+        db.import_transactions(path_to_data)
+            .context("Failed to import transactions")?;
+        db.import_metadata(path_to_data)
+            .context("Failed to import metadata")?;
+        db.import_dashboards(path_to_data)
+            .context("Failed to import dashboards")?;
 
         Ok(db)
     }
