@@ -37,7 +37,7 @@
         "providerShortName": null,
         "signingIdentity": null
       },
-      "resources": [],
+      "resources": ["schema.sql"],
       "shortDescription": "",
       "targets": "all",
       "windows": {

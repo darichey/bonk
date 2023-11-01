@@ -1,4 +1,4 @@
-use std::{fmt::Display, fs};
+use std::{fmt::Display, fs, path::PathBuf};
 
 use chrono::NaiveDate;
 use serde::{Deserialize, Serialize};
@@ -26,14 +26,14 @@ impl Statement<'_> {
 }
 
 impl Db {
-    pub fn new(path_to_data: &str) -> Result<Db> {
+    pub fn new(path_to_schema: PathBuf, path_to_data: &str) -> Result<Db> {
         let mut db = Db {
             con: sqlite::open(":memory:").context("Failed to open sqlite connection")?,
             metadatas: Vec::new(),
             dashboards: Vec::new(),
         };
 
-        db.import_transactions(path_to_data)
+        db.import_transactions(path_to_schema, path_to_data)
             .context("Failed to import transactions")?;
         db.import_metadata(path_to_data)
             .context("Failed to import metadata")?;
@@ -43,9 +43,9 @@ impl Db {
         Ok(db)
     }
 
-    fn import_transactions(&self, path_to_data: &str) -> Result<()> {
+    fn import_transactions(&self, path_to_schema: PathBuf, path_to_data: &str) -> Result<()> {
         // create transactions table
-        self.con.execute(fs::read_to_string("schema.sql")?)?;
+        self.con.execute(fs::read_to_string(path_to_schema)?)?;
 
         // insert transactions
         self.con.execute("BEGIN TRANSACTION")?;

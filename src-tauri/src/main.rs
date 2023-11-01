@@ -25,7 +25,12 @@ fn main() -> Result<()> {
     tauri::Builder::default()
         .setup(|app| match app.get_cli_matches() {
             Ok(matches) => {
-                let data_dir = matches
+                let path_to_schema = app
+                    .path_resolver()
+                    .resolve_resource("schema.sql")
+                    .expect("Failed to load schema.sql resource");
+
+                let path_to_data = matches
                     .args
                     .get("data_dir")
                     .expect("clap enforces data_dir is present")
@@ -33,7 +38,7 @@ fn main() -> Result<()> {
                     .as_str()
                     .expect("clap enforces data_dir is string");
 
-                let db = Mutex::new(Db::new(data_dir)?);
+                let db = Mutex::new(Db::new(path_to_schema, path_to_data)?);
                 app.manage(db);
 
                 Ok(())
