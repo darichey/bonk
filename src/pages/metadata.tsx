@@ -1,9 +1,8 @@
-import { useSearchParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import MetadataTable from "../components/MetdataTable";
 
 export default function MetadataPage() {
-  const [searchParams, _] = useSearchParams();
-  const name = searchParams.get("name");
+  const { name } = useParams();
 
   if (!name) {
     return <div>Error: no metadata name</div>;

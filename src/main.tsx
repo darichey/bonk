@@ -19,7 +19,7 @@ const router = createBrowserRouter([
         element: <HomePage />,
       },
       {
-        path: "/dashboard",
+        path: "/dashboard/:name",
         element: <DashboardPage />,
       },
       {
@@ -27,7 +27,7 @@ const router = createBrowserRouter([
         element: <LogPage />,
       },
       {
-        path: "/metadata",
+        path: "/metadata/:name",
         element: <MetadataPage />,
       },
       {

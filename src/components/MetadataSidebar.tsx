@@ -14,7 +14,7 @@ export default function MetadataSidebar() {
       ) : (
         <ul>
           {metadataNames.map((name, i) => (
-            <Link to={`/metadata?name=${encodeURIComponent(name)}`} key={i}>
+            <Link to={`/metadata/${name}`} key={i}>
               {name}
             </Link>
           ))}
