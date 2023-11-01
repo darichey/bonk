@@ -28,9 +28,9 @@
         devShells.default = mkShell {
           buildInputs = [
             # Rust dev
-            (rust-bin.selectLatestNightlyWith (toolchain: toolchain.default.override {
+            (rust-bin.stable.latest.default.override {
               extensions = [ "rust-src" ];
-            }))
+            })
 
             # JS dev
             nodejs_20
