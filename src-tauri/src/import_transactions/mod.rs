@@ -7,6 +7,7 @@ use std::{
     collections::{hash_map::DefaultHasher, HashMap},
     fs::{self, File},
     hash::{Hash, Hasher},
+    path::Path,
 };
 
 use anyhow::{Context, Result};
@@ -28,8 +29,11 @@ lazy_static! {
     };
 }
 
-pub fn import_all(path_to_data: &str) -> Result<Vec<Transaction>> {
-    let cfg_glob = format!("{path_to_data}/transactions/**/.importercfg.json");
+pub fn import_all(path_to_data: impl AsRef<Path>) -> Result<Vec<Transaction>> {
+    let cfg_glob = format!(
+        "{}/transactions/**/.importercfg.json",
+        path_to_data.as_ref().display()
+    );
     let cfg_paths = glob::glob(&cfg_glob)?;
 
     let mut transactions = Vec::new();

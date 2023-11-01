@@ -1,4 +1,8 @@
-use std::{fmt::Display, fs, path::PathBuf};
+use std::{
+    fmt::Display,
+    fs,
+    path::{Path, PathBuf},
+};
 
 use chrono::NaiveDate;
 use serde::{Deserialize, Serialize};
@@ -26,24 +30,28 @@ impl Statement<'_> {
 }
 
 impl Db {
-    pub fn new(path_to_schema: PathBuf, path_to_data: &str) -> Result<Db> {
+    pub fn new(path_to_schema: impl AsRef<Path>, path_to_data: impl AsRef<Path>) -> Result<Db> {
         let mut db = Db {
             con: sqlite::open(":memory:").context("Failed to open sqlite connection")?,
             metadatas: Vec::new(),
             dashboards: Vec::new(),
         };
 
-        db.import_transactions(path_to_schema, path_to_data)
+        db.import_transactions(path_to_schema, &path_to_data)
             .context("Failed to import transactions")?;
-        db.import_metadata(path_to_data)
+        db.import_metadata(&path_to_data)
             .context("Failed to import metadata")?;
-        db.import_dashboards(path_to_data)
+        db.import_dashboards(&path_to_data)
             .context("Failed to import dashboards")?;
 
         Ok(db)
     }
 
-    fn import_transactions(&self, path_to_schema: PathBuf, path_to_data: &str) -> Result<()> {
+    fn import_transactions(
+        &self,
+        path_to_schema: impl AsRef<Path>,
+        path_to_data: impl AsRef<Path>,
+    ) -> Result<()> {
         // create transactions table
         self.con.execute(fs::read_to_string(path_to_schema)?)?;
 
@@ -80,8 +88,8 @@ impl Db {
         Ok(())
     }
 
-    fn import_metadata(&mut self, path_to_data: &str) -> Result<()> {
-        let metadata_glob = format!("{path_to_data}/metadata/**/*.csv");
+    fn import_metadata(&mut self, path_to_data: impl AsRef<Path>) -> Result<()> {
+        let metadata_glob = format!("{}/metadata/**/*.csv", path_to_data.as_ref().display());
         let metadata_paths = glob::glob(&metadata_glob)?;
 
         for metadata_path in metadata_paths {
@@ -130,8 +138,8 @@ impl Db {
         Ok(())
     }
 
-    fn import_dashboards(&mut self, path_to_data: &str) -> Result<()> {
-        let dashboard_glob = format!("{path_to_data}/dashboards/**/*.toml");
+    fn import_dashboards(&mut self, path_to_data: impl AsRef<Path>) -> Result<()> {
+        let dashboard_glob = format!("{}/dashboards/**/*.toml", path_to_data.as_ref().display());
         let dashboard_paths = glob::glob(&dashboard_glob)?;
 
         for dashboard_path in dashboard_paths {
