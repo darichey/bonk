@@ -5,6 +5,7 @@ use std::sync::Mutex;
 
 use anyhow::Result;
 use db::Db;
+use tauri::Manager;
 
 use crate::commands::{
     get_all_transactions, get_dashboard, get_dashboard_names, get_metadata, get_metadata_names,
@@ -21,10 +22,24 @@ mod import_transactions;
 mod metadata;
 
 fn main() -> Result<()> {
-    let db = Mutex::new(Db::new("../data")?);
-
     tauri::Builder::default()
-        .manage(db)
+        .setup(|app| match app.get_cli_matches() {
+            Ok(matches) => {
+                let data_dir = matches
+                    .args
+                    .get("data_dir")
+                    .expect("clap enforces data_dir is present")
+                    .value
+                    .as_str()
+                    .expect("clap enforces data_dir is string");
+
+                let db = Mutex::new(Db::new(data_dir)?);
+                app.manage(db);
+
+                Ok(())
+            }
+            Err(err) => Err(Box::new(err)),
+        })
         .invoke_handler(tauri::generate_handler![
             get_all_transactions,
             query_transactions_for_chart,

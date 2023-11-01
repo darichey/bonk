@@ -60,6 +60,16 @@
         "title": "finance-app",
         "width": 800
       }
-    ]
+    ],
+    "cli": {
+      "args": [
+        {
+          "name": "data_dir",
+          "index": 1,
+          "takesValue": true,
+          "required": true
+        }
+      ]
+    }
   }
 }
