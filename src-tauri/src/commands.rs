@@ -146,3 +146,40 @@ pub fn get_dashboard(name: String, db: State<Mutex<Db>>) -> Result<Dashboard, St
         .cloned()
         .ok_or("Couldn't find dashboard".to_string())
 }
+
+#[tauri::command]
+pub fn render_query_template(
+    template: String,
+    variables: HashMap<String, String>,
+    db: State<Mutex<Db>>,
+) -> Result<String, String> {
+    let db = db.lock().unwrap();
+
+    let evaluated_variables = variables
+        .into_iter()
+        .map(|(name, query)| {
+            let stmt = db.prepare(&query)?;
+            let res = db
+                .query(stmt)
+                .next()
+                .expect("Query didn't produce a row")?
+                .try_read::<&str, _>(0)?
+                .to_string();
+            Ok((name, res))
+        })
+        .collect::<Result<HashMap<String, String>>>()
+        .map_err(|err| err.to_string())?;
+
+    Ok(format_template(&template, evaluated_variables))
+}
+
+fn format_template(template: &str, values: HashMap<String, String>) -> String {
+    let mut result = String::from(template);
+
+    for (key, value) in values.iter() {
+        let placeholder = format!("{{{{{}}}}}", key);
+        result = result.replace(&placeholder, value);
+    }
+
+    result
+}

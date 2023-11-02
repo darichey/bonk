@@ -1,4 +1,5 @@
 import { useGetDashboard } from "../commands";
+import DashboardText from "./DashboardText";
 import QueryChart from "./chart/QueryChart";
 
 export default function Dashboard({ name }: { name: string }) {
@@ -16,7 +17,7 @@ export default function Dashboard({ name }: { name: string }) {
           case "chart":
             return <QueryChart key={i} chart={component} />;
           case "text":
-            return <p>{component.text}</p>;
+            return <DashboardText key={i} text={component} />;
         }
       })}
     </div>

@@ -40,3 +40,15 @@ export function useGetDashboard(name: string) {
     return invoke(cmd, { name: arg });
   });
 }
+
+export function useRenderQueryTemplate(
+  template: string,
+  variables: Record<string, string>
+) {
+  return useSWR<string>(
+    ["render_query_template", template, variables],
+    ([cmd, arg1, arg2]) => {
+      return invoke(cmd, { template: arg1, variables: arg2 });
+    }
+  );
+}

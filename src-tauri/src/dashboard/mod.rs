@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use serde::Deserialize;
 use serde::Serialize;
 
@@ -20,7 +22,8 @@ pub struct Chart {
 
 #[derive(Clone, Deserialize, Serialize)]
 pub struct Text {
-    pub text: String,
+    pub template: String,
+    pub variables: HashMap<String, String>,
 }
 
 #[derive(Clone, Deserialize, Serialize)]

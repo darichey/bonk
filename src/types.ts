@@ -28,7 +28,8 @@ export interface Chart {
 
 export interface Text {
   type: "text";
-  text: string;
+  template: string;
+  variables: Record<string, string>;
 }
 
 export type Component = Chart | Text;

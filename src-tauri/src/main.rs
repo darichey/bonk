@@ -9,7 +9,7 @@ use tauri::Manager;
 
 use crate::commands::{
     get_all_transactions, get_dashboard, get_dashboard_names, get_metadata, get_metadata_names,
-    query_transactions, query_transactions_for_chart,
+    query_transactions, query_transactions_for_chart, render_query_template,
 };
 
 #[macro_use]
@@ -52,7 +52,8 @@ fn main() -> Result<()> {
             get_metadata_names,
             get_metadata,
             get_dashboard_names,
-            get_dashboard
+            get_dashboard,
+            render_query_template,
         ])
         .run(tauri::generate_context!())?;
 
