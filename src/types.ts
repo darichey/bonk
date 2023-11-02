@@ -19,13 +19,16 @@ export type ChartData = Record<string, SqlValue[]>;
 export type ChartType = "line" | "bar";
 
 export interface Chart {
+  type: "chart";
   title: string;
   chartType: ChartType;
   xAxis: string;
   query: string;
 }
 
+export type Component = Chart;
+
 export interface Dashboard {
   name: string;
-  charts: Chart[];
+  components: Component[];
 }

@@ -11,7 +11,7 @@ export default function Dashboard({ name }: { name: string }) {
   ) : (
     <div>
       <h1>{dashboard.name}</h1>
-      {dashboard.charts.map((chart, i) => (
+      {dashboard.components.map((chart, i) => (
         <QueryChart key={i} chart={chart} />
       ))}
     </div>
