@@ -1,6 +1,6 @@
 use std::{collections::HashMap, sync::Mutex};
 
-use anyhow::Result;
+use anyhow::{Context, Result};
 use serde::Serialize;
 use tauri::State;
 
@@ -159,12 +159,21 @@ pub fn render_query_template(
         .into_iter()
         .map(|(name, query)| {
             let stmt = db.prepare(&query)?;
-            let res = db
+            let values: Vec<sqlite::Value> = db
                 .query(stmt)
                 .next()
-                .expect("Query didn't produce a row")?
-                .try_read::<&str, _>(0)?
-                .to_string();
+                .context("Query didn't produce a row")??
+                .into();
+            let value = values.first().context("Row empty")?;
+
+            let res = match value {
+                sqlite::Value::Float(f) => f.to_string(),
+                sqlite::Value::Integer(i) => i.to_string(),
+                sqlite::Value::String(s) => s.to_string(),
+                sqlite::Value::Null => "null".to_string(),
+                sqlite::Value::Binary(_) => anyhow::bail!("Can't convert Binary to string"),
+            };
+
             Ok((name, res))
         })
         .collect::<Result<HashMap<String, String>>>()
