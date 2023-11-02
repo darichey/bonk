@@ -24,12 +24,16 @@ export interface Chart {
   chartType: ChartType;
   xAxis: string;
   query: string;
+  gridColumn: string;
+  gridRow: string;
 }
 
 export interface Text {
   type: "text";
   template: string;
   variables: Record<string, string>;
+  gridColumn: string;
+  gridRow: string;
 }
 
 export type Component = Chart | Text;

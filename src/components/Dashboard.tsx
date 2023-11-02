@@ -11,15 +11,28 @@ export default function Dashboard({ name }: { name: string }) {
     <div>Loading...</div>
   ) : (
     <div>
-      <h1>{dashboard.name}</h1>
-      {dashboard.components.map((component, i) => {
-        switch (component.type) {
-          case "chart":
-            return <QueryChart key={i} chart={component} />;
-          case "text":
-            return <DashboardText key={i} text={component} />;
-        }
-      })}
+      <h1 className="font-extrabold text-2xl border-b p-1 mb-4">
+        {dashboard.name}
+      </h1>
+      <div className="grid grid-cols-5 gap-4">
+        {dashboard.components.map((component, i) => (
+          <div
+            style={{
+              gridColumn: component.gridColumn,
+              gridRow: component.gridRow,
+            }}
+            key={i}
+          >
+            {component.type === "chart" ? (
+              <QueryChart chart={component} />
+            ) : component.type === "text" ? (
+              <DashboardText text={component} />
+            ) : (
+              <div>Unknown component type</div>
+            )}
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

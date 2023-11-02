@@ -18,12 +18,17 @@ pub struct Chart {
     pub chart_type: ChartType,
     pub x_axis: String,
     pub query: String,
+    pub grid_column: String,
+    pub grid_row: String,
 }
 
 #[derive(Clone, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct Text {
     pub template: String,
     pub variables: HashMap<String, String>,
+    pub grid_column: String,
+    pub grid_row: String,
 }
 
 #[derive(Clone, Deserialize, Serialize)]
