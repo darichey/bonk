@@ -26,7 +26,12 @@ export interface Chart {
   query: string;
 }
 
-export type Component = Chart;
+export interface Text {
+  type: "text";
+  text: string;
+}
+
+export type Component = Chart | Text;
 
 export interface Dashboard {
   name: string;

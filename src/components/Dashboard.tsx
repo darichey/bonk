@@ -11,9 +11,14 @@ export default function Dashboard({ name }: { name: string }) {
   ) : (
     <div>
       <h1>{dashboard.name}</h1>
-      {dashboard.components.map((chart, i) => (
-        <QueryChart key={i} chart={chart} />
-      ))}
+      {dashboard.components.map((component, i) => {
+        switch (component.type) {
+          case "chart":
+            return <QueryChart key={i} chart={component} />;
+          case "text":
+            return <p>{component.text}</p>;
+        }
+      })}
     </div>
   );
 }

@@ -145,8 +145,7 @@ impl Db {
         for dashboard_path in dashboard_paths {
             let dashboard_path = dashboard_path?;
             let contents = fs::read_to_string(dashboard_path)?;
-            // dbg!(&contents);
-            let dashboard: Dashboard = toml::from_str(&contents).unwrap();
+            let dashboard: Dashboard = toml::from_str(&contents)?;
             self.dashboards.push(dashboard);
         }
 

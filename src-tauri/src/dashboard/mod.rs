@@ -17,10 +17,17 @@ pub struct Chart {
     pub x_axis: String,
     pub query: String,
 }
+
+#[derive(Clone, Deserialize, Serialize)]
+pub struct Text {
+    pub text: String,
+}
+
 #[derive(Clone, Deserialize, Serialize)]
 #[serde(tag = "type", rename_all = "lowercase")]
 pub enum Component {
     Chart(Chart),
+    Text(Text),
 }
 
 #[derive(Clone, Deserialize, Serialize)]
