@@ -8,6 +8,7 @@ import HomePage from "./pages/home.tsx";
 import LogPage from "./pages/log.tsx";
 import MetadataPage from "./pages/metadata.tsx";
 import QueryPage from "./pages/query.tsx";
+import PlaidPage from "./pages/plaid.tsx";
 
 const router = createBrowserRouter([
   {
@@ -29,6 +30,10 @@ const router = createBrowserRouter([
       {
         path: "/metadata/:name",
         element: <MetadataPage />,
+      },
+      {
+        path: "/plaid",
+        element: <PlaidPage />,
       },
       {
         path: "/query",

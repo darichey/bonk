@@ -19,6 +19,9 @@ lazy_static = "1.4.0"
 sqlite = "0.31.1"
 tauri = { version = "1.4.0", features = ["cli"] }
 toml = "0.8.6"
+# TODO: This crate is kinda weird. replace with generating bindings in a build script
+plaid = "6.0.0"
+httpclient = "0.15.1"
 
 [features]
 # this feature is used for production builds or when `devPath` points to the filesystem and the built-in dev server is disabled.

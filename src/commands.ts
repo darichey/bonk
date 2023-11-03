@@ -2,6 +2,8 @@ import { invoke } from "@tauri-apps/api/tauri";
 import useSWR from "swr";
 import { ChartData, Dashboard, TableData, Transaction } from "./types";
 
+// TODO: annotate function return types
+
 export function useGetAllTransactions() {
   return useSWR<Transaction[]>("get_all_transactions", invoke);
 }
@@ -51,4 +53,8 @@ export function useRenderQueryTemplate(
       return invoke(cmd, { template: arg1, variables: arg2 });
     }
   );
+}
+
+export function useCreateLinkToken() {
+  return useSWR<string>("create_link_token", invoke);
 }

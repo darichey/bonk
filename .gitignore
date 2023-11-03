@@ -36,3 +36,5 @@ next-env.d.ts
 # out
 /dist
 result
+
+.secrets.env

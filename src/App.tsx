@@ -19,6 +19,9 @@ export default function App() {
           <li>
             <Link to="/query">Query</Link>
           </li>
+          <li>
+            <Link to="/plaid">Plaid</Link>
+          </li>
         </ul>
         <div className="mb-5">
           <MetadataSidebar />
