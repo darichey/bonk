@@ -32,6 +32,9 @@
               extensions = [ "rust-src" ];
             })
 
+            # Generate rust plaid client
+            openapi-generator-cli
+
             # JS dev
             nodejs_20
 
