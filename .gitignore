@@ -1,5 +1,5 @@
 .direnv
-/target
+target
 data
 *.sqlite
 
