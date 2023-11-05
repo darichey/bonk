@@ -1,7 +1,10 @@
 use std::{collections::HashMap, sync::Mutex};
 
 use anyhow::{Context, Result};
-use plaid::{model::LinkTokenCreateRequestUser, request::LinkTokenCreateRequired, PlaidClient};
+use plaid::{
+    apis::{configuration::Configuration, plaid_api},
+    models::{CountryCode, LinkTokenCreateRequest, LinkTokenCreateRequestUser, Products},
+};
 use serde::Serialize;
 use tauri::State;
 
@@ -195,21 +198,22 @@ fn format_template(template: &str, values: HashMap<String, String>) -> String {
 }
 
 #[tauri::command]
-pub async fn create_link_token(plaid_client: State<'_, PlaidClient>) -> Result<String, String> {
+pub async fn create_link_token(plaid_config: State<'_, Configuration>) -> Result<String, String> {
     println!("create_link_token");
 
-    Ok(plaid_client
-        .link_token_create(LinkTokenCreateRequired {
-            client_name: "finance-app",
-            country_codes: &["US"],
-            language: "en",
-            user: LinkTokenCreateRequestUser {
-                client_user_id: "user-id".to_string(),
-                ..Default::default()
-            },
-        })
-        .products(["auth"])
-        .await
-        .map_err(|err| err.to_string())?
-        .link_token)
+    Ok(plaid_api::link_token_create(
+        &plaid_config,
+        LinkTokenCreateRequest {
+            products: Some(vec![Products::Auth]),
+            ..LinkTokenCreateRequest::new(
+                "finance-app".to_string(),
+                "en".to_string(),
+                vec![CountryCode::Us],
+                LinkTokenCreateRequestUser::new("user-id".to_string()),
+            )
+        },
+    )
+    .await
+    .map_err(|err| err.to_string())?
+    .link_token)
 }

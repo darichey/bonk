@@ -1,12 +1,13 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
-use std::sync::Mutex;
+use std::{env, sync::Mutex};
 
 use anyhow::Result;
 use db::Db;
-use plaid::PlaidClient;
-use tauri::Manager;
+use plaid::apis::configuration::Configuration;
+use reqwest::header::HeaderMap;
+use tauri::{App, Manager};
 
 use crate::commands::{
     create_link_token, get_all_transactions, get_dashboard, get_dashboard_names, get_metadata,
@@ -25,31 +26,8 @@ mod metadata;
 fn main() -> Result<()> {
     tauri::Builder::default()
         .setup(|app| {
-            match app.get_cli_matches() {
-                Ok(matches) => {
-                    let path_to_schema = app
-                        .path_resolver()
-                        .resolve_resource("schema.sql")
-                        .expect("Failed to load schema.sql resource");
-
-                    let path_to_data = matches
-                        .args
-                        .get("data_dir")
-                        .expect("clap enforces data_dir is present")
-                        .value
-                        .as_str()
-                        .expect("clap enforces data_dir is string");
-
-                    let db = Mutex::new(Db::new(path_to_schema, path_to_data)?);
-                    app.manage(db);
-                }
-                Err(err) => return Err(Box::new(err)),
-            };
-
-            let plaid_client = PlaidClient::from_env()
-                .with_middleware(httpclient::middleware::LoggerMiddleware::new());
-            app.manage(plaid_client);
-
+            setup_db(app)?;
+            setup_plaid(app)?;
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
@@ -64,6 +42,51 @@ fn main() -> Result<()> {
             create_link_token,
         ])
         .run(tauri::generate_context!())?;
+
+    Ok(())
+}
+
+fn setup_db(app: &mut App) -> Result<()> {
+    let path_to_schema = app
+        .path_resolver()
+        .resolve_resource("schema.sql")
+        .expect("Failed to load schema.sql resource");
+
+    let matches = app.get_cli_matches()?;
+
+    let path_to_data = matches
+        .args
+        .get("data_dir")
+        .expect("clap enforces data_dir is present")
+        .value
+        .as_str()
+        .expect("clap enforces data_dir is string");
+
+    let db = Mutex::new(Db::new(path_to_schema, path_to_data)?);
+    app.manage(db);
+
+    Ok(())
+}
+
+fn setup_plaid(app: &mut App) -> Result<()> {
+    let base_path = env::var("PLAID_ENV")?;
+    let client_id = env::var("PLAID_CLIENT_ID")?;
+    let secret = env::var("PLAID_SECRET")?;
+    let version = env::var("PLAID_VERSION")?;
+
+    let mut headers = HeaderMap::new();
+    headers.insert("Plaid-Client-Id", client_id.parse()?);
+    headers.insert("Plaid-Secret", secret.parse()?);
+    headers.insert("Plaid-Version", version.parse()?);
+
+    let plaid_config = Configuration {
+        base_path,
+        client: reqwest::Client::builder()
+            .default_headers(headers)
+            .build()?,
+        ..Default::default()
+    };
+    app.manage(plaid_config);
 
     Ok(())
 }
