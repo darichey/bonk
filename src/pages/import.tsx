@@ -1,7 +1,11 @@
 import { useCallback, useEffect, useState } from "react";
 import { PlaidLinkOnSuccessMetadata, usePlaidLink } from "react-plaid-link";
 import useSWR from "swr";
-import { useCreateLinkToken, useExchangePublicToken } from "../commands";
+import {
+  useCreateLinkToken,
+  useExchangePublicToken,
+  usePlaidGetTransactions,
+} from "../commands";
 
 export default function ImportPage() {
   const [showImport, setShowImport] = useState(false);
@@ -47,6 +51,12 @@ function CreateToken() {
     error: errorAccessToken,
   } = useExchangePublicToken(publicToken);
 
+  const {
+    data: transactions,
+    isLoading: isLoadingTransactions,
+    error: errorTransactions,
+  } = usePlaidGetTransactions(accessToken != null);
+
   if (errorLinkToken) {
     return <div>Encountered error: {errorLinkToken}</div>;
   }
@@ -61,8 +71,9 @@ function CreateToken() {
       <div>Public Token: {publicToken}</div>
       <div>Access Token: {accessToken}</div>
 
-      <div>{isLoadingAccessToken}</div>
-      <div>{errorAccessToken}</div>
+      <div>Transactions: {transactions}</div>
+      <div>{isLoadingTransactions}</div>
+      <div>{errorTransactions}</div>
     </div>
   );
 }

@@ -3,14 +3,18 @@ use std::{collections::HashMap, sync::Mutex};
 use anyhow::{Context, Result};
 use plaid::{
     apis::{configuration::Configuration, plaid_api},
-    models::{CountryCode, LinkTokenCreateRequest, LinkTokenCreateRequestUser, Products},
+    models::{
+        CountryCode, LinkTokenCreateRequest, LinkTokenCreateRequestUser, Products,
+        TransactionsGetRequest,
+    },
 };
 use serde::Serialize;
-use tauri::State;
+use tauri::{AppHandle, State};
 
 use crate::{
     dashboard::Dashboard,
     db::{Db, Transaction},
+    PlaidAccessToken,
 };
 
 /// A wrapper for seralizing sqlite Values
@@ -204,7 +208,7 @@ pub async fn create_link_token(plaid_config: State<'_, Configuration>) -> Result
     Ok(plaid_api::link_token_create(
         &plaid_config,
         LinkTokenCreateRequest {
-            products: Some(vec![Products::Auth]),
+            products: Some(vec![Products::Auth, Products::Transactions]),
             ..LinkTokenCreateRequest::new(
                 "finance-app".to_string(),
                 "en".to_string(),
@@ -221,11 +225,12 @@ pub async fn create_link_token(plaid_config: State<'_, Configuration>) -> Result
 #[tauri::command]
 pub async fn exchange_public_token(
     plaid_config: State<'_, Configuration>,
+    plaid_access_token: State<'_, PlaidAccessToken>,
     public_token: String,
 ) -> Result<String, String> {
     println!("exchange_public_token");
 
-    Ok(plaid_api::item_public_token_exchange(
+    let access_token = plaid_api::item_public_token_exchange(
         &plaid_config,
         plaid::models::ItemPublicTokenExchangeRequest {
             public_token,
@@ -234,5 +239,29 @@ pub async fn exchange_public_token(
     )
     .await
     .map_err(|err| err.to_string())?
-    .access_token)
+    .access_token;
+
+    plaid_access_token.set(access_token.clone());
+
+    Ok(access_token)
+}
+
+#[tauri::command]
+pub async fn plaid_get_transactions(
+    plaid_config: State<'_, Configuration>,
+    plaid_access_token: State<'_, PlaidAccessToken>,
+) -> Result<String, String> {
+    let response = plaid_api::transactions_get(
+        &plaid_config,
+        TransactionsGetRequest {
+            access_token: plaid_access_token.get(),
+            start_date: "2023-01-01".to_string(),
+            end_date: "2023-11-20".to_string(),
+            ..Default::default()
+        },
+    )
+    .await
+    .map_err(|err| err.to_string())?;
+
+    Ok(response.total_transactions.to_string())
 }

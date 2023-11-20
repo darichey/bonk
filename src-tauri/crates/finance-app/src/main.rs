@@ -11,8 +11,8 @@ use tauri::{App, Manager};
 
 use crate::commands::{
     create_link_token, exchange_public_token, get_all_transactions, get_dashboard,
-    get_dashboard_names, get_metadata, get_metadata_names, query_transactions,
-    query_transactions_for_chart, render_query_template,
+    get_dashboard_names, get_metadata, get_metadata_names, plaid_get_transactions,
+    query_transactions, query_transactions_for_chart, render_query_template,
 };
 
 #[macro_use]
@@ -42,6 +42,7 @@ fn main() -> Result<()> {
             render_query_template,
             create_link_token,
             exchange_public_token,
+            plaid_get_transactions,
         ])
         .run(tauri::generate_context!())?;
 
@@ -70,6 +71,23 @@ fn setup_db(app: &mut App) -> Result<()> {
     Ok(())
 }
 
+pub struct PlaidAccessToken(Mutex<Option<String>>);
+
+impl PlaidAccessToken {
+    pub fn get(&self) -> String {
+        self.0
+            .lock()
+            .unwrap()
+            .as_ref()
+            .expect("Plaid access token not yet set")
+            .clone()
+    }
+
+    pub fn set(&self, access_token: String) {
+        *self.0.lock().unwrap() = Some(access_token);
+    }
+}
+
 fn setup_plaid(app: &mut App) -> Result<()> {
     let base_path = env::var("PLAID_ENV")?;
     let client_id = env::var("PLAID_CLIENT_ID")?;
@@ -89,6 +107,7 @@ fn setup_plaid(app: &mut App) -> Result<()> {
         ..Default::default()
     };
     app.manage(plaid_config);
+    app.manage(PlaidAccessToken(Default::default()));
 
     Ok(())
 }

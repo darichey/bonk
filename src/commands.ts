@@ -67,3 +67,8 @@ export function useExchangePublicToken(publicToken: string | null) {
     }
   );
 }
+
+// TODO doFetch is stupid
+export function usePlaidGetTransactions(doFetch: boolean) {
+  return useSWR<string>(doFetch ? "plaid_get_transactions" : null, invoke);
+}
