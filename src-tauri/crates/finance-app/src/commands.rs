@@ -217,3 +217,22 @@ pub async fn create_link_token(plaid_config: State<'_, Configuration>) -> Result
     .map_err(|err| err.to_string())?
     .link_token)
 }
+
+#[tauri::command]
+pub async fn exchange_public_token(
+    plaid_config: State<'_, Configuration>,
+    public_token: String,
+) -> Result<String, String> {
+    println!("exchange_public_token");
+
+    Ok(plaid_api::item_public_token_exchange(
+        &plaid_config,
+        plaid::models::ItemPublicTokenExchangeRequest {
+            public_token,
+            ..Default::default()
+        },
+    )
+    .await
+    .map_err(|err| err.to_string())?
+    .access_token)
+}

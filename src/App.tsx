@@ -20,7 +20,7 @@ export default function App() {
             <Link to="/query">Query</Link>
           </li>
           <li>
-            <Link to="/plaid">Plaid</Link>
+            <Link to="/import">Import</Link>
           </li>
         </ul>
         <div className="mb-5">

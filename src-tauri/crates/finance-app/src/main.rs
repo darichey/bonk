@@ -10,8 +10,9 @@ use reqwest::header::HeaderMap;
 use tauri::{App, Manager};
 
 use crate::commands::{
-    create_link_token, get_all_transactions, get_dashboard, get_dashboard_names, get_metadata,
-    get_metadata_names, query_transactions, query_transactions_for_chart, render_query_template,
+    create_link_token, exchange_public_token, get_all_transactions, get_dashboard,
+    get_dashboard_names, get_metadata, get_metadata_names, query_transactions,
+    query_transactions_for_chart, render_query_template,
 };
 
 #[macro_use]
@@ -40,6 +41,7 @@ fn main() -> Result<()> {
             get_dashboard,
             render_query_template,
             create_link_token,
+            exchange_public_token,
         ])
         .run(tauri::generate_context!())?;
 

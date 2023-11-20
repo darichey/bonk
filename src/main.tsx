@@ -8,7 +8,8 @@ import HomePage from "./pages/home.tsx";
 import LogPage from "./pages/log.tsx";
 import MetadataPage from "./pages/metadata.tsx";
 import QueryPage from "./pages/query.tsx";
-import PlaidPage from "./pages/plaid.tsx";
+import ImportPage from "./pages/import.tsx";
+import { SWRConfig } from "swr";
 
 const router = createBrowserRouter([
   {
@@ -24,16 +25,16 @@ const router = createBrowserRouter([
         element: <DashboardPage />,
       },
       {
+        path: "/import",
+        element: <ImportPage />,
+      },
+      {
         path: "/log",
         element: <LogPage />,
       },
       {
         path: "/metadata/:name",
         element: <MetadataPage />,
-      },
-      {
-        path: "/plaid",
-        element: <PlaidPage />,
       },
       {
         path: "/query",
@@ -45,6 +46,12 @@ const router = createBrowserRouter([
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
-    <RouterProvider router={router} />
+    <SWRConfig
+      value={{
+        revalidateOnFocus: false,
+      }}
+    >
+      <RouterProvider router={router} />
+    </SWRConfig>
   </React.StrictMode>
 );

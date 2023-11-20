@@ -58,3 +58,12 @@ export function useRenderQueryTemplate(
 export function useCreateLinkToken() {
   return useSWR<string>("create_link_token", invoke);
 }
+
+export function useExchangePublicToken(publicToken: string | null) {
+  return useSWR<string>(
+    publicToken ? ["exchange_public_token", publicToken] : null,
+    ([cmd, arg]) => {
+      return invoke(cmd, { publicToken: arg });
+    }
+  );
+}
