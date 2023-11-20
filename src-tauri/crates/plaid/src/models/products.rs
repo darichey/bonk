@@ -53,6 +53,8 @@ pub enum Products {
     Signal,
     #[serde(rename = "statements")]
     Statements,
+    #[serde(rename = "identity_match")]
+    IdentityMatch,
 
 }
 
@@ -79,6 +81,7 @@ impl ToString for Products {
             Self::RecurringTransactions => String::from("recurring_transactions"),
             Self::Signal => String::from("signal"),
             Self::Statements => String::from("statements"),
+            Self::IdentityMatch => String::from("identity_match"),
         }
     }
 }
