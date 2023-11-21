@@ -246,11 +246,19 @@ pub async fn exchange_public_token(
     Ok(access_token)
 }
 
+#[derive(Serialize)]
+pub struct PlaidTransaction {
+    account: String,
+    amount: f64,
+    date: String,
+    name: String,
+}
+
 #[tauri::command]
 pub async fn plaid_get_transactions(
     plaid_config: State<'_, Configuration>,
     plaid_access_token: State<'_, PlaidAccessToken>,
-) -> Result<String, String> {
+) -> Result<Vec<PlaidTransaction>, String> {
     let response = plaid_api::transactions_get(
         &plaid_config,
         TransactionsGetRequest {
@@ -263,5 +271,25 @@ pub async fn plaid_get_transactions(
     .await
     .map_err(|err| err.to_string())?;
 
-    Ok(response.total_transactions.to_string())
+    let accounts: HashMap<String, String> = response
+        .accounts
+        .into_iter()
+        .map(|account| (account.account_id, account.name))
+        .collect();
+
+    let transactions = response
+        .transactions
+        .into_iter()
+        .map(|transaction| PlaidTransaction {
+            account: accounts
+                .get(&transaction.account_id)
+                .expect("unknown account id")
+                .clone(),
+            amount: transaction.amount,
+            date: transaction.date,
+            name: transaction.name,
+        })
+        .collect();
+
+    Ok(transactions)
 }

@@ -42,3 +42,10 @@ export interface Dashboard {
   name: string;
   components: Component[];
 }
+
+export interface PlaidTransaction {
+  account: string;
+  amount: number;
+  date: string;
+  name: string;
+}

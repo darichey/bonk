@@ -1,6 +1,12 @@
 import { invoke } from "@tauri-apps/api/tauri";
 import useSWR from "swr";
-import { ChartData, Dashboard, TableData, Transaction } from "./types";
+import {
+  ChartData,
+  Dashboard,
+  PlaidTransaction,
+  TableData,
+  Transaction,
+} from "./types";
 
 // TODO: annotate function return types
 
@@ -70,5 +76,8 @@ export function useExchangePublicToken(publicToken: string | null) {
 
 // TODO doFetch is stupid
 export function usePlaidGetTransactions(doFetch: boolean) {
-  return useSWR<string>(doFetch ? "plaid_get_transactions" : null, invoke);
+  return useSWR<PlaidTransaction[]>(
+    doFetch ? "plaid_get_transactions" : null,
+    invoke
+  );
 }

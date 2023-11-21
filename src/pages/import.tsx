@@ -71,9 +71,39 @@ function CreateToken() {
       <div>Public Token: {publicToken}</div>
       <div>Access Token: {accessToken}</div>
 
-      <div>Transactions: {transactions}</div>
-      <div>{isLoadingTransactions}</div>
-      <div>{errorTransactions}</div>
+      <div>
+        <h1>Plaid Transactions</h1>
+        {errorTransactions ? (
+          <div>Error loading plaid transactions: {errorTransactions}</div>
+        ) : isLoadingTransactions || !transactions ? (
+          <div>Loading plaid transactions...</div>
+        ) : (
+          <div>
+            <table className="w-full">
+              <thead>
+                <tr>
+                  <th className="text-left">Date</th>
+                  <th className="text-left">Description</th>
+                  <th className="text-left">Account</th>
+                  <th className="text-right">Amount</th>
+                </tr>
+              </thead>
+              <tbody>
+                {transactions.map((transaction) => (
+                  <tr>
+                    <td>{transaction.date}</td>
+                    <td>{transaction.name}</td>
+                    <td>{transaction.account}</td>
+                    <td className="text-right font-mono">
+                      {transaction.amount}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
