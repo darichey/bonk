@@ -1,8 +1,4 @@
-use std::{
-    fmt::Display,
-    fs,
-    path::{Path, PathBuf},
-};
+use std::{fmt::Display, fs, path::Path};
 
 use chrono::NaiveDate;
 use serde::{Deserialize, Serialize};

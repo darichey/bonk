@@ -9,7 +9,7 @@ use plaid::{
     },
 };
 use serde::Serialize;
-use tauri::{AppHandle, State};
+use tauri::State;
 
 use crate::{
     dashboard::Dashboard,
