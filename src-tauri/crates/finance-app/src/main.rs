@@ -27,7 +27,11 @@ mod metadata;
 fn main() -> Result<()> {
     tauri::Builder::default()
         .setup(|app| {
-            setup_db(app)?;
+            if let Err(err) = setup_db(app) {
+                // TODO: this is ugly but is helpful in debugging because otherwise the context is swallowed
+                println!("{:#?}", err);
+                return Err(err.into());
+            }
             setup_plaid(app)?;
             Ok(())
         })
