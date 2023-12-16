@@ -1,0 +1,7 @@
+2023-01-01 Mcdonald's
+  expenses:fast_food         10.91
+  liabilities:my_credit_card
+
+2023-01-02 Paying credit card
+  liabilities:my_credit_card    10.91
+  assets:my_checking
