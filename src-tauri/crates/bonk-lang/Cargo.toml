@@ -3,12 +3,5 @@ name = "bonk-lang"
 version = "0.1.0"
 edition = "2021"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
 [dependencies]
 chrono = "0.4.31"
-logos = "0.13.0"
-lalrpop-util = "0.20.0"
-
-[build-dependencies]
-lalrpop = "0.20.0"

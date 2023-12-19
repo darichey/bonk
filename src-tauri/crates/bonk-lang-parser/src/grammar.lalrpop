@@ -5,7 +5,7 @@ grammar<'input>(input: &'input str);
 extern {
     type Location = usize;
     type Error = ();
-    
+
     enum Token<'input> {
         "date" => Token::Date(<&'input str>),
         "description" => Token::Description(<&'input str>),

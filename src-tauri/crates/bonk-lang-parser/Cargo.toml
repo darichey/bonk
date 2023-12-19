@@ -1,0 +1,12 @@
+[package]
+name = "bonk-lang-parser"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+logos = "0.13.0"
+lalrpop-util = "0.20.0"
+chrono = "0.4.31"
+
+[build-dependencies]
+lalrpop = "0.20.0"

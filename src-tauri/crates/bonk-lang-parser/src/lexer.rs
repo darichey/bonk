@@ -18,6 +18,7 @@ pub enum Token<'input> {
     NewLine,
 }
 
+#[cfg(test)]
 mod tests {
     use super::*;
 
