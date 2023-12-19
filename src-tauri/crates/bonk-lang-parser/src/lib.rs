@@ -1,6 +1,8 @@
 mod lexer;
+mod tree;
 
 use lalrpop_util::{lalrpop_mod, ParseError};
+use tree::Ledger;
 
 use self::lexer::Token;
 
@@ -10,7 +12,7 @@ lalrpop_mod!(
     pub grammar
 );
 
-pub fn parse(src: &str) -> Result<(), ParseError<usize, Token<'_>, ()>> {
+pub fn parse(src: &str) -> Result<Ledger, ParseError<usize, Token<'_>, ()>> {
     let lexer = lexer::Lexer::new(src)
         .spanned()
         .map(|(token, span)| token.map(|token| (span.start, token, span.end)));
@@ -20,7 +22,10 @@ pub fn parse(src: &str) -> Result<(), ParseError<usize, Token<'_>, ()>> {
 
 #[cfg(test)]
 mod tests {
-    use crate::parse;
+    use crate::{
+        parse,
+        tree::{Ledger, Posting, Transaction},
+    };
 
     #[test]
     fn parses() {
@@ -33,6 +38,40 @@ mod tests {
   assets:my_checking
 "#;
 
-        assert_eq!(parse(src), Ok(()));
+        assert_eq!(
+            parse(src),
+            Ok(Ledger {
+                transactions: vec![
+                    Transaction {
+                        date: "2023-01-01",
+                        description: "\"Mcdonald's\"",
+                        postings: vec![
+                            Posting {
+                                account: "expenses:fast_food",
+                                amount: Some("10.91"),
+                            },
+                            Posting {
+                                account: "liabilities:my_credit_card",
+                                amount: None
+                            }
+                        ]
+                    },
+                    Transaction {
+                        date: "2023-01-02",
+                        description: "\"Paying credit card\"",
+                        postings: vec![
+                            Posting {
+                                account: "liabilities:my_credit_card",
+                                amount: Some("10.91")
+                            },
+                            Posting {
+                                account: "assets:my_checking",
+                                amount: None
+                            }
+                        ]
+                    }
+                ]
+            })
+        );
     }
 }
