@@ -1,39 +1,21 @@
-use chrono::NaiveDate;
 use logos::{Lexer as LogosLexer, Logos};
 
-pub type Lexer<'input> = LogosLexer<'input, Token>;
+pub type Lexer<'input> = LogosLexer<'input, Token<'input>>;
 
-#[derive(Logos, Debug, PartialEq)]
-pub enum Token {
-    #[regex(r"(\d{4})-(\d{2})-(\d{2})", date)]
-    Date(NaiveDate),
-    #[regex(r#""([^"\\]|\\["\\bnfrt])*""#, description)]
-    Description(String),
-    #[regex(r"[A-Za-z_][A-Za-z0-9_]*(:[A-Za-z_][A-Za-z0-9_]*)*", account)]
-    Account(String),
-    #[regex(r"-?\d+(\.\d+)?", number)]
-    Number(f64),
+#[derive(Logos, Copy, Clone, Debug, PartialEq)]
+pub enum Token<'input> {
+    #[regex(r"(\d{4})-(\d{2})-(\d{2})")]
+    Date(&'input str),
+    #[regex(r#""([^"\\]|\\["\\bnfrt])*""#)]
+    Description(&'input str),
+    #[regex(r"[A-Za-z_][A-Za-z0-9_]*(:[A-Za-z_][A-Za-z0-9_]*)*")]
+    Account(&'input str),
+    #[regex(r"-?\d+(\.\d+)?")]
+    Amount(&'input str),
     #[token(" ")]
     Space,
     #[token("\n")]
     NewLine,
-}
-
-fn date(lex: &mut LogosLexer<Token>) -> NaiveDate {
-    NaiveDate::parse_from_str(lex.slice(), "%Y-%m-%d").expect("date should be valid")
-}
-
-fn description(lex: &mut LogosLexer<Token>) -> String {
-    let token = lex.slice();
-    token[1..token.len() - 1].to_owned()
-}
-
-fn account(lex: &mut LogosLexer<Token>) -> String {
-    lex.slice().to_owned()
-}
-
-fn number(lex: &mut LogosLexer<Token>) -> f64 {
-    lex.slice().parse().expect("number should be valid")
 }
 
 mod tests {
@@ -53,64 +35,61 @@ mod tests {
   expenses:fast_food    10.91
   liabilities:my_credit_card"#,
             &[
-                Token::Date(NaiveDate::from_ymd_opt(2023, 1, 1).unwrap()),
+                Token::Date("2023-01-01"),
                 Token::Space,
-                Token::Description("Mcdonald's".to_string()),
+                Token::Description(r#""Mcdonald's""#),
                 Token::NewLine,
                 Token::Space,
                 Token::Space,
-                Token::Account("expenses:fast_food".to_string()),
+                Token::Account("expenses:fast_food"),
                 Token::Space,
                 Token::Space,
                 Token::Space,
                 Token::Space,
-                Token::Number(10.91),
+                Token::Amount("10.91"),
                 Token::NewLine,
                 Token::Space,
                 Token::Space,
-                Token::Account("liabilities:my_credit_card".to_string()),
+                Token::Account("liabilities:my_credit_card"),
             ],
         );
     }
 
     #[test]
     fn lex_dates() {
-        assert_tokens_eq(
-            "2023-01-01",
-            &[Token::Date(NaiveDate::from_ymd_opt(2023, 1, 1).unwrap())],
-        );
+        assert_tokens_eq("2023-01-01", &[Token::Date("2023-01-01")]);
     }
 
     #[test]
     fn lex_descriptions() {
-        assert_tokens_eq(r#""hello""#, &[Token::Description("hello".to_string())]);
+        assert_tokens_eq(r#""hello""#, &[Token::Description(r#""hello""#)]);
         assert_tokens_eq(
             r#""hello_world""#,
-            &[Token::Description("hello_world".to_string())],
+            &[Token::Description(r#""hello_world""#)],
         );
         assert_tokens_eq(
             r#""HeLLo_WoRLd""#,
-            &[Token::Description("HeLLo_WoRLd".to_string())],
+            &[Token::Description(r#""HeLLo_WoRLd""#)],
         );
     }
 
     #[test]
     fn lex_accounts() {
-        assert_tokens_eq("expenses", &[Token::Account("expenses".to_string())]);
+        assert_tokens_eq("expenses", &[Token::Account("expenses")]);
 
         assert_tokens_eq(
             "expenses:fast_food",
-            &[Token::Account("expenses:fast_food".to_string())],
+            &[Token::Account("expenses:fast_food")],
         );
     }
 
     #[test]
-    fn lex_numbers() {
-        assert_tokens_eq("3", &[Token::Number(3.0)]);
-        assert_tokens_eq("3.15", &[Token::Number(3.15)]);
-        assert_tokens_eq("10.00", &[Token::Number(10.0)]);
-        assert_tokens_eq("-3", &[Token::Number(-3.0)]);
-        assert_tokens_eq("-3.0", &[Token::Number(-3.0)]);
+    fn lex_amounts() {
+        assert_tokens_eq("3", &[Token::Amount("3")]);
+        assert_tokens_eq("3.15", &[Token::Amount("3.15")]);
+        assert_tokens_eq("10.00", &[Token::Amount("10.00")]);
+        assert_tokens_eq("-3", &[Token::Amount("-3")]);
+        assert_tokens_eq("-3.0", &[Token::Amount("-3.0")]);
     }
 
     #[test]
