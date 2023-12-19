@@ -6,7 +6,7 @@ pub struct Ledger<'input> {
 #[derive(PartialEq, Eq, Debug)]
 pub struct Transaction<'input> {
     pub date: &'input str,
-    pub description: &'input str,
+    pub description: Option<&'input str>,
     pub postings: Vec<Posting<'input>>,
 }
 

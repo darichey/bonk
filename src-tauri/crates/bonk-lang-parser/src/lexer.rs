@@ -18,6 +18,12 @@ pub enum Token<'input> {
     NewLine,
 }
 
+impl std::fmt::Display for Token<'_> {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        write!(f, "{:?}", self)
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

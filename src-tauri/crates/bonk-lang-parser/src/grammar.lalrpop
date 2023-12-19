@@ -1,11 +1,13 @@
 use crate::lexer::Token;
 use crate::tree::{Ledger, Transaction, Posting};
 
-grammar<'input>(input: &'input str);
+use lalrpop_util::ErrorRecovery;
+
+grammar<'input, 'err>(input: &'input str, errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, &'static str>>);
 
 extern {
     type Location = usize;
-    type Error = ();
+    type Error = &'static str;
 
     enum Token<'input> {
         "date" => Token::Date(<&'input str>),
@@ -17,13 +19,17 @@ extern {
     }
 }
 
+RecoverError: () = {
+    <!> => errors.push(<>),
+};
+
 pub Ledger: Ledger<'input> = {
     <t:Transaction> <mut ts:("\n" <Transaction>)*> => {
         ts.insert(0, t);
         Ledger {
             transactions: ts
         }
-    }
+    },
 }
 
 Transaction: Transaction<'input> = {
@@ -31,10 +37,27 @@ Transaction: Transaction<'input> = {
         ps.insert(0, p);
         Transaction {
             date,
-            description,
+            description: Some(description),
             postings: ps
         }
-    }
+    },
+    // Missing description
+    <date:"date"> RecoverError "\n" <p:Posting> <mut ps:("\n" <Posting>)*> "\n" => {
+        ps.insert(0, p);
+        Transaction {
+            date,
+            description: None,
+            postings: ps
+        }
+    },
+    // Missing postings
+    <date:"date"> " " <description:"description"> RecoverError => {
+        Transaction {
+            date,
+            description: Some(description),
+            postings: vec![]
+        }
+    },
 }
 
 Posting: Posting<'input> = {
@@ -43,5 +66,5 @@ Posting: Posting<'input> = {
             account,
             amount
         }
-    }
+    },
 }
