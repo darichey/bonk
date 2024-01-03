@@ -2,28 +2,44 @@
   "name": "bonk",
   "rules": {
     "ledger": {
-      "type": "REPEAT",
+      "type": "FIELD",
+      "name": "transaction",
       "content": {
-        "type": "SYMBOL",
-        "name": "transaction"
+        "type": "REPEAT",
+        "content": {
+          "type": "SYMBOL",
+          "name": "transaction"
+        }
       }
     },
     "transaction": {
       "type": "SEQ",
       "members": [
         {
-          "type": "SYMBOL",
-          "name": "date"
-        },
-        {
-          "type": "SYMBOL",
-          "name": "description"
-        },
-        {
-          "type": "REPEAT1",
+          "type": "FIELD",
+          "name": "date",
           "content": {
             "type": "SYMBOL",
-            "name": "posting"
+            "name": "date"
+          }
+        },
+        {
+          "type": "FIELD",
+          "name": "description",
+          "content": {
+            "type": "SYMBOL",
+            "name": "description"
+          }
+        },
+        {
+          "type": "FIELD",
+          "name": "posting",
+          "content": {
+            "type": "REPEAT1",
+            "content": {
+              "type": "SYMBOL",
+              "name": "posting"
+            }
           }
         }
       ]
@@ -32,20 +48,28 @@
       "type": "SEQ",
       "members": [
         {
-          "type": "SYMBOL",
-          "name": "account"
+          "type": "FIELD",
+          "name": "account",
+          "content": {
+            "type": "SYMBOL",
+            "name": "account"
+          }
         },
         {
-          "type": "CHOICE",
-          "members": [
-            {
-              "type": "SYMBOL",
-              "name": "amount"
-            },
-            {
-              "type": "BLANK"
-            }
-          ]
+          "type": "FIELD",
+          "name": "amount",
+          "content": {
+            "type": "CHOICE",
+            "members": [
+              {
+                "type": "SYMBOL",
+                "name": "amount"
+              },
+              {
+                "type": "BLANK"
+              }
+            ]
+          }
         }
       ]
     },

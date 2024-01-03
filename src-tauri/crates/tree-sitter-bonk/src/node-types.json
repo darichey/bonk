@@ -2,58 +2,79 @@
   {
     "type": "ledger",
     "named": true,
-    "fields": {},
-    "children": {
-      "multiple": true,
-      "required": false,
-      "types": [
-        {
-          "type": "transaction",
-          "named": true
-        }
-      ]
+    "fields": {
+      "transaction": {
+        "multiple": true,
+        "required": false,
+        "types": [
+          {
+            "type": "transaction",
+            "named": true
+          }
+        ]
+      }
     }
   },
   {
     "type": "posting",
     "named": true,
-    "fields": {},
-    "children": {
-      "multiple": true,
-      "required": true,
-      "types": [
-        {
-          "type": "account",
-          "named": true
-        },
-        {
-          "type": "amount",
-          "named": true
-        }
-      ]
+    "fields": {
+      "account": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "account",
+            "named": true
+          }
+        ]
+      },
+      "amount": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "amount",
+            "named": true
+          }
+        ]
+      }
     }
   },
   {
     "type": "transaction",
     "named": true,
-    "fields": {},
-    "children": {
-      "multiple": true,
-      "required": true,
-      "types": [
-        {
-          "type": "date",
-          "named": true
-        },
-        {
-          "type": "description",
-          "named": true
-        },
-        {
-          "type": "posting",
-          "named": true
-        }
-      ]
+    "fields": {
+      "date": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "date",
+            "named": true
+          }
+        ]
+      },
+      "description": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "description",
+            "named": true
+          }
+        ]
+      },
+      "posting": {
+        "multiple": true,
+        "required": true,
+        "types": [
+          {
+            "type": "posting",
+            "named": true
+          }
+        ]
+      }
     }
   },
   {
