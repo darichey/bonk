@@ -2,8 +2,41 @@
   "name": "bonk",
   "rules": {
     "source_file": {
-      "type": "STRING",
-      "value": "hello"
+      "type": "CHOICE",
+      "members": [
+        {
+          "type": "SYMBOL",
+          "name": "date"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "description"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "account"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "amount"
+        }
+      ]
+    },
+    "date": {
+      "type": "PATTERN",
+      "value": "\\d{4}-\\d{2}-\\d{2}"
+    },
+    "description": {
+      "type": "PATTERN",
+      "value": "\"([^\"\\\\]|\\\\[\"\\\\bnfrt])*\""
+    },
+    "account": {
+      "type": "PATTERN",
+      "value": "[A-Za-z_][A-Za-z0-9_]*(:[A-Za-z_][A-Za-z0-9_]*)*"
+    },
+    "amount": {
+      "type": "PATTERN",
+      "value": "-?\\d+(\\.\\d+)?"
     }
   },
   "extras": [

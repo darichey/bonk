@@ -2,10 +2,44 @@
   {
     "type": "source_file",
     "named": true,
-    "fields": {}
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "account",
+          "named": true
+        },
+        {
+          "type": "amount",
+          "named": true
+        },
+        {
+          "type": "date",
+          "named": true
+        },
+        {
+          "type": "description",
+          "named": true
+        }
+      ]
+    }
   },
   {
-    "type": "hello",
-    "named": false
+    "type": "account",
+    "named": true
+  },
+  {
+    "type": "amount",
+    "named": true
+  },
+  {
+    "type": "date",
+    "named": true
+  },
+  {
+    "type": "description",
+    "named": true
   }
 ]
