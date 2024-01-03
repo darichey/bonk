@@ -22,8 +22,16 @@ pub fn parse(src: &str) -> Ledger {
 }
 
 impl Parser<'_, '_, '_> {
+    fn assert_kind(&self, kind: &str) {
+        assert!(self.cursor.node().kind() == kind)
+    }
+
+    fn node_text(&self) -> &str {
+        self.cursor.node().utf8_text(self.src.as_bytes()).unwrap()
+    }
+
     fn parse_ledger(&mut self) -> Ledger {
-        assert!(self.cursor.node().kind() == "ledger");
+        self.assert_kind("ledger");
         self.cursor.goto_first_child();
         let transactions = self.parse_transactions();
         self.cursor.goto_parent();
@@ -42,7 +50,7 @@ impl Parser<'_, '_, '_> {
     }
 
     fn parse_transaction(&mut self) -> Transaction {
-        assert!(self.cursor.node().kind() == "transaction");
+        self.assert_kind("transaction");
         self.cursor.goto_first_child();
         let date = self.parse_date();
         self.cursor.goto_next_sibling();
@@ -58,14 +66,14 @@ impl Parser<'_, '_, '_> {
     }
 
     fn parse_date(&mut self) -> NaiveDate {
-        assert!(self.cursor.node().kind() == "date");
-        let str = self.cursor.node().utf8_text(self.src.as_bytes()).unwrap();
+        self.assert_kind("date");
+        let str = self.node_text();
         NaiveDate::parse_from_str(str, "%Y-%m-%d").unwrap()
     }
 
     fn parse_description(&mut self) -> String {
-        assert!(self.cursor.node().kind() == "description");
-        let str = self.cursor.node().utf8_text(self.src.as_bytes()).unwrap();
+        self.assert_kind("description");
+        let str = self.node_text();
         str.to_owned()
     }
 
@@ -81,7 +89,7 @@ impl Parser<'_, '_, '_> {
     }
 
     fn parse_posting(&mut self) -> Posting {
-        assert!(self.cursor.node().kind() == "posting");
+        self.assert_kind("posting");
         self.cursor.goto_first_child();
         let account = self.parse_account();
         let amount = if self.cursor.goto_next_sibling() {
@@ -94,18 +102,16 @@ impl Parser<'_, '_, '_> {
     }
 
     fn parse_account(&self) -> Account {
-        assert!(self.cursor.node().kind() == "account");
-        let str = self.cursor.node().utf8_text(self.src.as_bytes()).unwrap();
+        self.assert_kind("account");
         Account {
-            path: str.split(':').map(|s| s.to_owned()).collect(),
+            path: self.node_text().split(':').map(|s| s.to_owned()).collect(),
         }
     }
 
     fn parse_amount(&self) -> Amount {
-        assert!(self.cursor.node().kind() == "amount");
-        let str = self.cursor.node().utf8_text(self.src.as_bytes()).unwrap();
+        self.assert_kind("amount");
         Amount {
-            cents: str.replace('.', "").parse().unwrap(),
+            cents: self.node_text().replace('.', "").parse().unwrap(),
         }
     }
 }
