@@ -32,6 +32,8 @@
               extensions = [ "rust-src" ];
             })
 
+            tree-sitter
+
             # Generate rust plaid client
             openapi-generator-cli
 
