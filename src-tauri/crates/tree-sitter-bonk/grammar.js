@@ -2,7 +2,9 @@ module.exports = grammar({
   name: "bonk",
 
   rules: {
-    source_file: ($) => choice($.date, $.description, $.account, $.amount),
+    ledger: ($) => repeat($.transaction),
+    transaction: ($) => seq($.date, $.description, repeat1($.posting)),
+    posting: ($) => seq($.account, optional($.amount)),
 
     date: ($) => /\d{4}-\d{2}-\d{2}/,
     description: ($) => /"([^"\\]|\\["\\bnfrt])*"/,

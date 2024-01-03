@@ -1,10 +1,25 @@
 [
   {
-    "type": "source_file",
+    "type": "ledger",
     "named": true,
     "fields": {},
     "children": {
-      "multiple": false,
+      "multiple": true,
+      "required": false,
+      "types": [
+        {
+          "type": "transaction",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "posting",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
       "required": true,
       "types": [
         {
@@ -14,13 +29,28 @@
         {
           "type": "amount",
           "named": true
-        },
+        }
+      ]
+    }
+  },
+  {
+    "type": "transaction",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
         {
           "type": "date",
           "named": true
         },
         {
           "type": "description",
+          "named": true
+        },
+        {
+          "type": "posting",
           "named": true
         }
       ]

@@ -1,8 +1,15 @@
 {
   "name": "bonk",
   "rules": {
-    "source_file": {
-      "type": "CHOICE",
+    "ledger": {
+      "type": "REPEAT",
+      "content": {
+        "type": "SYMBOL",
+        "name": "transaction"
+      }
+    },
+    "transaction": {
+      "type": "SEQ",
       "members": [
         {
           "type": "SYMBOL",
@@ -13,12 +20,32 @@
           "name": "description"
         },
         {
+          "type": "REPEAT1",
+          "content": {
+            "type": "SYMBOL",
+            "name": "posting"
+          }
+        }
+      ]
+    },
+    "posting": {
+      "type": "SEQ",
+      "members": [
+        {
           "type": "SYMBOL",
           "name": "account"
         },
         {
-          "type": "SYMBOL",
-          "name": "amount"
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "SYMBOL",
+              "name": "amount"
+            },
+            {
+              "type": "BLANK"
+            }
+          ]
         }
       ]
     },

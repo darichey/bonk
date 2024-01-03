@@ -6,14 +6,14 @@
 #endif
 
 #define LANGUAGE_VERSION 14
-#define STATE_COUNT 4
+#define STATE_COUNT 11
 #define LARGE_STATE_COUNT 2
-#define SYMBOL_COUNT 6
+#define SYMBOL_COUNT 10
 #define ALIAS_COUNT 0
 #define TOKEN_COUNT 5
 #define EXTERNAL_TOKEN_COUNT 0
 #define FIELD_COUNT 0
-#define MAX_ALIAS_SEQUENCE_LENGTH 1
+#define MAX_ALIAS_SEQUENCE_LENGTH 3
 #define PRODUCTION_ID_COUNT 1
 
 enum {
@@ -21,7 +21,11 @@ enum {
   sym_description = 2,
   sym_account = 3,
   sym_amount = 4,
-  sym_source_file = 5,
+  sym_ledger = 5,
+  sym_transaction = 6,
+  sym_posting = 7,
+  aux_sym_ledger_repeat1 = 8,
+  aux_sym_transaction_repeat1 = 9,
 };
 
 static const char * const ts_symbol_names[] = {
@@ -30,7 +34,11 @@ static const char * const ts_symbol_names[] = {
   [sym_description] = "description",
   [sym_account] = "account",
   [sym_amount] = "amount",
-  [sym_source_file] = "source_file",
+  [sym_ledger] = "ledger",
+  [sym_transaction] = "transaction",
+  [sym_posting] = "posting",
+  [aux_sym_ledger_repeat1] = "ledger_repeat1",
+  [aux_sym_transaction_repeat1] = "transaction_repeat1",
 };
 
 static const TSSymbol ts_symbol_map[] = {
@@ -39,7 +47,11 @@ static const TSSymbol ts_symbol_map[] = {
   [sym_description] = sym_description,
   [sym_account] = sym_account,
   [sym_amount] = sym_amount,
-  [sym_source_file] = sym_source_file,
+  [sym_ledger] = sym_ledger,
+  [sym_transaction] = sym_transaction,
+  [sym_posting] = sym_posting,
+  [aux_sym_ledger_repeat1] = aux_sym_ledger_repeat1,
+  [aux_sym_transaction_repeat1] = aux_sym_transaction_repeat1,
 };
 
 static const TSSymbolMetadata ts_symbol_metadata[] = {
@@ -63,9 +75,25 @@ static const TSSymbolMetadata ts_symbol_metadata[] = {
     .visible = true,
     .named = true,
   },
-  [sym_source_file] = {
+  [sym_ledger] = {
     .visible = true,
     .named = true,
+  },
+  [sym_transaction] = {
+    .visible = true,
+    .named = true,
+  },
+  [sym_posting] = {
+    .visible = true,
+    .named = true,
+  },
+  [aux_sym_ledger_repeat1] = {
+    .visible = false,
+    .named = false,
+  },
+  [aux_sym_transaction_repeat1] = {
+    .visible = false,
+    .named = false,
   },
 };
 
@@ -82,6 +110,13 @@ static const TSStateId ts_primary_state_ids[STATE_COUNT] = {
   [1] = 1,
   [2] = 2,
   [3] = 3,
+  [4] = 4,
+  [5] = 5,
+  [6] = 6,
+  [7] = 7,
+  [8] = 8,
+  [9] = 9,
+  [10] = 10,
 };
 
 static bool ts_lex(TSLexer *lexer, TSStateId state) {
@@ -198,6 +233,13 @@ static const TSLexMode ts_lex_modes[STATE_COUNT] = {
   [1] = {.lex_state = 0},
   [2] = {.lex_state = 0},
   [3] = {.lex_state = 0},
+  [4] = {.lex_state = 0},
+  [5] = {.lex_state = 0},
+  [6] = {.lex_state = 0},
+  [7] = {.lex_state = 0},
+  [8] = {.lex_state = 0},
+  [9] = {.lex_state = 0},
+  [10] = {.lex_state = 0},
 };
 
 static const uint16_t ts_parse_table[LARGE_STATE_COUNT][SYMBOL_COUNT] = {
@@ -209,35 +251,104 @@ static const uint16_t ts_parse_table[LARGE_STATE_COUNT][SYMBOL_COUNT] = {
     [sym_amount] = ACTIONS(1),
   },
   [1] = {
-    [sym_source_file] = STATE(3),
-    [sym_date] = ACTIONS(3),
-    [sym_description] = ACTIONS(3),
-    [sym_account] = ACTIONS(3),
-    [sym_amount] = ACTIONS(5),
+    [sym_ledger] = STATE(10),
+    [sym_transaction] = STATE(4),
+    [aux_sym_ledger_repeat1] = STATE(4),
+    [ts_builtin_sym_end] = ACTIONS(3),
+    [sym_date] = ACTIONS(5),
   },
 };
 
 static const uint16_t ts_small_parse_table[] = {
-  [0] = 1,
-    ACTIONS(7), 1,
-      ts_builtin_sym_end,
-  [4] = 1,
+  [0] = 3,
     ACTIONS(9), 1,
+      sym_account,
+    ACTIONS(7), 2,
+      ts_builtin_sym_end,
+      sym_date,
+    STATE(3), 2,
+      sym_posting,
+      aux_sym_transaction_repeat1,
+  [12] = 3,
+    ACTIONS(13), 1,
+      sym_account,
+    ACTIONS(11), 2,
+      ts_builtin_sym_end,
+      sym_date,
+    STATE(3), 2,
+      sym_posting,
+      aux_sym_transaction_repeat1,
+  [24] = 3,
+    ACTIONS(5), 1,
+      sym_date,
+    ACTIONS(16), 1,
+      ts_builtin_sym_end,
+    STATE(5), 2,
+      sym_transaction,
+      aux_sym_ledger_repeat1,
+  [35] = 3,
+    ACTIONS(18), 1,
+      ts_builtin_sym_end,
+    ACTIONS(20), 1,
+      sym_date,
+    STATE(5), 2,
+      sym_transaction,
+      aux_sym_ledger_repeat1,
+  [46] = 2,
+    ACTIONS(25), 1,
+      sym_amount,
+    ACTIONS(23), 3,
+      ts_builtin_sym_end,
+      sym_date,
+      sym_account,
+  [55] = 2,
+    ACTIONS(9), 1,
+      sym_account,
+    STATE(2), 2,
+      sym_posting,
+      aux_sym_transaction_repeat1,
+  [63] = 1,
+    ACTIONS(27), 3,
+      ts_builtin_sym_end,
+      sym_date,
+      sym_account,
+  [69] = 1,
+    ACTIONS(29), 1,
+      sym_description,
+  [73] = 1,
+    ACTIONS(31), 1,
       ts_builtin_sym_end,
 };
 
 static const uint32_t ts_small_parse_table_map[] = {
   [SMALL_STATE(2)] = 0,
-  [SMALL_STATE(3)] = 4,
+  [SMALL_STATE(3)] = 12,
+  [SMALL_STATE(4)] = 24,
+  [SMALL_STATE(5)] = 35,
+  [SMALL_STATE(6)] = 46,
+  [SMALL_STATE(7)] = 55,
+  [SMALL_STATE(8)] = 63,
+  [SMALL_STATE(9)] = 69,
+  [SMALL_STATE(10)] = 73,
 };
 
 static const TSParseActionEntry ts_parse_actions[] = {
   [0] = {.entry = {.count = 0, .reusable = false}},
   [1] = {.entry = {.count = 1, .reusable = false}}, RECOVER(),
-  [3] = {.entry = {.count = 1, .reusable = true}}, SHIFT(2),
-  [5] = {.entry = {.count = 1, .reusable = false}}, SHIFT(2),
-  [7] = {.entry = {.count = 1, .reusable = true}}, REDUCE(sym_source_file, 1),
-  [9] = {.entry = {.count = 1, .reusable = true}},  ACCEPT_INPUT(),
+  [3] = {.entry = {.count = 1, .reusable = true}}, REDUCE(sym_ledger, 0),
+  [5] = {.entry = {.count = 1, .reusable = true}}, SHIFT(9),
+  [7] = {.entry = {.count = 1, .reusable = true}}, REDUCE(sym_transaction, 3),
+  [9] = {.entry = {.count = 1, .reusable = true}}, SHIFT(6),
+  [11] = {.entry = {.count = 1, .reusable = true}}, REDUCE(aux_sym_transaction_repeat1, 2),
+  [13] = {.entry = {.count = 2, .reusable = true}}, REDUCE(aux_sym_transaction_repeat1, 2), SHIFT_REPEAT(6),
+  [16] = {.entry = {.count = 1, .reusable = true}}, REDUCE(sym_ledger, 1),
+  [18] = {.entry = {.count = 1, .reusable = true}}, REDUCE(aux_sym_ledger_repeat1, 2),
+  [20] = {.entry = {.count = 2, .reusable = true}}, REDUCE(aux_sym_ledger_repeat1, 2), SHIFT_REPEAT(9),
+  [23] = {.entry = {.count = 1, .reusable = true}}, REDUCE(sym_posting, 1),
+  [25] = {.entry = {.count = 1, .reusable = false}}, SHIFT(8),
+  [27] = {.entry = {.count = 1, .reusable = true}}, REDUCE(sym_posting, 2),
+  [29] = {.entry = {.count = 1, .reusable = true}}, SHIFT(7),
+  [31] = {.entry = {.count = 1, .reusable = true}},  ACCEPT_INPUT(),
 };
 
 #ifdef __cplusplus
