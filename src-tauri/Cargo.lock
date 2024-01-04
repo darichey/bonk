@@ -161,7 +161,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "bonk-lang"
+name = "bonk-ast"
 version = "0.1.0"
 dependencies = [
  "cc",
