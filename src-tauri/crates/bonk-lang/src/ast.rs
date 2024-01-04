@@ -43,16 +43,41 @@ impl Transaction<'_> {
 pub struct Posting<'a>(Node<'a>, &'a str);
 
 impl Posting<'_> {
-    pub fn account(&self) -> Option<&str> {
+    pub fn account(&self) -> Option<Account> {
         self.0
             .child_by_field_name("account")
-            .map(|n| n.utf8_text(self.1.as_bytes()).unwrap())
+            .map(|n| Account(n, self.1))
     }
 
-    pub fn amount(&self) -> Option<&str> {
+    pub fn amount(&self) -> Option<Amount> {
         self.0
             .child_by_field_name("amount")
-            .map(|n| n.utf8_text(self.1.as_bytes()).unwrap())
+            .map(|n| Amount(n, self.1))
+    }
+}
+
+pub struct Account<'a>(Node<'a>, &'a str);
+
+impl Account<'_> {
+    pub fn path(&self) -> Vec<&str> {
+        self.0
+            .utf8_text(self.1.as_bytes())
+            .unwrap()
+            .split(':')
+            .collect()
+    }
+}
+
+pub struct Amount<'a>(Node<'a>, &'a str);
+
+impl Amount<'_> {
+    pub fn cents(&self) -> i32 {
+        self.0
+            .utf8_text(self.1.as_bytes())
+            .unwrap()
+            .replace('.', "")
+            .parse()
+            .unwrap()
     }
 }
 
@@ -87,12 +112,18 @@ mod tests {
 
         let postings = transaction.postings();
         let posting = postings.get(0).unwrap();
-        assert_eq!(posting.account(), Some("expenses:fast_food"));
-        assert_eq!(posting.amount(), Some("10.91"));
+        assert_eq!(
+            posting.account().unwrap().path(),
+            vec!["expenses", "fast_food"]
+        );
+        assert_eq!(posting.amount().unwrap().cents(), 1091);
 
         let posting = postings.get(1).unwrap();
-        assert_eq!(posting.account(), Some("liabilities:my_credit_card"));
-        assert_eq!(posting.amount(), None);
+        assert_eq!(
+            posting.account().unwrap().path(),
+            vec!["liabilities", "my_credit_card"]
+        );
+        assert!(posting.amount().is_none());
 
         let transaction = transactions.get(1).unwrap();
         assert_eq!(transaction.date(), Some("2023-01-02"));
@@ -100,11 +131,17 @@ mod tests {
 
         let postings = transaction.postings();
         let posting = postings.get(0).unwrap();
-        assert_eq!(posting.account(), Some("liabilities:my_credit_card"));
-        assert_eq!(posting.amount(), Some("10.91"));
+        assert_eq!(
+            posting.account().unwrap().path(),
+            vec!["liabilities", "my_credit_card"]
+        );
+        assert_eq!(posting.amount().unwrap().cents(), 1091);
 
         let posting = postings.get(1).unwrap();
-        assert_eq!(posting.account(), Some("assets:my_checking"));
-        assert_eq!(posting.amount(), None);
+        assert_eq!(
+            posting.account().unwrap().path(),
+            vec!["assets", "my_checking"]
+        );
+        assert!(posting.amount().is_none());
     }
 }
