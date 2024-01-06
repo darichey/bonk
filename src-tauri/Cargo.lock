@@ -171,6 +171,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "bonk-ast-errorless"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "serde",
+]
+
+[[package]]
 name = "bonk-lsp"
 version = "0.1.0"
 dependencies = [
