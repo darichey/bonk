@@ -1,3 +1,5 @@
+mod ser;
+
 use chrono::NaiveDate;
 
 pub struct Ledger {
