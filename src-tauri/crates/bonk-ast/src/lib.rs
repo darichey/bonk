@@ -1,15 +1,24 @@
-use tree_sitter::Node;
+use tree_sitter::{Node, Tree};
 
-pub struct Ledger<'a>(Node<'a>, &'a str);
+pub fn parse(src: &str) -> Ledger {
+    let mut parser = tree_sitter::Parser::new();
+    parser.set_language(tree_sitter_bonk::language()).unwrap();
+    let tree = parser.parse(src, None).unwrap();
+    let ledger = Ledger::new(tree, src);
+    ledger
+}
+
+pub struct Ledger<'a>(Tree, &'a str);
 
 impl<'a> Ledger<'a> {
-    pub fn new(node: Node<'a>, src: &'a str) -> Self {
-        Self(node, src)
+    pub fn new(tree: Tree, src: &'a str) -> Self {
+        Self(tree, src)
     }
 
     pub fn transactions(&self) -> Vec<Transaction<'_>> {
         let mut cursor = self.0.walk();
         self.0
+            .root_node()
             .children_by_field_name("transaction", &mut cursor)
             .map(|n| Transaction(n, self.1))
             .collect()
@@ -83,9 +92,7 @@ impl Amount<'_> {
 
 #[cfg(test)]
 mod tests {
-    use tree_sitter::Parser;
-
-    use super::Ledger;
+    use crate::parse;
 
     #[test]
     fn test() {
@@ -97,11 +104,7 @@ mod tests {
   liabilities:my_credit_card    10.91
   assets:my_checking"#;
 
-        let mut parser = Parser::new();
-        parser.set_language(tree_sitter_bonk::language()).unwrap();
-        let tree = parser.parse(src, None).unwrap();
-        let root = tree.root_node();
-        let ledger = Ledger::new(root, src);
+        let ledger = parse(src);
 
         let transactions = ledger.transactions();
         assert_eq!(transactions.len(), 2);
