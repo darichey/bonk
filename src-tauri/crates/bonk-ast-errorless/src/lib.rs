@@ -1,6 +1,13 @@
+mod convert;
 mod ser;
 
 use chrono::NaiveDate;
+use convert::AstHasErrors;
+
+pub fn parse(src: &str) -> Result<Ledger, AstHasErrors> {
+    let ledger = bonk_ast::parse(src);
+    ledger.try_into()
+}
 
 pub struct Ledger {
     pub transactions: Vec<Transaction>,
