@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+  <body>
+    <script src="https://cdn.plaid.com/link/v2/stable/link-initialize.js"></script>
+    <script type="text/javascript">
+      const handler = Plaid.create({
+        token: "$$LINK_TOKEN$$",
+        onSuccess: (publicToken, metadata) => {
+          fetch(`/?t=${publicToken}`, { method: "POST" });
+          document.getElementById("msg").innerHTML =
+            "Done! You can close this tab now.";
+        },
+        onLoad: () => {},
+        onExit: (err, metadata) => {},
+        onEvent: (eventName, metadata) => {},
+      });
+
+      handler.open();
+    </script>
+    <div id="msg">Opening Plaid Link...</div>
+  </body>
+</html>
