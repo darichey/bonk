@@ -10,6 +10,5 @@ plaid = { path = "../plaid" }
 bonk-ast-errorless = { path = "../bonk-ast-errorless" }
 serde = "1.0.195"
 rouille = "3.6.2"
-tokio = "1.35.1"
-reqwest = "0.11.23"
+reqwest = "~0.9"
 webbrowser = "0.8.12"

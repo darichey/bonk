@@ -202,7 +202,7 @@ fn format_template(template: &str, values: HashMap<String, String>) -> String {
 }
 
 #[tauri::command]
-pub async fn create_link_token(plaid_config: State<'_, Configuration>) -> Result<String, String> {
+pub fn create_link_token(plaid_config: State<'_, Configuration>) -> Result<String, String> {
     println!("create_link_token");
 
     Ok(plaid_api::link_token_create(
@@ -217,13 +217,12 @@ pub async fn create_link_token(plaid_config: State<'_, Configuration>) -> Result
             )
         },
     )
-    .await
     .map_err(|err| err.to_string())?
     .link_token)
 }
 
 #[tauri::command]
-pub async fn exchange_public_token(
+pub fn exchange_public_token(
     plaid_config: State<'_, Configuration>,
     plaid_access_token: State<'_, PlaidAccessToken>,
     public_token: String,
@@ -238,7 +237,6 @@ pub async fn exchange_public_token(
             secret: None,
         },
     )
-    .await
     .map_err(|err| err.to_string())?
     .access_token;
 
@@ -256,7 +254,7 @@ pub struct PlaidTransaction {
 }
 
 #[tauri::command]
-pub async fn plaid_get_transactions(
+pub fn plaid_get_transactions(
     plaid_config: State<'_, Configuration>,
     plaid_access_token: State<'_, PlaidAccessToken>,
 ) -> Result<Vec<PlaidTransaction>, String> {
@@ -271,7 +269,6 @@ pub async fn plaid_get_transactions(
             secret: None,
         },
     )
-    .await
     .map_err(|err| err.to_string())?;
 
     let accounts: HashMap<String, String> = response

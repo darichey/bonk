@@ -1,12 +1,3 @@
-use std::{
-    collections::HashMap,
-    env,
-    error::Error,
-    ops::Deref,
-    sync::{Arc, Mutex},
-    time::Duration,
-};
-
 use plaid::{
     apis::{configuration::Configuration, plaid_api},
     models::{
@@ -17,6 +8,14 @@ use plaid::{
 use reqwest::header::HeaderMap;
 use rouille::{router, Request, Response, Server};
 use serde::Serialize;
+use std::{
+    collections::HashMap,
+    env,
+    error::Error,
+    ops::Deref,
+    sync::{Arc, Mutex},
+    time::Duration,
+};
 
 fn main() -> Result<(), Box<dyn Error>> {
     let access_token = get_plaid_access_token()?;
@@ -56,11 +55,8 @@ fn handle_post(request: &Request, public_token: Arc<Mutex<Option<String>>>) -> R
 }
 
 fn get_plaid_access_token() -> Result<String, Box<dyn Error>> {
-    let runtime = tokio::runtime::Builder::new_current_thread()
-        .enable_all()
-        .build()?;
     let config = plaid_config()?;
-    let link_token = runtime.block_on(create_link_token(&config))?;
+    let link_token = create_link_token(&config)?;
 
     let public_token: Arc<Mutex<Option<String>>> = Arc::new(Mutex::new(None));
 
@@ -86,12 +82,12 @@ fn get_plaid_access_token() -> Result<String, Box<dyn Error>> {
         }
     };
 
-    let access_token = runtime.block_on(exchange_public_token(&config, &public_token))?;
+    let access_token = exchange_public_token(&config, &public_token)?;
 
     Ok(access_token)
 }
 
-async fn create_link_token(config: &Configuration) -> Result<String, Box<dyn Error>> {
+fn create_link_token(config: &Configuration) -> Result<String, Box<dyn Error>> {
     Ok(plaid_api::link_token_create(
         config,
         LinkTokenCreateRequest {
@@ -103,12 +99,11 @@ async fn create_link_token(config: &Configuration) -> Result<String, Box<dyn Err
                 LinkTokenCreateRequestUser::new("user-id".to_string()),
             )
         },
-    )
-    .await?
+    )?
     .link_token)
 }
 
-async fn exchange_public_token(
+fn exchange_public_token(
     config: &Configuration,
     public_token: &str,
 ) -> Result<String, Box<dyn Error>> {
@@ -119,8 +114,7 @@ async fn exchange_public_token(
             client_id: None,
             secret: None,
         },
-    )
-    .await?
+    )?
     .access_token;
 
     Ok(access_token)
@@ -134,7 +128,7 @@ struct PlaidTransaction {
     name: String,
 }
 
-async fn plaid_get_transactions(
+fn plaid_get_transactions(
     config: &Configuration,
     access_token: &str,
 ) -> Result<Vec<PlaidTransaction>, Box<dyn Error>> {
@@ -148,8 +142,7 @@ async fn plaid_get_transactions(
             options: None,
             secret: None,
         },
-    )
-    .await?;
+    )?;
 
     let accounts: HashMap<String, String> = response
         .accounts

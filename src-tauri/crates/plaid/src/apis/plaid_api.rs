@@ -1864,7 +1864,7 @@ pub enum WebhookVerificationKeyGetError {
 
 
 /// The `/accounts/balance/get` endpoint returns the real-time balance for each of an Item's accounts. While other endpoints, such as `/accounts/get`, return a balance object, only `/accounts/balance/get` forces the available and current balance fields to be refreshed rather than cached. This endpoint can be used for existing Items that were added via any of Plaid’s other products. This endpoint can be used as long as Link has been initialized with any other product, `balance` itself is not a product that can be used to initialize Link. As this endpoint triggers a synchronous request for fresh data, latency may be higher than for other Plaid endpoints (typically less than 10 seconds, but occasionally up to 30 seconds or more); if you encounter errors, you may find it necessary to adjust your timeout period when making requests.
-pub async fn accounts_balance_get(configuration: &configuration::Configuration, accounts_balance_get_request: crate::models::AccountsBalanceGetRequest) -> Result<crate::models::AccountsGetResponse, Error<AccountsBalanceGetError>> {
+pub fn accounts_balance_get(configuration: &configuration::Configuration, accounts_balance_get_request: crate::models::AccountsBalanceGetRequest) -> Result<crate::models::AccountsGetResponse, Error<AccountsBalanceGetError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -1902,10 +1902,10 @@ pub async fn accounts_balance_get(configuration: &configuration::Configuration, 
     local_var_req_builder = local_var_req_builder.json(&accounts_balance_get_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -1917,7 +1917,7 @@ pub async fn accounts_balance_get(configuration: &configuration::Configuration, 
 }
 
 /// The `/accounts/get` endpoint can be used to retrieve a list of accounts associated with any linked Item. Plaid will only return active bank accounts — that is, accounts that are not closed and are capable of carrying a balance. For items that went through the updated account selection pane, this endpoint only returns accounts that were permissioned by the user when they initially created the Item. If a user creates a new account after the initial link, you can capture this event through the [`NEW_ACCOUNTS_AVAILABLE`](https://plaid.com/docs/api/items/#new_accounts_available) webhook and then use Link's [update mode](https://plaid.com/docs/link/update-mode/) to request that the user share this new account with you.  `/accounts/get` is free to use and retrieves cached information, rather than extracting fresh information from the institution. The balance returned will reflect the balance at the time of the last successful Item update. If the Item is enabled for a regularly updating product, such as Transactions, Investments, or Liabilities, the balance will typically update about once a day, as long as the Item is healthy. If the Item is enabled only for products that do not frequently update, such as Auth or Identity, balance data may be much older.  For realtime balance information, use the paid endpoint `/accounts/balance/get` instead.
-pub async fn accounts_get(configuration: &configuration::Configuration, accounts_get_request: crate::models::AccountsGetRequest) -> Result<crate::models::AccountsGetResponse, Error<AccountsGetError>> {
+pub fn accounts_get(configuration: &configuration::Configuration, accounts_get_request: crate::models::AccountsGetRequest) -> Result<crate::models::AccountsGetResponse, Error<AccountsGetError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -1955,10 +1955,10 @@ pub async fn accounts_get(configuration: &configuration::Configuration, accounts
     local_var_req_builder = local_var_req_builder.json(&accounts_get_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -1970,7 +1970,7 @@ pub async fn accounts_get(configuration: &configuration::Configuration, accounts
 }
 
 /// Allows financial institutions to retrieve information about Plaid clients for the purpose of building control-tower experiences
-pub async fn application_get(configuration: &configuration::Configuration, application_get_request: crate::models::ApplicationGetRequest) -> Result<crate::models::ApplicationGetResponse, Error<ApplicationGetError>> {
+pub fn application_get(configuration: &configuration::Configuration, application_get_request: crate::models::ApplicationGetRequest) -> Result<crate::models::ApplicationGetResponse, Error<ApplicationGetError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -2008,10 +2008,10 @@ pub async fn application_get(configuration: &configuration::Configuration, appli
     local_var_req_builder = local_var_req_builder.json(&application_get_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -2023,7 +2023,7 @@ pub async fn application_get(configuration: &configuration::Configuration, appli
 }
 
 /// Plaid can provide an Audit Copy of any Asset Report directly to a participating third party on your behalf. For example, Plaid can supply an Audit Copy directly to Fannie Mae on your behalf if you participate in the Day 1 Certainty™ program. An Audit Copy contains the same underlying data as the Asset Report.  To grant access to an Audit Copy, use the `/asset_report/audit_copy/create` endpoint to create an `audit_copy_token` and then pass that token to the third party who needs access. Each third party has its own `auditor_id`, for example `fannie_mae`. You’ll need to create a separate Audit Copy for each third party to whom you want to grant access to the Report.
-pub async fn asset_report_audit_copy_create(configuration: &configuration::Configuration, asset_report_audit_copy_create_request: crate::models::AssetReportAuditCopyCreateRequest) -> Result<crate::models::AssetReportAuditCopyCreateResponse, Error<AssetReportAuditCopyCreateError>> {
+pub fn asset_report_audit_copy_create(configuration: &configuration::Configuration, asset_report_audit_copy_create_request: crate::models::AssetReportAuditCopyCreateRequest) -> Result<crate::models::AssetReportAuditCopyCreateResponse, Error<AssetReportAuditCopyCreateError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -2061,10 +2061,10 @@ pub async fn asset_report_audit_copy_create(configuration: &configuration::Confi
     local_var_req_builder = local_var_req_builder.json(&asset_report_audit_copy_create_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -2076,7 +2076,7 @@ pub async fn asset_report_audit_copy_create(configuration: &configuration::Confi
 }
 
 /// `/asset_report/audit_copy/get` allows auditors to get a copy of an Asset Report that was previously shared via the `/asset_report/audit_copy/create` endpoint.  The caller of `/asset_report/audit_copy/create` must provide the `audit_copy_token` to the auditor.  This token can then be used to call `/asset_report/audit_copy/create`.
-pub async fn asset_report_audit_copy_get(configuration: &configuration::Configuration, asset_report_audit_copy_get_request: crate::models::AssetReportAuditCopyGetRequest) -> Result<crate::models::AssetReportGetResponse, Error<AssetReportAuditCopyGetError>> {
+pub fn asset_report_audit_copy_get(configuration: &configuration::Configuration, asset_report_audit_copy_get_request: crate::models::AssetReportAuditCopyGetRequest) -> Result<crate::models::AssetReportGetResponse, Error<AssetReportAuditCopyGetError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -2114,10 +2114,10 @@ pub async fn asset_report_audit_copy_get(configuration: &configuration::Configur
     local_var_req_builder = local_var_req_builder.json(&asset_report_audit_copy_get_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -2129,7 +2129,7 @@ pub async fn asset_report_audit_copy_get(configuration: &configuration::Configur
 }
 
 /// The `/asset_report/audit_copy/remove` endpoint allows you to remove an Audit Copy. Removing an Audit Copy invalidates the `audit_copy_token` associated with it, meaning both you and any third parties holding the token will no longer be able to use it to access Report data. Items associated with the Asset Report, the Asset Report itself and other Audit Copies of it are not affected and will remain accessible after removing the given Audit Copy.
-pub async fn asset_report_audit_copy_remove(configuration: &configuration::Configuration, asset_report_audit_copy_remove_request: crate::models::AssetReportAuditCopyRemoveRequest) -> Result<crate::models::AssetReportAuditCopyRemoveResponse, Error<AssetReportAuditCopyRemoveError>> {
+pub fn asset_report_audit_copy_remove(configuration: &configuration::Configuration, asset_report_audit_copy_remove_request: crate::models::AssetReportAuditCopyRemoveRequest) -> Result<crate::models::AssetReportAuditCopyRemoveResponse, Error<AssetReportAuditCopyRemoveError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -2167,10 +2167,10 @@ pub async fn asset_report_audit_copy_remove(configuration: &configuration::Confi
     local_var_req_builder = local_var_req_builder.json(&asset_report_audit_copy_remove_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -2182,7 +2182,7 @@ pub async fn asset_report_audit_copy_remove(configuration: &configuration::Confi
 }
 
 /// The `/asset_report/create` endpoint initiates the process of creating an Asset Report, which can then be retrieved by passing the `asset_report_token` return value to the `/asset_report/get` or `/asset_report/pdf/get` endpoints.  The Asset Report takes some time to be created and is not available immediately after calling `/asset_report/create`. The exact amount of time to create the report will vary depending on how many days of history are requested and will typically range from a few seconds to about one minute. When the Asset Report is ready to be retrieved using `/asset_report/get` or `/asset_report/pdf/get`, Plaid will fire a `PRODUCT_READY` webhook. For full details of the webhook schema, see [Asset Report webhooks](https://plaid.com/docs/api/products/assets/#webhooks).  The `/asset_report/create` endpoint creates an Asset Report at a moment in time. Asset Reports are immutable. To get an updated Asset Report, use the `/asset_report/refresh` endpoint.
-pub async fn asset_report_create(configuration: &configuration::Configuration, asset_report_create_request: crate::models::AssetReportCreateRequest) -> Result<crate::models::AssetReportCreateResponse, Error<AssetReportCreateError>> {
+pub fn asset_report_create(configuration: &configuration::Configuration, asset_report_create_request: crate::models::AssetReportCreateRequest) -> Result<crate::models::AssetReportCreateResponse, Error<AssetReportCreateError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -2220,10 +2220,10 @@ pub async fn asset_report_create(configuration: &configuration::Configuration, a
     local_var_req_builder = local_var_req_builder.json(&asset_report_create_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -2235,7 +2235,7 @@ pub async fn asset_report_create(configuration: &configuration::Configuration, a
 }
 
 /// By default, an Asset Report will contain all of the accounts on a given Item. In some cases, you may not want the Asset Report to contain all accounts. For example, you might have the end user choose which accounts are relevant in Link using the Account Select view, which you can enable in the dashboard. Or, you might always exclude certain account types or subtypes, which you can identify by using the `/accounts/get` endpoint. To narrow an Asset Report to only a subset of accounts, use the `/asset_report/filter` endpoint.  To exclude certain Accounts from an Asset Report, first use the `/asset_report/create` endpoint to create the report, then send the `asset_report_token` along with a list of `account_ids` to exclude to the `/asset_report/filter` endpoint, to create a new Asset Report which contains only a subset of the original Asset Report's data.  Because Asset Reports are immutable, calling `/asset_report/filter` does not alter the original Asset Report in any way; rather, `/asset_report/filter` creates a new Asset Report with a new token and id. Asset Reports created via `/asset_report/filter` do not contain new Asset data, and are not billed.  Plaid will fire a [`PRODUCT_READY`](https://plaid.com/docs/api/products/assets/#product_ready) webhook once generation of the filtered Asset Report has completed.
-pub async fn asset_report_filter(configuration: &configuration::Configuration, asset_report_filter_request: crate::models::AssetReportFilterRequest) -> Result<crate::models::AssetReportFilterResponse, Error<AssetReportFilterError>> {
+pub fn asset_report_filter(configuration: &configuration::Configuration, asset_report_filter_request: crate::models::AssetReportFilterRequest) -> Result<crate::models::AssetReportFilterResponse, Error<AssetReportFilterError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -2273,10 +2273,10 @@ pub async fn asset_report_filter(configuration: &configuration::Configuration, a
     local_var_req_builder = local_var_req_builder.json(&asset_report_filter_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -2288,7 +2288,7 @@ pub async fn asset_report_filter(configuration: &configuration::Configuration, a
 }
 
 /// The `/asset_report/get` endpoint retrieves the Asset Report in JSON format. Before calling `/asset_report/get`, you must first create the Asset Report using `/asset_report/create` (or filter an Asset Report using `/asset_report/filter`) and then wait for the [`PRODUCT_READY`](https://plaid.com/docs/api/products/assets/#product_ready) webhook to fire, indicating that the Report is ready to be retrieved.  By default, an Asset Report includes transaction descriptions as returned by the bank, as opposed to parsed and categorized by Plaid. You can also receive cleaned and categorized transactions, as well as additional insights like merchant name or location information. We call this an Asset Report with Insights. An Asset Report with Insights provides transaction category, location, and merchant information in addition to the transaction strings provided in a standard Asset Report. To retrieve an Asset Report with Insights, call `/asset_report/get` endpoint with `include_insights` set to `true`.  For latency-sensitive applications, you can optionally call `/asset_report/create` with `options.add_ons` set to `[\"fast_assets\"]`. This will cause Plaid to create two versions of the Asset Report: one with only current and available balance and identity information, and then later on the complete Asset Report. You will receive separate webhooks for each version of the Asset Report.
-pub async fn asset_report_get(configuration: &configuration::Configuration, asset_report_get_request: crate::models::AssetReportGetRequest) -> Result<crate::models::AssetReportGetResponse, Error<AssetReportGetError>> {
+pub fn asset_report_get(configuration: &configuration::Configuration, asset_report_get_request: crate::models::AssetReportGetRequest) -> Result<crate::models::AssetReportGetResponse, Error<AssetReportGetError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -2326,10 +2326,10 @@ pub async fn asset_report_get(configuration: &configuration::Configuration, asse
     local_var_req_builder = local_var_req_builder.json(&asset_report_get_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -2341,7 +2341,7 @@ pub async fn asset_report_get(configuration: &configuration::Configuration, asse
 }
 
 /// The `/asset_report/pdf/get` endpoint retrieves the Asset Report in PDF format. Before calling `/asset_report/pdf/get`, you must first create the Asset Report using `/asset_report/create` (or filter an Asset Report using `/asset_report/filter`) and then wait for the [`PRODUCT_READY`](https://plaid.com/docs/api/products/assets/#product_ready) webhook to fire, indicating that the Report is ready to be retrieved.  The response to `/asset_report/pdf/get` is the PDF binary data. The `request_id`  is returned in the `Plaid-Request-ID` header.  [View a sample PDF Asset Report](https://plaid.com/documents/sample-asset-report.pdf).
-pub async fn asset_report_pdf_get(configuration: &configuration::Configuration, asset_report_pdf_get_request: crate::models::AssetReportPdfGetRequest) -> Result<std::path::PathBuf, Error<AssetReportPdfGetError>> {
+pub fn asset_report_pdf_get(configuration: &configuration::Configuration, asset_report_pdf_get_request: crate::models::AssetReportPdfGetRequest) -> Result<std::path::PathBuf, Error<AssetReportPdfGetError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -2379,10 +2379,10 @@ pub async fn asset_report_pdf_get(configuration: &configuration::Configuration, 
     local_var_req_builder = local_var_req_builder.json(&asset_report_pdf_get_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -2394,7 +2394,7 @@ pub async fn asset_report_pdf_get(configuration: &configuration::Configuration, 
 }
 
 /// An Asset Report is an immutable snapshot of a user's assets. In order to \"refresh\" an Asset Report you created previously, you can use the `/asset_report/refresh` endpoint to create a new Asset Report based on the old one, but with the most recent data available.  The new Asset Report will contain the same Items as the original Report, as well as the same filters applied by any call to `/asset_report/filter`. By default, the new Asset Report will also use the same parameters you submitted with your original `/asset_report/create` request, but the original `days_requested` value and the values of any parameters in the `options` object can be overridden with new values. To change these arguments, simply supply new values for them in your request to `/asset_report/refresh`. Submit an empty string (\"\") for any previously-populated fields you would like set as empty.
-pub async fn asset_report_refresh(configuration: &configuration::Configuration, asset_report_refresh_request: crate::models::AssetReportRefreshRequest) -> Result<crate::models::AssetReportRefreshResponse, Error<AssetReportRefreshError>> {
+pub fn asset_report_refresh(configuration: &configuration::Configuration, asset_report_refresh_request: crate::models::AssetReportRefreshRequest) -> Result<crate::models::AssetReportRefreshResponse, Error<AssetReportRefreshError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -2432,10 +2432,10 @@ pub async fn asset_report_refresh(configuration: &configuration::Configuration, 
     local_var_req_builder = local_var_req_builder.json(&asset_report_refresh_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -2447,7 +2447,7 @@ pub async fn asset_report_refresh(configuration: &configuration::Configuration, 
 }
 
 /// The `/item/remove` endpoint allows you to invalidate an `access_token`, meaning you will not be able to create new Asset Reports with it. Removing an Item does not affect any Asset Reports or Audit Copies you have already created, which will remain accessible until you remove them specifically.  The `/asset_report/remove` endpoint allows you to remove an Asset Report. Removing an Asset Report invalidates its `asset_report_token`, meaning you will no longer be able to use it to access Report data or create new Audit Copies. Removing an Asset Report does not affect the underlying Items, but does invalidate any `audit_copy_tokens` associated with the Asset Report.
-pub async fn asset_report_remove(configuration: &configuration::Configuration, asset_report_remove_request: crate::models::AssetReportRemoveRequest) -> Result<crate::models::AssetReportRemoveResponse, Error<AssetReportRemoveError>> {
+pub fn asset_report_remove(configuration: &configuration::Configuration, asset_report_remove_request: crate::models::AssetReportRemoveRequest) -> Result<crate::models::AssetReportRemoveResponse, Error<AssetReportRemoveError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -2485,10 +2485,10 @@ pub async fn asset_report_remove(configuration: &configuration::Configuration, a
     local_var_req_builder = local_var_req_builder.json(&asset_report_remove_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -2500,7 +2500,7 @@ pub async fn asset_report_remove(configuration: &configuration::Configuration, a
 }
 
 /// The `/auth/get` endpoint returns the bank account and bank identification numbers (such as routing numbers, for US accounts) associated with an Item's checking and savings accounts, along with high-level account data and balances when available.  Note: This request may take some time to complete if `auth` was not specified as an initial product when creating the Item. This is because Plaid must communicate directly with the institution to retrieve the data.  Versioning note: In API version 2017-03-08, the schema of the `numbers` object returned by this endpoint is substantially different. For details, see [Plaid API versioning](https://plaid.com/docs/api/versioning/#version-2018-05-22).
-pub async fn auth_get(configuration: &configuration::Configuration, auth_get_request: crate::models::AuthGetRequest) -> Result<crate::models::AuthGetResponse, Error<AuthGetError>> {
+pub fn auth_get(configuration: &configuration::Configuration, auth_get_request: crate::models::AuthGetRequest) -> Result<crate::models::AuthGetResponse, Error<AuthGetError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -2538,10 +2538,10 @@ pub async fn auth_get(configuration: &configuration::Configuration, auth_get_req
     local_var_req_builder = local_var_req_builder.json(&auth_get_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -2553,7 +2553,7 @@ pub async fn auth_get(configuration: &configuration::Configuration, auth_get_req
 }
 
 /// Use the `/bank_transfer/balance/get` endpoint to see the available balance in your bank transfer account. Debit transfers increase this balance once their status is posted. Credit transfers decrease this balance when they are created.  The transactable balance shows the amount in your account that you are able to use for transfers, and is essentially your available balance minus your minimum balance.  Note that this endpoint can only be used with FBO accounts, when using Bank Transfers in the Full Service configuration. It cannot be used on your own account when using Bank Transfers in the BTS Platform configuration.
-pub async fn bank_transfer_balance_get(configuration: &configuration::Configuration, bank_transfer_balance_get_request: crate::models::BankTransferBalanceGetRequest) -> Result<crate::models::BankTransferBalanceGetResponse, Error<BankTransferBalanceGetError>> {
+pub fn bank_transfer_balance_get(configuration: &configuration::Configuration, bank_transfer_balance_get_request: crate::models::BankTransferBalanceGetRequest) -> Result<crate::models::BankTransferBalanceGetResponse, Error<BankTransferBalanceGetError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -2591,10 +2591,10 @@ pub async fn bank_transfer_balance_get(configuration: &configuration::Configurat
     local_var_req_builder = local_var_req_builder.json(&bank_transfer_balance_get_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -2606,7 +2606,7 @@ pub async fn bank_transfer_balance_get(configuration: &configuration::Configurat
 }
 
 /// Use the `/bank_transfer/cancel` endpoint to cancel a bank transfer.  A transfer is eligible for cancelation if the `cancellable` property returned by `/bank_transfer/get` is `true`.
-pub async fn bank_transfer_cancel(configuration: &configuration::Configuration, bank_transfer_cancel_request: crate::models::BankTransferCancelRequest) -> Result<crate::models::BankTransferCancelResponse, Error<BankTransferCancelError>> {
+pub fn bank_transfer_cancel(configuration: &configuration::Configuration, bank_transfer_cancel_request: crate::models::BankTransferCancelRequest) -> Result<crate::models::BankTransferCancelResponse, Error<BankTransferCancelError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -2644,10 +2644,10 @@ pub async fn bank_transfer_cancel(configuration: &configuration::Configuration, 
     local_var_req_builder = local_var_req_builder.json(&bank_transfer_cancel_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -2659,7 +2659,7 @@ pub async fn bank_transfer_cancel(configuration: &configuration::Configuration, 
 }
 
 /// Use the `/bank_transfer/create` endpoint to initiate a new bank transfer.
-pub async fn bank_transfer_create(configuration: &configuration::Configuration, bank_transfer_create_request: crate::models::BankTransferCreateRequest) -> Result<crate::models::BankTransferCreateResponse, Error<BankTransferCreateError>> {
+pub fn bank_transfer_create(configuration: &configuration::Configuration, bank_transfer_create_request: crate::models::BankTransferCreateRequest) -> Result<crate::models::BankTransferCreateResponse, Error<BankTransferCreateError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -2697,10 +2697,10 @@ pub async fn bank_transfer_create(configuration: &configuration::Configuration, 
     local_var_req_builder = local_var_req_builder.json(&bank_transfer_create_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -2712,7 +2712,7 @@ pub async fn bank_transfer_create(configuration: &configuration::Configuration, 
 }
 
 /// Use the `/bank_transfer/event/list` endpoint to get a list of Plaid-initiated ACH or bank transfer events based on specified filter criteria. When using Auth with micro-deposit verification enabled, this endpoint can be used to fetch status updates on ACH micro-deposits. For more details, see [micro-deposit events](https://plaid.com/docs/auth/coverage/microdeposit-events/).
-pub async fn bank_transfer_event_list(configuration: &configuration::Configuration, bank_transfer_event_list_request: crate::models::BankTransferEventListRequest) -> Result<crate::models::BankTransferEventListResponse, Error<BankTransferEventListError>> {
+pub fn bank_transfer_event_list(configuration: &configuration::Configuration, bank_transfer_event_list_request: crate::models::BankTransferEventListRequest) -> Result<crate::models::BankTransferEventListResponse, Error<BankTransferEventListError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -2750,10 +2750,10 @@ pub async fn bank_transfer_event_list(configuration: &configuration::Configurati
     local_var_req_builder = local_var_req_builder.json(&bank_transfer_event_list_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -2765,7 +2765,7 @@ pub async fn bank_transfer_event_list(configuration: &configuration::Configurati
 }
 
 /// `/bank_transfer/event/sync` allows you to request up to the next 25 Plaid-initiated bank transfer events that happened after a specific `event_id`. When using Auth with micro-deposit verification enabled, this endpoint can be used to fetch status updates on ACH micro-deposits. For more details, see [micro-deposit events](https://www.plaid.com/docs/auth/coverage/microdeposit-events/).
-pub async fn bank_transfer_event_sync(configuration: &configuration::Configuration, bank_transfer_event_sync_request: crate::models::BankTransferEventSyncRequest) -> Result<crate::models::BankTransferEventSyncResponse, Error<BankTransferEventSyncError>> {
+pub fn bank_transfer_event_sync(configuration: &configuration::Configuration, bank_transfer_event_sync_request: crate::models::BankTransferEventSyncRequest) -> Result<crate::models::BankTransferEventSyncResponse, Error<BankTransferEventSyncError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -2803,10 +2803,10 @@ pub async fn bank_transfer_event_sync(configuration: &configuration::Configurati
     local_var_req_builder = local_var_req_builder.json(&bank_transfer_event_sync_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -2818,7 +2818,7 @@ pub async fn bank_transfer_event_sync(configuration: &configuration::Configurati
 }
 
 /// The `/bank_transfer/get` fetches information about the bank transfer corresponding to the given `bank_transfer_id`.
-pub async fn bank_transfer_get(configuration: &configuration::Configuration, bank_transfer_get_request: crate::models::BankTransferGetRequest) -> Result<crate::models::BankTransferGetResponse, Error<BankTransferGetError>> {
+pub fn bank_transfer_get(configuration: &configuration::Configuration, bank_transfer_get_request: crate::models::BankTransferGetRequest) -> Result<crate::models::BankTransferGetResponse, Error<BankTransferGetError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -2856,10 +2856,10 @@ pub async fn bank_transfer_get(configuration: &configuration::Configuration, ban
     local_var_req_builder = local_var_req_builder.json(&bank_transfer_get_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -2871,7 +2871,7 @@ pub async fn bank_transfer_get(configuration: &configuration::Configuration, ban
 }
 
 /// Use the `/bank_transfer/list` endpoint to see a list of all your bank transfers and their statuses. Results are paginated; use the `count` and `offset` query parameters to retrieve the desired bank transfers. 
-pub async fn bank_transfer_list(configuration: &configuration::Configuration, bank_transfer_list_request: crate::models::BankTransferListRequest) -> Result<crate::models::BankTransferListResponse, Error<BankTransferListError>> {
+pub fn bank_transfer_list(configuration: &configuration::Configuration, bank_transfer_list_request: crate::models::BankTransferListRequest) -> Result<crate::models::BankTransferListResponse, Error<BankTransferListError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -2909,10 +2909,10 @@ pub async fn bank_transfer_list(configuration: &configuration::Configuration, ba
     local_var_req_builder = local_var_req_builder.json(&bank_transfer_list_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -2924,7 +2924,7 @@ pub async fn bank_transfer_list(configuration: &configuration::Configuration, ba
 }
 
 /// As an alternative to adding Items via Link, you can also use the `/bank_transfer/migrate_account` endpoint to migrate known account and routing numbers to Plaid Items.  Note that Items created in this way are not compatible with endpoints for other products, such as `/accounts/balance/get`, and can only be used with Bank Transfer endpoints.  If you require access to other endpoints, create the Item through Link instead.  Access to `/bank_transfer/migrate_account` is not enabled by default; to obtain access, contact your Plaid Account Manager.
-pub async fn bank_transfer_migrate_account(configuration: &configuration::Configuration, bank_transfer_migrate_account_request: crate::models::BankTransferMigrateAccountRequest) -> Result<crate::models::BankTransferMigrateAccountResponse, Error<BankTransferMigrateAccountError>> {
+pub fn bank_transfer_migrate_account(configuration: &configuration::Configuration, bank_transfer_migrate_account_request: crate::models::BankTransferMigrateAccountRequest) -> Result<crate::models::BankTransferMigrateAccountResponse, Error<BankTransferMigrateAccountError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -2962,10 +2962,10 @@ pub async fn bank_transfer_migrate_account(configuration: &configuration::Config
     local_var_req_builder = local_var_req_builder.json(&bank_transfer_migrate_account_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -2977,7 +2977,7 @@ pub async fn bank_transfer_migrate_account(configuration: &configuration::Config
 }
 
 /// The `/bank_transfer/sweep/get` endpoint fetches information about the sweep corresponding to the given `sweep_id`.
-pub async fn bank_transfer_sweep_get(configuration: &configuration::Configuration, bank_transfer_sweep_get_request: crate::models::BankTransferSweepGetRequest) -> Result<crate::models::BankTransferSweepGetResponse, Error<BankTransferSweepGetError>> {
+pub fn bank_transfer_sweep_get(configuration: &configuration::Configuration, bank_transfer_sweep_get_request: crate::models::BankTransferSweepGetRequest) -> Result<crate::models::BankTransferSweepGetResponse, Error<BankTransferSweepGetError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -3015,10 +3015,10 @@ pub async fn bank_transfer_sweep_get(configuration: &configuration::Configuratio
     local_var_req_builder = local_var_req_builder.json(&bank_transfer_sweep_get_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -3030,7 +3030,7 @@ pub async fn bank_transfer_sweep_get(configuration: &configuration::Configuratio
 }
 
 /// The `/bank_transfer/sweep/list` endpoint fetches information about the sweeps matching the given filters.
-pub async fn bank_transfer_sweep_list(configuration: &configuration::Configuration, bank_transfer_sweep_list_request: crate::models::BankTransferSweepListRequest) -> Result<crate::models::BankTransferSweepListResponse, Error<BankTransferSweepListError>> {
+pub fn bank_transfer_sweep_list(configuration: &configuration::Configuration, bank_transfer_sweep_list_request: crate::models::BankTransferSweepListRequest) -> Result<crate::models::BankTransferSweepListResponse, Error<BankTransferSweepListError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -3068,10 +3068,10 @@ pub async fn bank_transfer_sweep_list(configuration: &configuration::Configurati
     local_var_req_builder = local_var_req_builder.json(&bank_transfer_sweep_list_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -3083,7 +3083,7 @@ pub async fn bank_transfer_sweep_list(configuration: &configuration::Configurati
 }
 
 /// This endpoint allows the customer to retrieve a Base Report. Customers should pass in the `user_token` created in `/link/token/create`.
-pub async fn base_report_get(configuration: &configuration::Configuration, base_report_get_request: crate::models::BaseReportGetRequest) -> Result<crate::models::BaseReportGetResponse, Error<BaseReportGetError>> {
+pub fn base_report_get(configuration: &configuration::Configuration, base_report_get_request: crate::models::BaseReportGetRequest) -> Result<crate::models::BaseReportGetResponse, Error<BaseReportGetError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -3121,10 +3121,10 @@ pub async fn base_report_get(configuration: &configuration::Configuration, base_
     local_var_req_builder = local_var_req_builder.json(&base_report_get_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -3136,7 +3136,7 @@ pub async fn base_report_get(configuration: &configuration::Configuration, base_
 }
 
 /// Create a fraud report for a given Beacon User.  Note: If you are creating users with the express purpose of providing historical fraud data, you should use the `/beacon/user/create` endpoint instead and embed the fraud report in the request. This will ensure that the Beacon User you create will not be subject to any billing costs.
-pub async fn beacon_report_create(configuration: &configuration::Configuration, beacon_report_create_request: crate::models::BeaconReportCreateRequest) -> Result<crate::models::BeaconReportCreateResponse, Error<BeaconReportCreateError>> {
+pub fn beacon_report_create(configuration: &configuration::Configuration, beacon_report_create_request: crate::models::BeaconReportCreateRequest) -> Result<crate::models::BeaconReportCreateResponse, Error<BeaconReportCreateError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -3174,10 +3174,10 @@ pub async fn beacon_report_create(configuration: &configuration::Configuration, 
     local_var_req_builder = local_var_req_builder.json(&beacon_report_create_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -3189,7 +3189,7 @@ pub async fn beacon_report_create(configuration: &configuration::Configuration, 
 }
 
 /// Returns a Beacon report for a given Beacon report id.
-pub async fn beacon_report_get(configuration: &configuration::Configuration, beacon_report_get_request: crate::models::BeaconReportGetRequest) -> Result<crate::models::BeaconReportGetResponse, Error<BeaconReportGetError>> {
+pub fn beacon_report_get(configuration: &configuration::Configuration, beacon_report_get_request: crate::models::BeaconReportGetRequest) -> Result<crate::models::BeaconReportGetResponse, Error<BeaconReportGetError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -3227,10 +3227,10 @@ pub async fn beacon_report_get(configuration: &configuration::Configuration, bea
     local_var_req_builder = local_var_req_builder.json(&beacon_report_get_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -3242,7 +3242,7 @@ pub async fn beacon_report_get(configuration: &configuration::Configuration, bea
 }
 
 /// Use the `/beacon/report/list` endpoint to view all Beacon Reports you created for a specific Beacon User. The reports returned by this endpoint are exclusively reports you created for a specific user. A Beacon User can only have one active report at a time, but a new report can be created if a previous report has been deleted. The results from this endpoint are paginated; the `next_cursor` field will be populated if there is another page of results that can be retrieved. To fetch the next page, pass the `next_cursor` value as the `cursor` parameter in the next request.
-pub async fn beacon_report_list(configuration: &configuration::Configuration, beacon_report_list_request: crate::models::BeaconReportListRequest) -> Result<crate::models::BeaconReportListResponse, Error<BeaconReportListError>> {
+pub fn beacon_report_list(configuration: &configuration::Configuration, beacon_report_list_request: crate::models::BeaconReportListRequest) -> Result<crate::models::BeaconReportListResponse, Error<BeaconReportListError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -3280,10 +3280,10 @@ pub async fn beacon_report_list(configuration: &configuration::Configuration, be
     local_var_req_builder = local_var_req_builder.json(&beacon_report_list_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -3295,7 +3295,7 @@ pub async fn beacon_report_list(configuration: &configuration::Configuration, be
 }
 
 /// Returns a Beacon Report Syndication for a given Beacon Report Syndication id.
-pub async fn beacon_report_syndication_get(configuration: &configuration::Configuration, beacon_report_syndication_get_request: crate::models::BeaconReportSyndicationGetRequest) -> Result<crate::models::BeaconReportSyndicationGetResponse, Error<BeaconReportSyndicationGetError>> {
+pub fn beacon_report_syndication_get(configuration: &configuration::Configuration, beacon_report_syndication_get_request: crate::models::BeaconReportSyndicationGetRequest) -> Result<crate::models::BeaconReportSyndicationGetResponse, Error<BeaconReportSyndicationGetError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -3333,10 +3333,10 @@ pub async fn beacon_report_syndication_get(configuration: &configuration::Config
     local_var_req_builder = local_var_req_builder.json(&beacon_report_syndication_get_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -3348,7 +3348,7 @@ pub async fn beacon_report_syndication_get(configuration: &configuration::Config
 }
 
 /// Use the `/beacon/report_syndication/list` endpoint to view all Beacon Reports that have been syndicated to a specific Beacon User. This endpoint returns Beacon Report Syndications which are references to Beacon Reports created either by you, or another Beacon customer, that matched the specified Beacon User. A Beacon User can have multiple active Beacon Report Syndications at once. The results from this endpoint are paginated; the `next_cursor` field will be populated if there is another page of results that can be retrieved. To fetch the next page, pass the `next_cursor` value as the `cursor` parameter in the next request.
-pub async fn beacon_report_syndication_list(configuration: &configuration::Configuration, beacon_report_syndication_list_request: crate::models::BeaconReportSyndicationListRequest) -> Result<crate::models::BeaconReportSyndicationListResponse, Error<BeaconReportSyndicationListError>> {
+pub fn beacon_report_syndication_list(configuration: &configuration::Configuration, beacon_report_syndication_list_request: crate::models::BeaconReportSyndicationListRequest) -> Result<crate::models::BeaconReportSyndicationListResponse, Error<BeaconReportSyndicationListError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -3386,10 +3386,10 @@ pub async fn beacon_report_syndication_list(configuration: &configuration::Confi
     local_var_req_builder = local_var_req_builder.json(&beacon_report_syndication_list_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -3401,7 +3401,7 @@ pub async fn beacon_report_syndication_list(configuration: &configuration::Confi
 }
 
 /// Create and scan a Beacon User against your Beacon Program, according to your program's settings.  When you submit a new user to `/beacon/user/create`, several checks are performed immediately:    - The user's PII (provided within the `user` object) is searched against all other users within the Beacon Program you specified. If a match is found that violates your program's \"Duplicate Information Filtering\" settings, the user will be returned with a status of `pending_review`.    - The user's PII is also searched against all fraud reports created by your organization across all of your Beacon Programs. If the user's data matches a fraud report that your team created, the user will be returned with a status of `rejected`.    - Finally, the user's PII is searched against all fraud report shared with the Beacon Network by other companies. If a matching fraud report is found, the user will be returned with a `pending_review` status if your program has enabled automatic flagging based on network fraud.
-pub async fn beacon_user_create(configuration: &configuration::Configuration, beacon_user_create_request: crate::models::BeaconUserCreateRequest) -> Result<crate::models::BeaconUserCreateResponse, Error<BeaconUserCreateError>> {
+pub fn beacon_user_create(configuration: &configuration::Configuration, beacon_user_create_request: crate::models::BeaconUserCreateRequest) -> Result<crate::models::BeaconUserCreateResponse, Error<BeaconUserCreateError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -3439,10 +3439,10 @@ pub async fn beacon_user_create(configuration: &configuration::Configuration, be
     local_var_req_builder = local_var_req_builder.json(&beacon_user_create_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -3454,7 +3454,7 @@ pub async fn beacon_user_create(configuration: &configuration::Configuration, be
 }
 
 /// Fetch a Beacon User.  The Beacon User is returned with all of their associated information and a `status` based on the Beacon Network duplicate record and fraud checks. 
-pub async fn beacon_user_get(configuration: &configuration::Configuration, beacon_user_get_request: crate::models::BeaconUserGetRequest) -> Result<crate::models::BeaconUserGetResponse, Error<BeaconUserGetError>> {
+pub fn beacon_user_get(configuration: &configuration::Configuration, beacon_user_get_request: crate::models::BeaconUserGetRequest) -> Result<crate::models::BeaconUserGetResponse, Error<BeaconUserGetError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -3492,10 +3492,10 @@ pub async fn beacon_user_get(configuration: &configuration::Configuration, beaco
     local_var_req_builder = local_var_req_builder.json(&beacon_user_get_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -3507,7 +3507,7 @@ pub async fn beacon_user_get(configuration: &configuration::Configuration, beaco
 }
 
 /// Update the status of a Beacon User.  When updating a Beacon User's status via this endpoint, Plaid validates that the status change is consistent with the related state for this Beacon User. Specifically, we will check:  1. Whether there are any associated Beacon Reports connected to the Beacon User, and 2. Whether there are any confirmed Beacon Report Syndications connected to the Beacon User.  When updating a Beacon User's status to \"rejected\", we enforce that either a Beacon Report has been created for the Beacon User or a Beacon Report Syndication has been confirmed. When updating a Beacon User's status to \"cleared\", we enforce that there are no active Beacon Reports or confirmed Beacon Report Syndications associated with the user. If you previously created a Beacon Report for this user, you must delete it before updating the Beacon User's status to \"cleared\". There are no restrictions on updating a Beacon User's status to \"pending_review\".  If these conditions are not met, the request will be rejected with an error explaining the issue.
-pub async fn beacon_user_review(configuration: &configuration::Configuration, beacon_user_review_request: crate::models::BeaconUserReviewRequest) -> Result<crate::models::BeaconUserGetResponse, Error<BeaconUserReviewError>> {
+pub fn beacon_user_review(configuration: &configuration::Configuration, beacon_user_review_request: crate::models::BeaconUserReviewRequest) -> Result<crate::models::BeaconUserGetResponse, Error<BeaconUserReviewError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -3545,10 +3545,10 @@ pub async fn beacon_user_review(configuration: &configuration::Configuration, be
     local_var_req_builder = local_var_req_builder.json(&beacon_user_review_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -3560,7 +3560,7 @@ pub async fn beacon_user_review(configuration: &configuration::Configuration, be
 }
 
 /// Update the identity data for a Beacon User in your Beacon Program.  Similar to `/beacon/user/create`, several checks are performed immediately when you submit a change to `/beacon/user/update`:    - The user's updated PII is searched against all other users within the Beacon Program you specified. If a match is found that violates your program's \"Duplicate Information Filtering\" settings, the user will be returned with a status of `pending_review`.    - The user's updated PII is also searched against all fraud reports created by your organization across all of your Beacon Programs. If the user's data matches a fraud report that your team created, the user will be returned with a status of `rejected`.    - Finally, the user's PII is searched against all fraud report shared with the Beacon Network by other companies. If a matching fraud report is found, the user will be returned with a `pending_review` status if your program has enabled automatic flagging based on network fraud.  Plaid maintains a version history for each Beacon User, so the Beacon User's identity data before and after the update is retained as separate versions.
-pub async fn beacon_user_update(configuration: &configuration::Configuration, beacon_user_update_request: crate::models::BeaconUserUpdateRequest) -> Result<crate::models::BeaconUserUpdateResponse, Error<BeaconUserUpdateError>> {
+pub fn beacon_user_update(configuration: &configuration::Configuration, beacon_user_update_request: crate::models::BeaconUserUpdateRequest) -> Result<crate::models::BeaconUserUpdateResponse, Error<BeaconUserUpdateError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -3598,10 +3598,10 @@ pub async fn beacon_user_update(configuration: &configuration::Configuration, be
     local_var_req_builder = local_var_req_builder.json(&beacon_user_update_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -3613,7 +3613,7 @@ pub async fn beacon_user_update(configuration: &configuration::Configuration, be
 }
 
 /// Send a request to the `/categories/get` endpoint to get detailed information on categories returned by Plaid. This endpoint does not require authentication.  All implementations are recommended to use the newer `personal_finance_category` taxonomy instead of the older `category` taxonomy supported by this endpoint. The [`personal_finance_category taxonomy` CSV file](https://plaid.com/documents/transactions-personal-finance-category-taxonomy.csv) is available for download and is not accessible via API.
-pub async fn categories_get(configuration: &configuration::Configuration, body: serde_json::Value) -> Result<crate::models::CategoriesGetResponse, Error<CategoriesGetError>> {
+pub fn categories_get(configuration: &configuration::Configuration, body: serde_json::Value) -> Result<crate::models::CategoriesGetResponse, Error<CategoriesGetError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -3627,10 +3627,10 @@ pub async fn categories_get(configuration: &configuration::Configuration, body: 
     local_var_req_builder = local_var_req_builder.json(&body);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -3642,7 +3642,7 @@ pub async fn categories_get(configuration: &configuration::Configuration, body: 
 }
 
 /// `/cra/bank_income/get` returns the bank income report(s) for a specified user.
-pub async fn cra_bank_income_get(configuration: &configuration::Configuration, cra_bank_income_get_request: crate::models::CraBankIncomeGetRequest) -> Result<crate::models::CraBankIncomeGetResponse, Error<CraBankIncomeGetError>> {
+pub fn cra_bank_income_get(configuration: &configuration::Configuration, cra_bank_income_get_request: crate::models::CraBankIncomeGetRequest) -> Result<crate::models::CraBankIncomeGetResponse, Error<CraBankIncomeGetError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -3680,10 +3680,10 @@ pub async fn cra_bank_income_get(configuration: &configuration::Configuration, c
     local_var_req_builder = local_var_req_builder.json(&cra_bank_income_get_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -3695,7 +3695,7 @@ pub async fn cra_bank_income_get(configuration: &configuration::Configuration, c
 }
 
 /// The `/payment_initiation/payment/token/create` endpoint has been deprecated. New Plaid customers will be unable to use this endpoint, and existing customers are encouraged to migrate to the newer, `link_token`-based flow. The recommended flow is to provide the `payment_id` to `/link/token/create`, which returns a `link_token` used to initialize Link.  The `/payment_initiation/payment/token/create` is used to create a `payment_token`, which can then be used in Link initialization to enter a payment initiation flow. You can only use a `payment_token` once. If this attempt fails, the end user aborts the flow, or the token expires, you will need to create a new payment token. Creating a new payment token does not require end user input.
-pub async fn create_payment_token(configuration: &configuration::Configuration, payment_initiation_payment_token_create_request: crate::models::PaymentInitiationPaymentTokenCreateRequest) -> Result<crate::models::PaymentInitiationPaymentTokenCreateResponse, Error<CreatePaymentTokenError>> {
+pub fn create_payment_token(configuration: &configuration::Configuration, payment_initiation_payment_token_create_request: crate::models::PaymentInitiationPaymentTokenCreateRequest) -> Result<crate::models::PaymentInitiationPaymentTokenCreateResponse, Error<CreatePaymentTokenError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -3733,10 +3733,10 @@ pub async fn create_payment_token(configuration: &configuration::Configuration, 
     local_var_req_builder = local_var_req_builder.json(&payment_initiation_payment_token_create_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -3748,7 +3748,7 @@ pub async fn create_payment_token(configuration: &configuration::Configuration, 
 }
 
 /// The `credit/asset_report/freddie_mac/get` endpoint retrieves the Asset Report in Freddie Mac's JSON format.
-pub async fn credit_asset_report_freddie_mac_get(configuration: &configuration::Configuration, request_body: ::std::collections::HashMap<String, serde_json::Value>) -> Result<crate::models::AssetReportFreddieGetResponse, Error<CreditAssetReportFreddieMacGetError>> {
+pub fn credit_asset_report_freddie_mac_get(configuration: &configuration::Configuration, request_body: ::std::collections::HashMap<String, serde_json::Value>) -> Result<crate::models::AssetReportFreddieGetResponse, Error<CreditAssetReportFreddieMacGetError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -3786,10 +3786,10 @@ pub async fn credit_asset_report_freddie_mac_get(configuration: &configuration::
     local_var_req_builder = local_var_req_builder.json(&request_body);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -3801,7 +3801,7 @@ pub async fn credit_asset_report_freddie_mac_get(configuration: &configuration::
 }
 
 /// Plaid can create an Audit Copy token of an Asset Report and/or Income Report to share with participating Government Sponsored Entity (GSE). If you participate in the Day 1 Certainty™ program, Plaid can supply an Audit Copy token directly to Fannie Mae on your behalf. An Audit Copy token contains the same underlying data as the Asset Report and/or Income Report (result of /credit/payroll_income/get).  Use the `/credit/audit_copy_token/create` endpoint to create an `audit_copy_token` and then pass that token to the GSE who needs access.
-pub async fn credit_audit_copy_token_create(configuration: &configuration::Configuration, credit_audit_copy_token_create_request: crate::models::CreditAuditCopyTokenCreateRequest) -> Result<crate::models::CreditAuditCopyTokenCreateResponse, Error<CreditAuditCopyTokenCreateError>> {
+pub fn credit_audit_copy_token_create(configuration: &configuration::Configuration, credit_audit_copy_token_create_request: crate::models::CreditAuditCopyTokenCreateRequest) -> Result<crate::models::CreditAuditCopyTokenCreateResponse, Error<CreditAuditCopyTokenCreateError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -3839,10 +3839,10 @@ pub async fn credit_audit_copy_token_create(configuration: &configuration::Confi
     local_var_req_builder = local_var_req_builder.json(&credit_audit_copy_token_create_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -3854,7 +3854,7 @@ pub async fn credit_audit_copy_token_create(configuration: &configuration::Confi
 }
 
 /// The `/credit/audit_copy_token/update` endpoint updates an existing  Audit Copy Token by adding the report tokens in the `report_tokens` field to the `audit_copy_token`. If the Audit Copy Token already contains a report of a certain type, it will be replaced with the token provided in the `report_tokens` field.
-pub async fn credit_audit_copy_token_update(configuration: &configuration::Configuration, credit_audit_copy_token_update_request: crate::models::CreditAuditCopyTokenUpdateRequest) -> Result<crate::models::CreditAuditCopyTokenUpdateResponse, Error<CreditAuditCopyTokenUpdateError>> {
+pub fn credit_audit_copy_token_update(configuration: &configuration::Configuration, credit_audit_copy_token_update_request: crate::models::CreditAuditCopyTokenUpdateRequest) -> Result<crate::models::CreditAuditCopyTokenUpdateResponse, Error<CreditAuditCopyTokenUpdateError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -3892,10 +3892,10 @@ pub async fn credit_audit_copy_token_update(configuration: &configuration::Confi
     local_var_req_builder = local_var_req_builder.json(&credit_audit_copy_token_update_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -3907,7 +3907,7 @@ pub async fn credit_audit_copy_token_update(configuration: &configuration::Confi
 }
 
 /// `/credit/bank_employment/get` returns the employment report(s) derived from bank transaction data for a specified user.
-pub async fn credit_bank_employment_get(configuration: &configuration::Configuration, credit_bank_employment_get_request: crate::models::CreditBankEmploymentGetRequest) -> Result<crate::models::CreditBankEmploymentGetResponse, Error<CreditBankEmploymentGetError>> {
+pub fn credit_bank_employment_get(configuration: &configuration::Configuration, credit_bank_employment_get_request: crate::models::CreditBankEmploymentGetRequest) -> Result<crate::models::CreditBankEmploymentGetResponse, Error<CreditBankEmploymentGetError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -3945,10 +3945,10 @@ pub async fn credit_bank_employment_get(configuration: &configuration::Configura
     local_var_req_builder = local_var_req_builder.json(&credit_bank_employment_get_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -3960,7 +3960,7 @@ pub async fn credit_bank_employment_get(configuration: &configuration::Configura
 }
 
 /// `/credit/bank_income/get` returns the bank income report(s) for a specified user.
-pub async fn credit_bank_income_get(configuration: &configuration::Configuration, credit_bank_income_get_request: crate::models::CreditBankIncomeGetRequest) -> Result<crate::models::CreditBankIncomeGetResponse, Error<CreditBankIncomeGetError>> {
+pub fn credit_bank_income_get(configuration: &configuration::Configuration, credit_bank_income_get_request: crate::models::CreditBankIncomeGetRequest) -> Result<crate::models::CreditBankIncomeGetResponse, Error<CreditBankIncomeGetError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -3998,10 +3998,10 @@ pub async fn credit_bank_income_get(configuration: &configuration::Configuration
     local_var_req_builder = local_var_req_builder.json(&credit_bank_income_get_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -4013,7 +4013,7 @@ pub async fn credit_bank_income_get(configuration: &configuration::Configuration
 }
 
 /// `/credit/bank_income/pdf/get` returns the most recent bank income report for a specified user in PDF format.
-pub async fn credit_bank_income_pdf_get(configuration: &configuration::Configuration, credit_bank_income_pdf_get_request: crate::models::CreditBankIncomePdfGetRequest) -> Result<std::path::PathBuf, Error<CreditBankIncomePdfGetError>> {
+pub fn credit_bank_income_pdf_get(configuration: &configuration::Configuration, credit_bank_income_pdf_get_request: crate::models::CreditBankIncomePdfGetRequest) -> Result<std::path::PathBuf, Error<CreditBankIncomePdfGetError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -4051,10 +4051,10 @@ pub async fn credit_bank_income_pdf_get(configuration: &configuration::Configura
     local_var_req_builder = local_var_req_builder.json(&credit_bank_income_pdf_get_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -4066,7 +4066,7 @@ pub async fn credit_bank_income_pdf_get(configuration: &configuration::Configura
 }
 
 /// `/credit/bank_income/refresh` refreshes the bank income report data for a specific user.
-pub async fn credit_bank_income_refresh(configuration: &configuration::Configuration, credit_bank_income_refresh_request: crate::models::CreditBankIncomeRefreshRequest) -> Result<crate::models::CreditBankIncomeRefreshResponse, Error<CreditBankIncomeRefreshError>> {
+pub fn credit_bank_income_refresh(configuration: &configuration::Configuration, credit_bank_income_refresh_request: crate::models::CreditBankIncomeRefreshRequest) -> Result<crate::models::CreditBankIncomeRefreshResponse, Error<CreditBankIncomeRefreshError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -4104,10 +4104,10 @@ pub async fn credit_bank_income_refresh(configuration: &configuration::Configura
     local_var_req_builder = local_var_req_builder.json(&credit_bank_income_refresh_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -4119,7 +4119,7 @@ pub async fn credit_bank_income_refresh(configuration: &configuration::Configura
 }
 
 /// `/credit/bank_income/webhook/update` allows you to subscribe or unsubscribe a user for income webhook notifications. By default, all users start out unsubscribed.  If a user is subscribed, on significant changes to the user's income profile, you will receive a `BANK_INCOME_REFRESH_UPDATE` webhook, prompting you to refresh bank income data for the user.
-pub async fn credit_bank_income_webhook_update(configuration: &configuration::Configuration, credit_bank_income_webhook_update_request: crate::models::CreditBankIncomeWebhookUpdateRequest) -> Result<crate::models::CreditBankIncomeWebhookUpdateResponse, Error<CreditBankIncomeWebhookUpdateError>> {
+pub fn credit_bank_income_webhook_update(configuration: &configuration::Configuration, credit_bank_income_webhook_update_request: crate::models::CreditBankIncomeWebhookUpdateRequest) -> Result<crate::models::CreditBankIncomeWebhookUpdateResponse, Error<CreditBankIncomeWebhookUpdateError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -4157,10 +4157,10 @@ pub async fn credit_bank_income_webhook_update(configuration: &configuration::Co
     local_var_req_builder = local_var_req_builder.json(&credit_bank_income_webhook_update_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -4172,7 +4172,7 @@ pub async fn credit_bank_income_webhook_update(configuration: &configuration::Co
 }
 
 /// `/credit/bank_statements/uploads/get` returns parsed data from bank statements uploaded by users as part of the Document Income flow. If your account is not enabled for Document Parsing, contact your account manager to request access.
-pub async fn credit_bank_statements_uploads_get(configuration: &configuration::Configuration, credit_bank_statements_uploads_get_request: crate::models::CreditBankStatementsUploadsGetRequest) -> Result<crate::models::CreditBankStatementsUploadsGetResponse, Error<CreditBankStatementsUploadsGetError>> {
+pub fn credit_bank_statements_uploads_get(configuration: &configuration::Configuration, credit_bank_statements_uploads_get_request: crate::models::CreditBankStatementsUploadsGetRequest) -> Result<crate::models::CreditBankStatementsUploadsGetResponse, Error<CreditBankStatementsUploadsGetError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -4210,10 +4210,10 @@ pub async fn credit_bank_statements_uploads_get(configuration: &configuration::C
     local_var_req_builder = local_var_req_builder.json(&credit_bank_statements_uploads_get_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -4225,7 +4225,7 @@ pub async fn credit_bank_statements_uploads_get(configuration: &configuration::C
 }
 
 /// `/credit/employment/get` returns a list of items with employment information from a user's payroll provider that was verified by an end user.
-pub async fn credit_employment_get(configuration: &configuration::Configuration, credit_employment_get_request: crate::models::CreditEmploymentGetRequest) -> Result<crate::models::CreditEmploymentGetResponse, Error<CreditEmploymentGetError>> {
+pub fn credit_employment_get(configuration: &configuration::Configuration, credit_employment_get_request: crate::models::CreditEmploymentGetRequest) -> Result<crate::models::CreditEmploymentGetResponse, Error<CreditEmploymentGetError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -4263,10 +4263,10 @@ pub async fn credit_employment_get(configuration: &configuration::Configuration,
     local_var_req_builder = local_var_req_builder.json(&credit_employment_get_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -4278,7 +4278,7 @@ pub async fn credit_employment_get(configuration: &configuration::Configuration,
 }
 
 /// The `credit/asset_report/freddie_mac/get` endpoint retrieves the Verification of Assets and Verification of Employment reports.
-pub async fn credit_freddie_mac_reports_get(configuration: &configuration::Configuration, credit_freddie_mac_reports_get_request: crate::models::CreditFreddieMacReportsGetRequest) -> Result<crate::models::CreditFreddieMacReportsGetResponse, Error<CreditFreddieMacReportsGetError>> {
+pub fn credit_freddie_mac_reports_get(configuration: &configuration::Configuration, credit_freddie_mac_reports_get_request: crate::models::CreditFreddieMacReportsGetRequest) -> Result<crate::models::CreditFreddieMacReportsGetResponse, Error<CreditFreddieMacReportsGetError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -4316,10 +4316,10 @@ pub async fn credit_freddie_mac_reports_get(configuration: &configuration::Confi
     local_var_req_builder = local_var_req_builder.json(&credit_freddie_mac_reports_get_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -4331,7 +4331,7 @@ pub async fn credit_freddie_mac_reports_get(configuration: &configuration::Confi
 }
 
 /// This endpoint gets payroll income information for a specific user, either as a result of the user connecting to their payroll provider or uploading a pay related document.
-pub async fn credit_payroll_income_get(configuration: &configuration::Configuration, credit_payroll_income_get_request: crate::models::CreditPayrollIncomeGetRequest) -> Result<crate::models::CreditPayrollIncomeGetResponse, Error<CreditPayrollIncomeGetError>> {
+pub fn credit_payroll_income_get(configuration: &configuration::Configuration, credit_payroll_income_get_request: crate::models::CreditPayrollIncomeGetRequest) -> Result<crate::models::CreditPayrollIncomeGetResponse, Error<CreditPayrollIncomeGetError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -4369,10 +4369,10 @@ pub async fn credit_payroll_income_get(configuration: &configuration::Configurat
     local_var_req_builder = local_var_req_builder.json(&credit_payroll_income_get_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -4384,7 +4384,7 @@ pub async fn credit_payroll_income_get(configuration: &configuration::Configurat
 }
 
 /// `/credit/payroll_income/parsing_config/update` updates the parsing configuration for a document income verification.
-pub async fn credit_payroll_income_parsing_config_update(configuration: &configuration::Configuration, request_body: ::std::collections::HashMap<String, serde_json::Value>) -> Result<crate::models::CreditPayrollIncomeParsingConfigUpdateResponse, Error<CreditPayrollIncomeParsingConfigUpdateError>> {
+pub fn credit_payroll_income_parsing_config_update(configuration: &configuration::Configuration, request_body: ::std::collections::HashMap<String, serde_json::Value>) -> Result<crate::models::CreditPayrollIncomeParsingConfigUpdateResponse, Error<CreditPayrollIncomeParsingConfigUpdateError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -4422,10 +4422,10 @@ pub async fn credit_payroll_income_parsing_config_update(configuration: &configu
     local_var_req_builder = local_var_req_builder.json(&request_body);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -4437,7 +4437,7 @@ pub async fn credit_payroll_income_parsing_config_update(configuration: &configu
 }
 
 /// `/credit/payroll_income/precheck` is an optional endpoint that can be called before initializing a Link session for income verification. It evaluates whether a given user is supportable by digital income verification. If the user is eligible for digital verification, that information will be associated with the user token, and in this way will generate a Link UI optimized for the end user and their specific employer. If the user cannot be confirmed as eligible, the user can still use the income verification flow, but they may be required to manually upload a paystub to verify their income.  While all request fields are optional, providing `employer` data will increase the chance of receiving a useful result.  When testing in Sandbox, you can control the results by providing special test values in the `employer` and `access_tokens` fields. `employer_good` and `employer_bad` will result in `HIGH` and `LOW` confidence values, respectively. `employer_multi` will result in a `HIGH` confidence with multiple payroll options. Likewise, `access_good` and `access_bad` will result in `HIGH` and `LOW` confidence values, respectively. Any other value for `employer` and `access_tokens` in Sandbox will result in `UNKNOWN` confidence.
-pub async fn credit_payroll_income_precheck(configuration: &configuration::Configuration, credit_payroll_income_precheck_request: crate::models::CreditPayrollIncomePrecheckRequest) -> Result<crate::models::CreditPayrollIncomePrecheckResponse, Error<CreditPayrollIncomePrecheckError>> {
+pub fn credit_payroll_income_precheck(configuration: &configuration::Configuration, credit_payroll_income_precheck_request: crate::models::CreditPayrollIncomePrecheckRequest) -> Result<crate::models::CreditPayrollIncomePrecheckResponse, Error<CreditPayrollIncomePrecheckError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -4475,10 +4475,10 @@ pub async fn credit_payroll_income_precheck(configuration: &configuration::Confi
     local_var_req_builder = local_var_req_builder.json(&credit_payroll_income_precheck_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -4490,7 +4490,7 @@ pub async fn credit_payroll_income_precheck(configuration: &configuration::Confi
 }
 
 /// `/credit/payroll_income/refresh` refreshes a given digital payroll income verification.
-pub async fn credit_payroll_income_refresh(configuration: &configuration::Configuration, credit_payroll_income_refresh_request: crate::models::CreditPayrollIncomeRefreshRequest) -> Result<crate::models::CreditPayrollIncomeRefreshResponse, Error<CreditPayrollIncomeRefreshError>> {
+pub fn credit_payroll_income_refresh(configuration: &configuration::Configuration, credit_payroll_income_refresh_request: crate::models::CreditPayrollIncomeRefreshRequest) -> Result<crate::models::CreditPayrollIncomeRefreshResponse, Error<CreditPayrollIncomeRefreshError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -4528,10 +4528,10 @@ pub async fn credit_payroll_income_refresh(configuration: &configuration::Config
     local_var_req_builder = local_var_req_builder.json(&credit_payroll_income_refresh_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -4543,7 +4543,7 @@ pub async fn credit_payroll_income_refresh(configuration: &configuration::Config
 }
 
 /// `/credit/payroll_income/risk_signals/get` can be used as part of the Document Income flow to assess a user-uploaded document for signs of potential fraud or tampering. It returns a risk score for each uploaded document that indicates the likelihood of the document being fraudulent, in addition to details on the individual risk signals contributing to the score.  To trigger risk signal generation for an Item, call `/link/token/create` with `parsing_config` set to include `fraud_risk`, or call `/credit/payroll_income/parsing_config/update`. Once risk signal generation has been triggered, `/credit/payroll_income/risk_signals/get` can be called at any time after the `INCOME_VERIFICATION_RISK_SIGNALS` webhook has been fired.  `/credit/payroll_income/risk_signals/get` is offered as an add-on to Document Income and is billed separately. To request access to this endpoint, submit a product access request or contact your Plaid account manager.
-pub async fn credit_payroll_income_risk_signals_get(configuration: &configuration::Configuration, credit_payroll_income_risk_signals_get_request: crate::models::CreditPayrollIncomeRiskSignalsGetRequest) -> Result<crate::models::CreditPayrollIncomeRiskSignalsGetResponse, Error<CreditPayrollIncomeRiskSignalsGetError>> {
+pub fn credit_payroll_income_risk_signals_get(configuration: &configuration::Configuration, credit_payroll_income_risk_signals_get_request: crate::models::CreditPayrollIncomeRiskSignalsGetRequest) -> Result<crate::models::CreditPayrollIncomeRiskSignalsGetResponse, Error<CreditPayrollIncomeRiskSignalsGetError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -4581,10 +4581,10 @@ pub async fn credit_payroll_income_risk_signals_get(configuration: &configuratio
     local_var_req_builder = local_var_req_builder.json(&credit_payroll_income_risk_signals_get_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -4596,7 +4596,7 @@ pub async fn credit_payroll_income_risk_signals_get(configuration: &configuratio
 }
 
 /// Plaid can share an Asset Report directly with a participating third party on your behalf. The shared Asset Report is the exact same Asset Report originally created in `/asset_report/create`.  To grant a third party access to an Asset Report, use the `/credit/relay/create` endpoint to create a `relay_token` and then pass that token to your third party. Each third party has its own `secondary_client_id`; for example, `ce5bd328dcd34123456`. You'll need to create a separate `relay_token` for each third party that needs access to the report on your behalf.
-pub async fn credit_relay_create(configuration: &configuration::Configuration, credit_relay_create_request: crate::models::CreditRelayCreateRequest) -> Result<crate::models::CreditRelayCreateResponse, Error<CreditRelayCreateError>> {
+pub fn credit_relay_create(configuration: &configuration::Configuration, credit_relay_create_request: crate::models::CreditRelayCreateRequest) -> Result<crate::models::CreditRelayCreateResponse, Error<CreditRelayCreateError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -4634,10 +4634,10 @@ pub async fn credit_relay_create(configuration: &configuration::Configuration, c
     local_var_req_builder = local_var_req_builder.json(&credit_relay_create_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -4649,7 +4649,7 @@ pub async fn credit_relay_create(configuration: &configuration::Configuration, c
 }
 
 /// `/credit/relay/get` allows third parties to receive a report that was shared with them, using a `relay_token` that was created by the report owner.
-pub async fn credit_relay_get(configuration: &configuration::Configuration, credit_relay_get_request: crate::models::CreditRelayGetRequest) -> Result<crate::models::AssetReportGetResponse, Error<CreditRelayGetError>> {
+pub fn credit_relay_get(configuration: &configuration::Configuration, credit_relay_get_request: crate::models::CreditRelayGetRequest) -> Result<crate::models::AssetReportGetResponse, Error<CreditRelayGetError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -4687,10 +4687,10 @@ pub async fn credit_relay_get(configuration: &configuration::Configuration, cred
     local_var_req_builder = local_var_req_builder.json(&credit_relay_get_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -4702,7 +4702,7 @@ pub async fn credit_relay_get(configuration: &configuration::Configuration, cred
 }
 
 /// `/credit/relay/pdf/get` allows third parties to receive a pdf report that was shared with them, using a `relay_token` that was created by the report owner.  The `/credit/relay/pdf/get` endpoint retrieves the Asset Report in PDF format. Before calling `/credit/relay/pdf/get`, you must first create the Asset Report using `/credit/relay/create` and then wait for the [`PRODUCT_READY`](https://plaid.com/docs/api/products/assets/#product_ready) webhook to fire, indicating that the Report is ready to be retrieved.  The response to `/credit/relay/pdf/get` is the PDF binary data. The `request_id` is returned in the `Plaid-Request-ID` header.  [View a sample PDF Asset Report](https://plaid.com/documents/sample-asset-report.pdf).
-pub async fn credit_relay_pdf_get(configuration: &configuration::Configuration, credit_relay_pdf_get_request: crate::models::CreditRelayPdfGetRequest) -> Result<std::path::PathBuf, Error<CreditRelayPdfGetError>> {
+pub fn credit_relay_pdf_get(configuration: &configuration::Configuration, credit_relay_pdf_get_request: crate::models::CreditRelayPdfGetRequest) -> Result<std::path::PathBuf, Error<CreditRelayPdfGetError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -4740,10 +4740,10 @@ pub async fn credit_relay_pdf_get(configuration: &configuration::Configuration, 
     local_var_req_builder = local_var_req_builder.json(&credit_relay_pdf_get_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -4755,7 +4755,7 @@ pub async fn credit_relay_pdf_get(configuration: &configuration::Configuration, 
 }
 
 /// The `/credit/relay/refresh` endpoint allows third parties to refresh a report that was relayed to them, using a `relay_token` that was created by the report owner. A new report will be created with the original report parameters, but with the most recent data available based on the `days_requested` value of the original report.
-pub async fn credit_relay_refresh(configuration: &configuration::Configuration, credit_relay_refresh_request: crate::models::CreditRelayRefreshRequest) -> Result<crate::models::CreditRelayRefreshResponse, Error<CreditRelayRefreshError>> {
+pub fn credit_relay_refresh(configuration: &configuration::Configuration, credit_relay_refresh_request: crate::models::CreditRelayRefreshRequest) -> Result<crate::models::CreditRelayRefreshResponse, Error<CreditRelayRefreshError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -4793,10 +4793,10 @@ pub async fn credit_relay_refresh(configuration: &configuration::Configuration, 
     local_var_req_builder = local_var_req_builder.json(&credit_relay_refresh_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -4808,7 +4808,7 @@ pub async fn credit_relay_refresh(configuration: &configuration::Configuration, 
 }
 
 /// The `/credit/relay/remove` endpoint allows you to invalidate a `relay_token`. The third party holding the token will no longer be able to access or refresh the reports which the `relay_token` gives access to. The original report, associated Items, and other relay tokens that provide access to the same report are not affected and will remain accessible after removing the given `relay_token`.
-pub async fn credit_relay_remove(configuration: &configuration::Configuration, credit_relay_remove_request: crate::models::CreditRelayRemoveRequest) -> Result<crate::models::CreditRelayRemoveResponse, Error<CreditRelayRemoveError>> {
+pub fn credit_relay_remove(configuration: &configuration::Configuration, credit_relay_remove_request: crate::models::CreditRelayRemoveRequest) -> Result<crate::models::CreditRelayRemoveResponse, Error<CreditRelayRemoveError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -4846,10 +4846,10 @@ pub async fn credit_relay_remove(configuration: &configuration::Configuration, c
     local_var_req_builder = local_var_req_builder.json(&credit_relay_remove_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -4861,7 +4861,7 @@ pub async fn credit_relay_remove(configuration: &configuration::Configuration, c
 }
 
 /// The `/credit/audit_copy_token/remove` endpoint allows you to remove an Audit Copy. Removing an Audit Copy invalidates the `audit_copy_token` associated with it, meaning both you and any third parties holding the token will no longer be able to use it to access Report data. Items associated with the Report data and other Audit Copies of it are not affected and will remain accessible after removing the given Audit Copy.
-pub async fn credit_report_audit_copy_remove(configuration: &configuration::Configuration, credit_audit_copy_token_remove_request: crate::models::CreditAuditCopyTokenRemoveRequest) -> Result<crate::models::CreditAuditCopyTokenRemoveResponse, Error<CreditReportAuditCopyRemoveError>> {
+pub fn credit_report_audit_copy_remove(configuration: &configuration::Configuration, credit_audit_copy_token_remove_request: crate::models::CreditAuditCopyTokenRemoveRequest) -> Result<crate::models::CreditAuditCopyTokenRemoveResponse, Error<CreditReportAuditCopyRemoveError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -4899,10 +4899,10 @@ pub async fn credit_report_audit_copy_remove(configuration: &configuration::Conf
     local_var_req_builder = local_var_req_builder.json(&credit_audit_copy_token_remove_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -4914,7 +4914,7 @@ pub async fn credit_report_audit_copy_remove(configuration: &configuration::Conf
 }
 
 /// This endpoint can be used for your end users after they complete the Link flow. This endpoint returns a list of Link sessions that your user completed, where each session includes the results from the Link flow.  These results include details about the Item that was created and some product related metadata (showing, for example, whether the user finished the bank income verification step).
-pub async fn credit_sessions_get(configuration: &configuration::Configuration, credit_sessions_get_request: crate::models::CreditSessionsGetRequest) -> Result<crate::models::CreditSessionsGetResponse, Error<CreditSessionsGetError>> {
+pub fn credit_sessions_get(configuration: &configuration::Configuration, credit_sessions_get_request: crate::models::CreditSessionsGetRequest) -> Result<crate::models::CreditSessionsGetResponse, Error<CreditSessionsGetError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -4952,10 +4952,10 @@ pub async fn credit_sessions_get(configuration: &configuration::Configuration, c
     local_var_req_builder = local_var_req_builder.json(&credit_sessions_get_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -4967,7 +4967,7 @@ pub async fn credit_sessions_get(configuration: &configuration::Configuration, c
 }
 
 /// Retrieve information about a dashboard user.
-pub async fn dashboard_user_get(configuration: &configuration::Configuration, dashboard_user_get_request: crate::models::DashboardUserGetRequest) -> Result<crate::models::DashboardUserGetResponse, Error<DashboardUserGetError>> {
+pub fn dashboard_user_get(configuration: &configuration::Configuration, dashboard_user_get_request: crate::models::DashboardUserGetRequest) -> Result<crate::models::DashboardUserGetResponse, Error<DashboardUserGetError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -5005,10 +5005,10 @@ pub async fn dashboard_user_get(configuration: &configuration::Configuration, da
     local_var_req_builder = local_var_req_builder.json(&dashboard_user_get_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -5020,7 +5020,7 @@ pub async fn dashboard_user_get(configuration: &configuration::Configuration, da
 }
 
 /// List all dashboard users associated with your account.
-pub async fn dashboard_user_list(configuration: &configuration::Configuration, dashboard_user_list_request: crate::models::DashboardUserListRequest) -> Result<crate::models::DashboardUserListResponse, Error<DashboardUserListError>> {
+pub fn dashboard_user_list(configuration: &configuration::Configuration, dashboard_user_list_request: crate::models::DashboardUserListRequest) -> Result<crate::models::DashboardUserListResponse, Error<DashboardUserListError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -5058,10 +5058,10 @@ pub async fn dashboard_user_list(configuration: &configuration::Configuration, d
     local_var_req_builder = local_var_req_builder.json(&dashboard_user_list_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -5073,7 +5073,7 @@ pub async fn dashboard_user_list(configuration: &configuration::Configuration, d
 }
 
 /// This endpoint provides an alternative to `/deposit_switch/create` for customers who have not yet fully integrated with Plaid Exchange. Like `/deposit_switch/create`, it creates a deposit switch entity that will be persisted throughout the lifecycle of the switch.
-pub async fn deposit_switch_alt_create(configuration: &configuration::Configuration, deposit_switch_alt_create_request: crate::models::DepositSwitchAltCreateRequest) -> Result<crate::models::DepositSwitchAltCreateResponse, Error<DepositSwitchAltCreateError>> {
+pub fn deposit_switch_alt_create(configuration: &configuration::Configuration, deposit_switch_alt_create_request: crate::models::DepositSwitchAltCreateRequest) -> Result<crate::models::DepositSwitchAltCreateResponse, Error<DepositSwitchAltCreateError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -5111,10 +5111,10 @@ pub async fn deposit_switch_alt_create(configuration: &configuration::Configurat
     local_var_req_builder = local_var_req_builder.json(&deposit_switch_alt_create_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -5126,7 +5126,7 @@ pub async fn deposit_switch_alt_create(configuration: &configuration::Configurat
 }
 
 /// This endpoint creates a deposit switch entity that will be persisted throughout the lifecycle of the switch.
-pub async fn deposit_switch_create(configuration: &configuration::Configuration, deposit_switch_create_request: crate::models::DepositSwitchCreateRequest) -> Result<crate::models::DepositSwitchCreateResponse, Error<DepositSwitchCreateError>> {
+pub fn deposit_switch_create(configuration: &configuration::Configuration, deposit_switch_create_request: crate::models::DepositSwitchCreateRequest) -> Result<crate::models::DepositSwitchCreateResponse, Error<DepositSwitchCreateError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -5164,10 +5164,10 @@ pub async fn deposit_switch_create(configuration: &configuration::Configuration,
     local_var_req_builder = local_var_req_builder.json(&deposit_switch_create_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -5179,7 +5179,7 @@ pub async fn deposit_switch_create(configuration: &configuration::Configuration,
 }
 
 /// This endpoint returns information related to how the user has configured their payroll allocation and the state of the switch. You can use this information to build logic related to the user's direct deposit allocation preferences.
-pub async fn deposit_switch_get(configuration: &configuration::Configuration, deposit_switch_get_request: crate::models::DepositSwitchGetRequest) -> Result<crate::models::DepositSwitchGetResponse, Error<DepositSwitchGetError>> {
+pub fn deposit_switch_get(configuration: &configuration::Configuration, deposit_switch_get_request: crate::models::DepositSwitchGetRequest) -> Result<crate::models::DepositSwitchGetResponse, Error<DepositSwitchGetError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -5217,10 +5217,10 @@ pub async fn deposit_switch_get(configuration: &configuration::Configuration, de
     local_var_req_builder = local_var_req_builder.json(&deposit_switch_get_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -5232,7 +5232,7 @@ pub async fn deposit_switch_get(configuration: &configuration::Configuration, de
 }
 
 /// In order for the end user to take action, you will need to create a public token representing the deposit switch. This token is used to initialize Link. It can be used one time and expires after 30 minutes. 
-pub async fn deposit_switch_token_create(configuration: &configuration::Configuration, deposit_switch_token_create_request: crate::models::DepositSwitchTokenCreateRequest) -> Result<crate::models::DepositSwitchTokenCreateResponse, Error<DepositSwitchTokenCreateError>> {
+pub fn deposit_switch_token_create(configuration: &configuration::Configuration, deposit_switch_token_create_request: crate::models::DepositSwitchTokenCreateRequest) -> Result<crate::models::DepositSwitchTokenCreateResponse, Error<DepositSwitchTokenCreateError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -5270,10 +5270,10 @@ pub async fn deposit_switch_token_create(configuration: &configuration::Configur
     local_var_req_builder = local_var_req_builder.json(&deposit_switch_token_create_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -5285,7 +5285,7 @@ pub async fn deposit_switch_token_create(configuration: &configuration::Configur
 }
 
 /// `/employers/search` allows you the ability to search Plaid’s database of known employers, for use with Deposit Switch. You can use this endpoint to look up a user's employer in order to confirm that they are supported. Users with non-supported employers can then be routed out of the Deposit Switch flow.  The data in the employer database is currently limited. As the Deposit Switch and Income products progress through their respective beta periods, more employers are being regularly added. Because the employer database is frequently updated, we recommend that you do not cache or store data from this endpoint for more than a day.
-pub async fn employers_search(configuration: &configuration::Configuration, employers_search_request: crate::models::EmployersSearchRequest) -> Result<crate::models::EmployersSearchResponse, Error<EmployersSearchError>> {
+pub fn employers_search(configuration: &configuration::Configuration, employers_search_request: crate::models::EmployersSearchRequest) -> Result<crate::models::EmployersSearchResponse, Error<EmployersSearchError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -5323,10 +5323,10 @@ pub async fn employers_search(configuration: &configuration::Configuration, empl
     local_var_req_builder = local_var_req_builder.json(&employers_search_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -5338,7 +5338,7 @@ pub async fn employers_search(configuration: &configuration::Configuration, empl
 }
 
 /// `/employment/verification/get` returns a list of employments through a user payroll that was verified by an end user.  This endpoint has been deprecated; new integrations should use `/credit/employment/get` instead.
-pub async fn employment_verification_get(configuration: &configuration::Configuration, employment_verification_get_request: crate::models::EmploymentVerificationGetRequest) -> Result<crate::models::EmploymentVerificationGetResponse, Error<EmploymentVerificationGetError>> {
+pub fn employment_verification_get(configuration: &configuration::Configuration, employment_verification_get_request: crate::models::EmploymentVerificationGetRequest) -> Result<crate::models::EmploymentVerificationGetResponse, Error<EmploymentVerificationGetError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -5376,10 +5376,10 @@ pub async fn employment_verification_get(configuration: &configuration::Configur
     local_var_req_builder = local_var_req_builder.json(&employment_verification_get_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -5391,7 +5391,7 @@ pub async fn employment_verification_get(configuration: &configuration::Configur
 }
 
 /// A generic webhook receiver endpoint for FDX Event Notifications
-pub async fn fdx_notifications(configuration: &configuration::Configuration, fdx_notification: crate::models::FdxNotification) -> Result<(), Error<FdxNotificationsError>> {
+pub fn fdx_notifications(configuration: &configuration::Configuration, fdx_notification: crate::models::FdxNotification) -> Result<(), Error<FdxNotificationsError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -5429,10 +5429,10 @@ pub async fn fdx_notifications(configuration: &configuration::Configuration, fdx
     local_var_req_builder = local_var_req_builder.json(&fdx_notification);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         Ok(())
@@ -5444,7 +5444,7 @@ pub async fn fdx_notifications(configuration: &configuration::Configuration, fdx
 }
 
 /// The `/identity/get` endpoint allows you to retrieve various account holder information on file with the financial institution, including names, emails, phone numbers, and addresses. Only name data is guaranteed to be returned; other fields will be empty arrays if not provided by the institution.  This request may take some time to complete if identity was not specified as an initial product when creating the Item. This is because Plaid must communicate directly with the institution to retrieve the data.  Note: In API versions 2018-05-22 and earlier, the `owners` object is not returned, and instead identity information is returned in the top level `identity` object. For more details, see [Plaid API versioning](https://plaid.com/docs/api/versioning/#version-2019-05-29).
-pub async fn identity_get(configuration: &configuration::Configuration, identity_get_request: crate::models::IdentityGetRequest) -> Result<crate::models::IdentityGetResponse, Error<IdentityGetError>> {
+pub fn identity_get(configuration: &configuration::Configuration, identity_get_request: crate::models::IdentityGetRequest) -> Result<crate::models::IdentityGetResponse, Error<IdentityGetError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -5482,10 +5482,10 @@ pub async fn identity_get(configuration: &configuration::Configuration, identity
     local_var_req_builder = local_var_req_builder.json(&identity_get_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -5497,7 +5497,7 @@ pub async fn identity_get(configuration: &configuration::Configuration, identity
 }
 
 /// The `/identity/match` endpoint generates a match score, which indicates how well the provided identity data matches the identity information on file with the account holder's financial institution.  Fields within the `balances` object will always be null when retrieved by `/identity/match`. Instead, use the free `/accounts/get` endpoint to request balance cached data, or `/accounts/balance/get` for real-time data.  This request may take some time to complete if Identity was not specified as an initial product when creating the Item. This is because Plaid must communicate directly with the institution to retrieve the data.
-pub async fn identity_match(configuration: &configuration::Configuration, identity_match_request: crate::models::IdentityMatchRequest) -> Result<crate::models::IdentityMatchResponse, Error<IdentityMatchError>> {
+pub fn identity_match(configuration: &configuration::Configuration, identity_match_request: crate::models::IdentityMatchRequest) -> Result<crate::models::IdentityMatchResponse, Error<IdentityMatchError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -5535,10 +5535,10 @@ pub async fn identity_match(configuration: &configuration::Configuration, identi
     local_var_req_builder = local_var_req_builder.json(&identity_match_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -5550,7 +5550,7 @@ pub async fn identity_match(configuration: &configuration::Configuration, identi
 }
 
 /// `/identity/refresh` is an optional endpoint for users of the Identity product. It initiates an on-demand extraction to fetch the most up to date Identity information from the Financial Institution. This on-demand extraction takes place in addition to the periodic extractions that automatically occur any Identity-enabled Item. If changes to Identity are discovered after calling `/identity/refresh`, Plaid will fire a webhook [`DEFAULT_UPDATE`](https://plaid.com/docs/api/products/identity/#default_update). `/identity/refresh` is offered as an add-on to Identity and has a separate [fee model](/docs/account/billing/#per-request-flat-fee). To request access to this endpoint, submit a [product access request](https://dashboard.plaid.com/team/products) or contact your Plaid account manager.
-pub async fn identity_refresh(configuration: &configuration::Configuration, identity_refresh_request: crate::models::IdentityRefreshRequest) -> Result<crate::models::IdentityRefreshResponse, Error<IdentityRefreshError>> {
+pub fn identity_refresh(configuration: &configuration::Configuration, identity_refresh_request: crate::models::IdentityRefreshRequest) -> Result<crate::models::IdentityRefreshResponse, Error<IdentityRefreshError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -5588,10 +5588,10 @@ pub async fn identity_refresh(configuration: &configuration::Configuration, iden
     local_var_req_builder = local_var_req_builder.json(&identity_refresh_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -5603,7 +5603,7 @@ pub async fn identity_refresh(configuration: &configuration::Configuration, iden
 }
 
 /// Create a new Identity Verification for the user specified by the `client_user_id` field. The requirements and behavior of the verification are determined by the `template_id` provided. If you don't know whether the associated user already has an active Identity Verification, you can specify `\"is_idempotent\": true` in the request body. With idempotency enabled, a new Identity Verification will only be created if one does not already exist for the associated `client_user_id` and `template_id`. If an Identity Verification is found, it will be returned unmodified with an `200 OK` HTTP status code.  You can also use this endpoint to supply information you already have collected about the user; if any of these fields are specified, the screens prompting the user to enter them will be skipped during the Link flow. 
-pub async fn identity_verification_create(configuration: &configuration::Configuration, identity_verification_create_request: crate::models::IdentityVerificationCreateRequest) -> Result<crate::models::IdentityVerificationCreateResponse, Error<IdentityVerificationCreateError>> {
+pub fn identity_verification_create(configuration: &configuration::Configuration, identity_verification_create_request: crate::models::IdentityVerificationCreateRequest) -> Result<crate::models::IdentityVerificationCreateResponse, Error<IdentityVerificationCreateError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -5641,10 +5641,10 @@ pub async fn identity_verification_create(configuration: &configuration::Configu
     local_var_req_builder = local_var_req_builder.json(&identity_verification_create_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -5656,7 +5656,7 @@ pub async fn identity_verification_create(configuration: &configuration::Configu
 }
 
 /// Retrieve a previously created identity verification.
-pub async fn identity_verification_get(configuration: &configuration::Configuration, identity_verification_get_request: crate::models::IdentityVerificationGetRequest) -> Result<crate::models::IdentityVerificationGetResponse, Error<IdentityVerificationGetError>> {
+pub fn identity_verification_get(configuration: &configuration::Configuration, identity_verification_get_request: crate::models::IdentityVerificationGetRequest) -> Result<crate::models::IdentityVerificationGetResponse, Error<IdentityVerificationGetError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -5694,10 +5694,10 @@ pub async fn identity_verification_get(configuration: &configuration::Configurat
     local_var_req_builder = local_var_req_builder.json(&identity_verification_get_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -5709,7 +5709,7 @@ pub async fn identity_verification_get(configuration: &configuration::Configurat
 }
 
 /// Filter and list Identity Verifications created by your account
-pub async fn identity_verification_list(configuration: &configuration::Configuration, identity_verification_list_request: crate::models::IdentityVerificationListRequest) -> Result<crate::models::IdentityVerificationListResponse, Error<IdentityVerificationListError>> {
+pub fn identity_verification_list(configuration: &configuration::Configuration, identity_verification_list_request: crate::models::IdentityVerificationListRequest) -> Result<crate::models::IdentityVerificationListResponse, Error<IdentityVerificationListError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -5747,10 +5747,10 @@ pub async fn identity_verification_list(configuration: &configuration::Configura
     local_var_req_builder = local_var_req_builder.json(&identity_verification_list_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -5762,7 +5762,7 @@ pub async fn identity_verification_list(configuration: &configuration::Configura
 }
 
 /// Allow a customer to retry their identity verification
-pub async fn identity_verification_retry(configuration: &configuration::Configuration, identity_verification_retry_request: crate::models::IdentityVerificationRetryRequest) -> Result<crate::models::IdentityVerificationRetryResponse, Error<IdentityVerificationRetryError>> {
+pub fn identity_verification_retry(configuration: &configuration::Configuration, identity_verification_retry_request: crate::models::IdentityVerificationRetryRequest) -> Result<crate::models::IdentityVerificationRetryResponse, Error<IdentityVerificationRetryError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -5800,10 +5800,10 @@ pub async fn identity_verification_retry(configuration: &configuration::Configur
     local_var_req_builder = local_var_req_builder.json(&identity_verification_retry_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -5815,7 +5815,7 @@ pub async fn identity_verification_retry(configuration: &configuration::Configur
 }
 
 /// `/income/verification/create` begins the income verification process by returning an `income_verification_id`. You can then provide the `income_verification_id` to `/link/token/create` under the `income_verification` parameter in order to create a Link instance that will prompt the user to go through the income verification flow. Plaid will fire an `INCOME` webhook once the user completes the Payroll Income flow, or when the uploaded documents in the Document Income flow have finished processing. 
-pub async fn income_verification_create(configuration: &configuration::Configuration, income_verification_create_request: crate::models::IncomeVerificationCreateRequest) -> Result<crate::models::IncomeVerificationCreateResponse, Error<IncomeVerificationCreateError>> {
+pub fn income_verification_create(configuration: &configuration::Configuration, income_verification_create_request: crate::models::IncomeVerificationCreateRequest) -> Result<crate::models::IncomeVerificationCreateResponse, Error<IncomeVerificationCreateError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -5853,10 +5853,10 @@ pub async fn income_verification_create(configuration: &configuration::Configura
     local_var_req_builder = local_var_req_builder.json(&income_verification_create_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -5868,7 +5868,7 @@ pub async fn income_verification_create(configuration: &configuration::Configura
 }
 
 /// `/income/verification/documents/download` provides the ability to download the source documents associated with the verification.  If Document Income was used, the documents will be those the user provided in Link. For Payroll Income, the most recent files available for download from the payroll provider will be available from this endpoint.  The response to `/income/verification/documents/download` is a ZIP file in binary data. If a `document_id` is passed, a single document will be contained in this file. If not, the response will contain all documents associated with the verification.  The `request_id` is returned in the `Plaid-Request-ID` header.
-pub async fn income_verification_documents_download(configuration: &configuration::Configuration, income_verification_documents_download_request: crate::models::IncomeVerificationDocumentsDownloadRequest) -> Result<std::path::PathBuf, Error<IncomeVerificationDocumentsDownloadError>> {
+pub fn income_verification_documents_download(configuration: &configuration::Configuration, income_verification_documents_download_request: crate::models::IncomeVerificationDocumentsDownloadRequest) -> Result<std::path::PathBuf, Error<IncomeVerificationDocumentsDownloadError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -5906,10 +5906,10 @@ pub async fn income_verification_documents_download(configuration: &configuratio
     local_var_req_builder = local_var_req_builder.json(&income_verification_documents_download_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -5921,7 +5921,7 @@ pub async fn income_verification_documents_download(configuration: &configuratio
 }
 
 /// `/income/verification/paystubs/get` returns the information collected from the paystubs that were used to verify an end user's income. It can be called once the status of the verification has been set to `VERIFICATION_STATUS_PROCESSING_COMPLETE`, as reported by the `INCOME: verification_status` webhook. Attempting to call the endpoint before verification has been completed will result in an error.  This endpoint has been deprecated; new integrations should use `/credit/payroll_income/get` instead.
-pub async fn income_verification_paystubs_get(configuration: &configuration::Configuration, income_verification_paystubs_get_request: crate::models::IncomeVerificationPaystubsGetRequest) -> Result<crate::models::IncomeVerificationPaystubsGetResponse, Error<IncomeVerificationPaystubsGetError>> {
+pub fn income_verification_paystubs_get(configuration: &configuration::Configuration, income_verification_paystubs_get_request: crate::models::IncomeVerificationPaystubsGetRequest) -> Result<crate::models::IncomeVerificationPaystubsGetResponse, Error<IncomeVerificationPaystubsGetError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -5959,10 +5959,10 @@ pub async fn income_verification_paystubs_get(configuration: &configuration::Con
     local_var_req_builder = local_var_req_builder.json(&income_verification_paystubs_get_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -5974,7 +5974,7 @@ pub async fn income_verification_paystubs_get(configuration: &configuration::Con
 }
 
 /// `/income/verification/precheck` is an optional endpoint that can be called before initializing a Link session for income verification. It evaluates whether a given user is supportable by digital income verification and returns a `precheck_id` that can be provided to `/link/token/create`. If the user is eligible for digital verification, providing the `precheck_id` in this way will generate a Link UI optimized for the end user and their specific employer. If the user cannot be confirmed as eligible, the `precheck_id` can still be provided to `/link/token/create` and the user can still use the income verification flow, but they may be required to manually upload a paystub to verify their income.  While all request fields are optional, providing either `employer` or `transactions_access_tokens` data will increase the chance of receiving a useful result.  This endpoint has been deprecated; new integrations should use `/credit/payroll_income/precheck` instead.
-pub async fn income_verification_precheck(configuration: &configuration::Configuration, income_verification_precheck_request: crate::models::IncomeVerificationPrecheckRequest) -> Result<crate::models::IncomeVerificationPrecheckResponse, Error<IncomeVerificationPrecheckError>> {
+pub fn income_verification_precheck(configuration: &configuration::Configuration, income_verification_precheck_request: crate::models::IncomeVerificationPrecheckRequest) -> Result<crate::models::IncomeVerificationPrecheckResponse, Error<IncomeVerificationPrecheckError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -6012,10 +6012,10 @@ pub async fn income_verification_precheck(configuration: &configuration::Configu
     local_var_req_builder = local_var_req_builder.json(&income_verification_precheck_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -6027,7 +6027,7 @@ pub async fn income_verification_precheck(configuration: &configuration::Configu
 }
 
 /// `/income/verification/taxforms/get` returns the information collected from forms that were used to verify an end user''s income. It can be called once the status of the verification has been set to `VERIFICATION_STATUS_PROCESSING_COMPLETE`, as reported by the `INCOME: verification_status` webhook. Attempting to call the endpoint before verification has been completed will result in an error.  This endpoint has been deprecated; new integrations should use `/credit/payroll_income/get` instead.
-pub async fn income_verification_taxforms_get(configuration: &configuration::Configuration, income_verification_taxforms_get_request: crate::models::IncomeVerificationTaxformsGetRequest) -> Result<crate::models::IncomeVerificationTaxformsGetResponse, Error<IncomeVerificationTaxformsGetError>> {
+pub fn income_verification_taxforms_get(configuration: &configuration::Configuration, income_verification_taxforms_get_request: crate::models::IncomeVerificationTaxformsGetRequest) -> Result<crate::models::IncomeVerificationTaxformsGetResponse, Error<IncomeVerificationTaxformsGetError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -6065,10 +6065,10 @@ pub async fn income_verification_taxforms_get(configuration: &configuration::Con
     local_var_req_builder = local_var_req_builder.json(&income_verification_taxforms_get_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -6080,7 +6080,7 @@ pub async fn income_verification_taxforms_get(configuration: &configuration::Con
 }
 
 /// Returns a JSON response containing details on all financial institutions currently supported by Plaid. Because Plaid supports thousands of institutions, results are paginated.  If there is no overlap between an institution’s enabled products and a client’s enabled products, then the institution will be filtered out from the response. As a result, the number of institutions returned may not match the count specified in the call.
-pub async fn institutions_get(configuration: &configuration::Configuration, institutions_get_request: crate::models::InstitutionsGetRequest) -> Result<crate::models::InstitutionsGetResponse, Error<InstitutionsGetError>> {
+pub fn institutions_get(configuration: &configuration::Configuration, institutions_get_request: crate::models::InstitutionsGetRequest) -> Result<crate::models::InstitutionsGetResponse, Error<InstitutionsGetError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -6118,10 +6118,10 @@ pub async fn institutions_get(configuration: &configuration::Configuration, inst
     local_var_req_builder = local_var_req_builder.json(&institutions_get_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -6133,7 +6133,7 @@ pub async fn institutions_get(configuration: &configuration::Configuration, inst
 }
 
 /// Returns a JSON response containing details on a specified financial institution currently supported by Plaid.  Versioning note: API versions 2019-05-29 and earlier allow use of the `public_key` parameter instead of the `client_id` and `secret` to authenticate to this endpoint. The `public_key` has been deprecated; all customers are encouraged to use `client_id` and `secret` instead. 
-pub async fn institutions_get_by_id(configuration: &configuration::Configuration, institutions_get_by_id_request: crate::models::InstitutionsGetByIdRequest) -> Result<crate::models::InstitutionsGetByIdResponse, Error<InstitutionsGetByIdError>> {
+pub fn institutions_get_by_id(configuration: &configuration::Configuration, institutions_get_by_id_request: crate::models::InstitutionsGetByIdRequest) -> Result<crate::models::InstitutionsGetByIdResponse, Error<InstitutionsGetByIdError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -6171,10 +6171,10 @@ pub async fn institutions_get_by_id(configuration: &configuration::Configuration
     local_var_req_builder = local_var_req_builder.json(&institutions_get_by_id_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -6186,7 +6186,7 @@ pub async fn institutions_get_by_id(configuration: &configuration::Configuration
 }
 
 /// Returns a JSON response containing details for institutions that match the query parameters, up to a maximum of ten institutions per query.  Versioning note: API versions 2019-05-29 and earlier allow use of the `public_key` parameter instead of the `client_id` and `secret` parameters to authenticate to this endpoint. The `public_key` parameter has since been deprecated; all customers are encouraged to use `client_id` and `secret` instead. 
-pub async fn institutions_search(configuration: &configuration::Configuration, institutions_search_request: crate::models::InstitutionsSearchRequest) -> Result<crate::models::InstitutionsSearchResponse, Error<InstitutionsSearchError>> {
+pub fn institutions_search(configuration: &configuration::Configuration, institutions_search_request: crate::models::InstitutionsSearchRequest) -> Result<crate::models::InstitutionsSearchResponse, Error<InstitutionsSearchError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -6224,10 +6224,10 @@ pub async fn institutions_search(configuration: &configuration::Configuration, i
     local_var_req_builder = local_var_req_builder.json(&institutions_search_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -6239,7 +6239,7 @@ pub async fn institutions_search(configuration: &configuration::Configuration, i
 }
 
 /// The `/investments/auth/get` endpoint allows developers to receive user-authorized data to facilitate the transfer of holdings
-pub async fn investments_auth_get(configuration: &configuration::Configuration, investments_auth_get_request: crate::models::InvestmentsAuthGetRequest) -> Result<crate::models::InvestmentsAuthGetResponse, Error<InvestmentsAuthGetError>> {
+pub fn investments_auth_get(configuration: &configuration::Configuration, investments_auth_get_request: crate::models::InvestmentsAuthGetRequest) -> Result<crate::models::InvestmentsAuthGetResponse, Error<InvestmentsAuthGetError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -6277,10 +6277,10 @@ pub async fn investments_auth_get(configuration: &configuration::Configuration, 
     local_var_req_builder = local_var_req_builder.json(&investments_auth_get_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -6292,7 +6292,7 @@ pub async fn investments_auth_get(configuration: &configuration::Configuration, 
 }
 
 /// The `/investments/holdings/get` endpoint allows developers to receive user-authorized stock position data for `investment`-type accounts.
-pub async fn investments_holdings_get(configuration: &configuration::Configuration, investments_holdings_get_request: crate::models::InvestmentsHoldingsGetRequest) -> Result<crate::models::InvestmentsHoldingsGetResponse, Error<InvestmentsHoldingsGetError>> {
+pub fn investments_holdings_get(configuration: &configuration::Configuration, investments_holdings_get_request: crate::models::InvestmentsHoldingsGetRequest) -> Result<crate::models::InvestmentsHoldingsGetResponse, Error<InvestmentsHoldingsGetError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -6330,10 +6330,10 @@ pub async fn investments_holdings_get(configuration: &configuration::Configurati
     local_var_req_builder = local_var_req_builder.json(&investments_holdings_get_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -6345,7 +6345,7 @@ pub async fn investments_holdings_get(configuration: &configuration::Configurati
 }
 
 /// `/investments/refresh` is an optional endpoint for users of the Investments product. It initiates an on-demand extraction to fetch the newest investments, holdings and investment transactions for an Item. This on-demand extraction takes place in addition to the periodic extractions that automatically occur multiple times a day for any Investments-enabled Item. If changes to investments are discovered after calling `/investments/refresh`, Plaid will fire webhooks: [`HOLDINGS: DEFAULT_UPDATE`](https://plaid.com/docs/api/products/investments/#holdings-default_update) if any new holdings are detected, and [INVESTMENTS_TRANSACTIONS: DEFAULT_UPDATE](https://plaid.com/docs/api/products/investments/#investments_transactions-default_update) if any new investment transactions are detected. Updated holdings and investment transactions can be fetched by calling `/investments/holdings/get` and `/investments/transactions/get`. \"Note that the `/investments/refresh` endpoint is not supported by all institutions. If called on an Item from an institution that does not support this functionality, it will return a `PRODUCT_NOT_SUPPORTED` error. `/investments/refresh` is offered as an add-on to Investments and has a separate [fee model](/docs/account/billing/#per-request-flat-fee). To request access to this endpoint, submit a [product access request](https://dashboard.plaid.com/team/products) or contact your Plaid account manager.
-pub async fn investments_refresh(configuration: &configuration::Configuration, investments_refresh_request: crate::models::InvestmentsRefreshRequest) -> Result<crate::models::InvestmentsRefreshResponse, Error<InvestmentsRefreshError>> {
+pub fn investments_refresh(configuration: &configuration::Configuration, investments_refresh_request: crate::models::InvestmentsRefreshRequest) -> Result<crate::models::InvestmentsRefreshResponse, Error<InvestmentsRefreshError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -6383,10 +6383,10 @@ pub async fn investments_refresh(configuration: &configuration::Configuration, i
     local_var_req_builder = local_var_req_builder.json(&investments_refresh_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -6398,7 +6398,7 @@ pub async fn investments_refresh(configuration: &configuration::Configuration, i
 }
 
 /// The `/investments/transactions/get` endpoint allows developers to retrieve up to 24 months of user-authorized transaction data for investment accounts.  Transactions are returned in reverse-chronological order, and the sequence of transaction ordering is stable and will not shift.  Due to the potentially large number of investment transactions associated with an Item, results are paginated. Manipulate the count and offset parameters in conjunction with the `total_investment_transactions` response body field to fetch all available investment transactions.  Note that Investments does not have a webhook to indicate when initial transaction data has loaded (unless you use the `async_update` option). Instead, if transactions data is not ready when `/investments/transactions/get` is first called, Plaid will wait for the data. For this reason, calling `/investments/transactions/get` immediately after Link may take up to one to two minutes to return.  Data returned by the asynchronous investments extraction flow (when `async_update` is set to true) may not be immediately available to `/investments/transactions/get`. To be alerted when the data is ready to be fetched, listen for the `HISTORICAL_UPDATE` webhook. If no investments history is ready when `/investments/transactions/get` is called, it will return a `PRODUCT_NOT_READY` error.
-pub async fn investments_transactions_get(configuration: &configuration::Configuration, investments_transactions_get_request: crate::models::InvestmentsTransactionsGetRequest) -> Result<crate::models::InvestmentsTransactionsGetResponse, Error<InvestmentsTransactionsGetError>> {
+pub fn investments_transactions_get(configuration: &configuration::Configuration, investments_transactions_get_request: crate::models::InvestmentsTransactionsGetRequest) -> Result<crate::models::InvestmentsTransactionsGetResponse, Error<InvestmentsTransactionsGetError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -6436,10 +6436,10 @@ pub async fn investments_transactions_get(configuration: &configuration::Configu
     local_var_req_builder = local_var_req_builder.json(&investments_transactions_get_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -6451,7 +6451,7 @@ pub async fn investments_transactions_get(configuration: &configuration::Configu
 }
 
 /// By default, the `access_token` associated with an Item does not expire and should be stored in a persistent, secure manner.  You can use the `/item/access_token/invalidate` endpoint to rotate the `access_token` associated with an Item. The endpoint returns a new `access_token` and immediately invalidates the previous `access_token`. 
-pub async fn item_access_token_invalidate(configuration: &configuration::Configuration, item_access_token_invalidate_request: crate::models::ItemAccessTokenInvalidateRequest) -> Result<crate::models::ItemAccessTokenInvalidateResponse, Error<ItemAccessTokenInvalidateError>> {
+pub fn item_access_token_invalidate(configuration: &configuration::Configuration, item_access_token_invalidate_request: crate::models::ItemAccessTokenInvalidateRequest) -> Result<crate::models::ItemAccessTokenInvalidateResponse, Error<ItemAccessTokenInvalidateError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -6489,10 +6489,10 @@ pub async fn item_access_token_invalidate(configuration: &configuration::Configu
     local_var_req_builder = local_var_req_builder.json(&item_access_token_invalidate_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -6504,7 +6504,7 @@ pub async fn item_access_token_invalidate(configuration: &configuration::Configu
 }
 
 /// List a historical log of user consent events
-pub async fn item_activity_list(configuration: &configuration::Configuration, item_activity_list_request: crate::models::ItemActivityListRequest) -> Result<crate::models::ItemActivityListResponse, Error<ItemActivityListError>> {
+pub fn item_activity_list(configuration: &configuration::Configuration, item_activity_list_request: crate::models::ItemActivityListRequest) -> Result<crate::models::ItemActivityListResponse, Error<ItemActivityListError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -6542,10 +6542,10 @@ pub async fn item_activity_list(configuration: &configuration::Configuration, it
     local_var_req_builder = local_var_req_builder.json(&item_activity_list_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -6557,7 +6557,7 @@ pub async fn item_activity_list(configuration: &configuration::Configuration, it
 }
 
 /// List a user’s connected applications
-pub async fn item_application_list(configuration: &configuration::Configuration, item_application_list_request: crate::models::ItemApplicationListRequest) -> Result<crate::models::ItemApplicationListResponse, Error<ItemApplicationListError>> {
+pub fn item_application_list(configuration: &configuration::Configuration, item_application_list_request: crate::models::ItemApplicationListRequest) -> Result<crate::models::ItemApplicationListResponse, Error<ItemApplicationListError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -6595,10 +6595,10 @@ pub async fn item_application_list(configuration: &configuration::Configuration,
     local_var_req_builder = local_var_req_builder.json(&item_application_list_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -6610,7 +6610,7 @@ pub async fn item_application_list(configuration: &configuration::Configuration,
 }
 
 /// Enable consumers to update product access on selected accounts for an application.
-pub async fn item_application_scopes_update(configuration: &configuration::Configuration, item_application_scopes_update_request: crate::models::ItemApplicationScopesUpdateRequest) -> Result<crate::models::ItemApplicationScopesUpdateResponse, Error<ItemApplicationScopesUpdateError>> {
+pub fn item_application_scopes_update(configuration: &configuration::Configuration, item_application_scopes_update_request: crate::models::ItemApplicationScopesUpdateRequest) -> Result<crate::models::ItemApplicationScopesUpdateResponse, Error<ItemApplicationScopesUpdateError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -6648,10 +6648,10 @@ pub async fn item_application_scopes_update(configuration: &configuration::Confi
     local_var_req_builder = local_var_req_builder.json(&item_application_scopes_update_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -6663,7 +6663,7 @@ pub async fn item_application_scopes_update(configuration: &configuration::Confi
 }
 
 /// Unlink a user’s connected application. On an unlink request, Plaid will immediately revoke the Application’s access to the User’s data.  The User will have to redo the OAuth authentication process in order to restore functionality.  This endpoint only removes ongoing data access permissions, therefore the User will need to reach out to the Application itself in order to disable and delete their account and delete any data that the Application already received (if the Application does not do so by default).  This endpoint should be called in real time as the User is unlinking an Application, and should not be batched in order to ensure that the change is reflected as soon as possible.
-pub async fn item_application_unlink(configuration: &configuration::Configuration, item_application_unlink_request: crate::models::ItemApplicationUnlinkRequest) -> Result<crate::models::ItemApplicationUnlinkResponse, Error<ItemApplicationUnlinkError>> {
+pub fn item_application_unlink(configuration: &configuration::Configuration, item_application_unlink_request: crate::models::ItemApplicationUnlinkRequest) -> Result<crate::models::ItemApplicationUnlinkResponse, Error<ItemApplicationUnlinkError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -6701,10 +6701,10 @@ pub async fn item_application_unlink(configuration: &configuration::Configuratio
     local_var_req_builder = local_var_req_builder.json(&item_application_unlink_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -6716,7 +6716,7 @@ pub async fn item_application_unlink(configuration: &configuration::Configuratio
 }
 
 /// Note: As of July 2020, the `/item/public_token/create` endpoint is deprecated. Instead, use `/link/token/create` with an `access_token` to create a Link token for use with [update mode](https://plaid.com/docs/link/update-mode).  If you need your user to take action to restore or resolve an error associated with an Item, generate a public token with the `/item/public_token/create` endpoint and then initialize Link with that `public_token`.  A `public_token` is one-time use and expires after 30 minutes. You use a `public_token` to initialize Link in [update mode](https://plaid.com/docs/link/update-mode) for a particular Item. You can generate a `public_token` for an Item even if you did not use Link to create the Item originally.  The `/item/public_token/create` endpoint is **not** used to create your initial `public_token`. If you have not already received an `access_token` for a specific Item, use Link to obtain your `public_token` instead. See the [Quickstart](https://plaid.com/docs/quickstart) for more information.
-pub async fn item_create_public_token(configuration: &configuration::Configuration, item_public_token_create_request: crate::models::ItemPublicTokenCreateRequest) -> Result<crate::models::ItemPublicTokenCreateResponse, Error<ItemCreatePublicTokenError>> {
+pub fn item_create_public_token(configuration: &configuration::Configuration, item_public_token_create_request: crate::models::ItemPublicTokenCreateRequest) -> Result<crate::models::ItemPublicTokenCreateResponse, Error<ItemCreatePublicTokenError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -6754,10 +6754,10 @@ pub async fn item_create_public_token(configuration: &configuration::Configurati
     local_var_req_builder = local_var_req_builder.json(&item_public_token_create_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -6769,7 +6769,7 @@ pub async fn item_create_public_token(configuration: &configuration::Configurati
 }
 
 /// Returns information about the status of an Item.
-pub async fn item_get(configuration: &configuration::Configuration, item_get_request: crate::models::ItemGetRequest) -> Result<crate::models::ItemGetResponse, Error<ItemGetError>> {
+pub fn item_get(configuration: &configuration::Configuration, item_get_request: crate::models::ItemGetRequest) -> Result<crate::models::ItemGetResponse, Error<ItemGetError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -6807,10 +6807,10 @@ pub async fn item_get(configuration: &configuration::Configuration, item_get_req
     local_var_req_builder = local_var_req_builder.json(&item_get_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -6822,7 +6822,7 @@ pub async fn item_get(configuration: &configuration::Configuration, item_get_req
 }
 
 /// `/item/import` creates an Item via your Plaid Exchange Integration and returns an `access_token`. As part of an `/item/import` request, you will include a User ID (`user_auth.user_id`) and Authentication Token (`user_auth.auth_token`) that enable data aggregation through your Plaid Exchange API endpoints. These authentication principals are to be chosen by you.  Upon creating an Item via `/item/import`, Plaid will automatically begin an extraction of that Item through the Plaid Exchange infrastructure you have already integrated.
-pub async fn item_import(configuration: &configuration::Configuration, item_import_request: crate::models::ItemImportRequest) -> Result<crate::models::ItemImportResponse, Error<ItemImportError>> {
+pub fn item_import(configuration: &configuration::Configuration, item_import_request: crate::models::ItemImportRequest) -> Result<crate::models::ItemImportResponse, Error<ItemImportError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -6860,10 +6860,10 @@ pub async fn item_import(configuration: &configuration::Configuration, item_impo
     local_var_req_builder = local_var_req_builder.json(&item_import_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -6875,7 +6875,7 @@ pub async fn item_import(configuration: &configuration::Configuration, item_impo
 }
 
 /// Exchange a Link `public_token` for an API `access_token`. Link hands off the `public_token` client-side via the `onSuccess` callback once a user has successfully created an Item. The `public_token` is ephemeral and expires after 30 minutes. An `access_token` does not expire, but can be revoked by calling `/item/remove`.  The response also includes an `item_id` that should be stored with the `access_token`. The `item_id` is used to identify an Item in a webhook. The `item_id` can also be retrieved by making an `/item/get` request.
-pub async fn item_public_token_exchange(configuration: &configuration::Configuration, item_public_token_exchange_request: crate::models::ItemPublicTokenExchangeRequest) -> Result<crate::models::ItemPublicTokenExchangeResponse, Error<ItemPublicTokenExchangeError>> {
+pub fn item_public_token_exchange(configuration: &configuration::Configuration, item_public_token_exchange_request: crate::models::ItemPublicTokenExchangeRequest) -> Result<crate::models::ItemPublicTokenExchangeResponse, Error<ItemPublicTokenExchangeError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -6913,10 +6913,10 @@ pub async fn item_public_token_exchange(configuration: &configuration::Configura
     local_var_req_builder = local_var_req_builder.json(&item_public_token_exchange_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -6928,7 +6928,7 @@ pub async fn item_public_token_exchange(configuration: &configuration::Configura
 }
 
 /// The `/item/remove` endpoint allows you to remove an Item. Once removed, the `access_token`, as well as any processor tokens or bank account tokens associated with the Item, is no longer valid and cannot be used to access any data that was associated with the Item.  Note that in the Development environment, issuing an `/item/remove`  request will not decrement your live credential count. To increase your credential account in Development, contact Support.  Also note that for certain OAuth-based institutions, an Item removed via `/item/remove` may still show as an active connection in the institution's OAuth permission manager.  API versions 2019-05-29 and earlier return a `removed` boolean as part of the response.
-pub async fn item_remove(configuration: &configuration::Configuration, item_remove_request: crate::models::ItemRemoveRequest) -> Result<crate::models::ItemRemoveResponse, Error<ItemRemoveError>> {
+pub fn item_remove(configuration: &configuration::Configuration, item_remove_request: crate::models::ItemRemoveRequest) -> Result<crate::models::ItemRemoveResponse, Error<ItemRemoveError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -6966,10 +6966,10 @@ pub async fn item_remove(configuration: &configuration::Configuration, item_remo
     local_var_req_builder = local_var_req_builder.json(&item_remove_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -6981,7 +6981,7 @@ pub async fn item_remove(configuration: &configuration::Configuration, item_remo
 }
 
 /// The POST `/item/webhook/update` allows you to update the webhook URL associated with an Item. This request triggers a [`WEBHOOK_UPDATE_ACKNOWLEDGED`](https://plaid.com/docs/api/items/#webhook_update_acknowledged) webhook to the newly specified webhook URL.
-pub async fn item_webhook_update(configuration: &configuration::Configuration, item_webhook_update_request: crate::models::ItemWebhookUpdateRequest) -> Result<crate::models::ItemWebhookUpdateResponse, Error<ItemWebhookUpdateError>> {
+pub fn item_webhook_update(configuration: &configuration::Configuration, item_webhook_update_request: crate::models::ItemWebhookUpdateRequest) -> Result<crate::models::ItemWebhookUpdateResponse, Error<ItemWebhookUpdateError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -7019,10 +7019,10 @@ pub async fn item_webhook_update(configuration: &configuration::Configuration, i
     local_var_req_builder = local_var_req_builder.json(&item_webhook_update_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -7034,7 +7034,7 @@ pub async fn item_webhook_update(configuration: &configuration::Configuration, i
 }
 
 /// The `/liabilities/get` endpoint returns various details about an Item with loan or credit accounts. Liabilities data is available primarily for US financial institutions, with some limited coverage of Canadian institutions. Currently supported account types are account type `credit` with account subtype `credit card` or `paypal`, and account type `loan` with account subtype `student` or `mortgage`. To limit accounts listed in Link to types and subtypes supported by Liabilities, you can use the `account_filters` parameter when [creating a Link token](https://plaid.com/docs/api/tokens/#linktokencreate).  The types of information returned by Liabilities can include balances and due dates, loan terms, and account details such as original loan amount and guarantor. Data is refreshed approximately once per day; the latest data can be retrieved by calling `/liabilities/get`.  Note: This request may take some time to complete if `liabilities` was not specified as an initial product when creating the Item. This is because Plaid must communicate directly with the institution to retrieve the additional data.
-pub async fn liabilities_get(configuration: &configuration::Configuration, liabilities_get_request: crate::models::LiabilitiesGetRequest) -> Result<crate::models::LiabilitiesGetResponse, Error<LiabilitiesGetError>> {
+pub fn liabilities_get(configuration: &configuration::Configuration, liabilities_get_request: crate::models::LiabilitiesGetRequest) -> Result<crate::models::LiabilitiesGetResponse, Error<LiabilitiesGetError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -7072,10 +7072,10 @@ pub async fn liabilities_get(configuration: &configuration::Configuration, liabi
     local_var_req_builder = local_var_req_builder.json(&liabilities_get_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -7087,7 +7087,7 @@ pub async fn liabilities_get(configuration: &configuration::Configuration, liabi
 }
 
 /// Use the `/link_delivery/create` endpoint to create a Hosted Link session.
-pub async fn link_delivery_create(configuration: &configuration::Configuration, link_delivery_create_request: crate::models::LinkDeliveryCreateRequest) -> Result<crate::models::LinkDeliveryCreateResponse, Error<LinkDeliveryCreateError>> {
+pub fn link_delivery_create(configuration: &configuration::Configuration, link_delivery_create_request: crate::models::LinkDeliveryCreateRequest) -> Result<crate::models::LinkDeliveryCreateResponse, Error<LinkDeliveryCreateError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -7125,10 +7125,10 @@ pub async fn link_delivery_create(configuration: &configuration::Configuration, 
     local_var_req_builder = local_var_req_builder.json(&link_delivery_create_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -7140,7 +7140,7 @@ pub async fn link_delivery_create(configuration: &configuration::Configuration, 
 }
 
 /// Use the `/link_delivery/get` endpoint to get the status of a Hosted Link session.
-pub async fn link_delivery_get(configuration: &configuration::Configuration, link_delivery_get_request: crate::models::LinkDeliveryGetRequest) -> Result<crate::models::LinkDeliveryGetResponse, Error<LinkDeliveryGetError>> {
+pub fn link_delivery_get(configuration: &configuration::Configuration, link_delivery_get_request: crate::models::LinkDeliveryGetRequest) -> Result<crate::models::LinkDeliveryGetResponse, Error<LinkDeliveryGetError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -7178,10 +7178,10 @@ pub async fn link_delivery_get(configuration: &configuration::Configuration, lin
     local_var_req_builder = local_var_req_builder.json(&link_delivery_get_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -7193,7 +7193,7 @@ pub async fn link_delivery_get(configuration: &configuration::Configuration, lin
 }
 
 /// Exchange an OAuth `link_correlation_id` for the corresponding `link_token`. The `link_correlation_id` is only available for 'payment_initiation' products and is provided to the client via the OAuth `redirect_uri` as a query parameter. The `link_correlation_id` is ephemeral and expires in a brief period, after which it can no longer be exchanged for the 'link_token'.
-pub async fn link_oauth_correlation_id_exchange(configuration: &configuration::Configuration, link_o_auth_correlation_id_exchange_request: crate::models::LinkOAuthCorrelationIdExchangeRequest) -> Result<crate::models::LinkOAuthCorrelationIdExchangeResponse, Error<LinkOauthCorrelationIdExchangeError>> {
+pub fn link_oauth_correlation_id_exchange(configuration: &configuration::Configuration, link_o_auth_correlation_id_exchange_request: crate::models::LinkOAuthCorrelationIdExchangeRequest) -> Result<crate::models::LinkOAuthCorrelationIdExchangeResponse, Error<LinkOauthCorrelationIdExchangeError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -7231,10 +7231,10 @@ pub async fn link_oauth_correlation_id_exchange(configuration: &configuration::C
     local_var_req_builder = local_var_req_builder.json(&link_o_auth_correlation_id_exchange_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -7246,7 +7246,7 @@ pub async fn link_oauth_correlation_id_exchange(configuration: &configuration::C
 }
 
 /// The `/link/token/create` endpoint creates a `link_token`, which is required as a parameter when initializing Link. Once Link has been initialized, it returns a `public_token`, which can then be exchanged for an `access_token` via `/item/public_token/exchange` as part of the main Link flow.  A `link_token` generated by `/link/token/create` is also used to initialize other Link flows, such as the update mode flow for tokens with expired credentials, or the Payment Initiation (Europe) flow.
-pub async fn link_token_create(configuration: &configuration::Configuration, link_token_create_request: crate::models::LinkTokenCreateRequest) -> Result<crate::models::LinkTokenCreateResponse, Error<LinkTokenCreateError>> {
+pub fn link_token_create(configuration: &configuration::Configuration, link_token_create_request: crate::models::LinkTokenCreateRequest) -> Result<crate::models::LinkTokenCreateResponse, Error<LinkTokenCreateError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -7284,10 +7284,10 @@ pub async fn link_token_create(configuration: &configuration::Configuration, lin
     local_var_req_builder = local_var_req_builder.json(&link_token_create_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -7299,7 +7299,7 @@ pub async fn link_token_create(configuration: &configuration::Configuration, lin
 }
 
 /// The `/link/token/get` endpoint gets information about a previously-created `link_token` using the `/link/token/create` endpoint. It can be useful for debugging purposes.
-pub async fn link_token_get(configuration: &configuration::Configuration, link_token_get_request: crate::models::LinkTokenGetRequest) -> Result<crate::models::LinkTokenGetResponse, Error<LinkTokenGetError>> {
+pub fn link_token_get(configuration: &configuration::Configuration, link_token_get_request: crate::models::LinkTokenGetRequest) -> Result<crate::models::LinkTokenGetResponse, Error<LinkTokenGetError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -7337,10 +7337,10 @@ pub async fn link_token_get(configuration: &configuration::Configuration, link_t
     local_var_req_builder = local_var_req_builder.json(&link_token_get_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -7352,7 +7352,7 @@ pub async fn link_token_get(configuration: &configuration::Configuration, link_t
 }
 
 /// The `/partner/customer/create` endpoint is used by reseller partners to create end customers.
-pub async fn partner_customer_create(configuration: &configuration::Configuration, partner_customer_create_request: crate::models::PartnerCustomerCreateRequest) -> Result<crate::models::PartnerCustomerCreateResponse, Error<PartnerCustomerCreateError>> {
+pub fn partner_customer_create(configuration: &configuration::Configuration, partner_customer_create_request: crate::models::PartnerCustomerCreateRequest) -> Result<crate::models::PartnerCustomerCreateResponse, Error<PartnerCustomerCreateError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -7390,10 +7390,10 @@ pub async fn partner_customer_create(configuration: &configuration::Configuratio
     local_var_req_builder = local_var_req_builder.json(&partner_customer_create_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -7405,7 +7405,7 @@ pub async fn partner_customer_create(configuration: &configuration::Configuratio
 }
 
 /// The `/partner/customer/enable` endpoint is used by reseller partners to enable an end customer in the Production environment.
-pub async fn partner_customer_enable(configuration: &configuration::Configuration, partner_customer_enable_request: crate::models::PartnerCustomerEnableRequest) -> Result<crate::models::PartnerCustomerEnableResponse, Error<PartnerCustomerEnableError>> {
+pub fn partner_customer_enable(configuration: &configuration::Configuration, partner_customer_enable_request: crate::models::PartnerCustomerEnableRequest) -> Result<crate::models::PartnerCustomerEnableResponse, Error<PartnerCustomerEnableError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -7443,10 +7443,10 @@ pub async fn partner_customer_enable(configuration: &configuration::Configuratio
     local_var_req_builder = local_var_req_builder.json(&partner_customer_enable_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -7458,7 +7458,7 @@ pub async fn partner_customer_enable(configuration: &configuration::Configuratio
 }
 
 /// The `/partner/customer/get` endpoint is used by reseller partners to retrieve data about a single end customer.
-pub async fn partner_customer_get(configuration: &configuration::Configuration, partner_customer_get_request: crate::models::PartnerCustomerGetRequest) -> Result<crate::models::PartnerCustomerGetResponse, Error<PartnerCustomerGetError>> {
+pub fn partner_customer_get(configuration: &configuration::Configuration, partner_customer_get_request: crate::models::PartnerCustomerGetRequest) -> Result<crate::models::PartnerCustomerGetResponse, Error<PartnerCustomerGetError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -7496,10 +7496,10 @@ pub async fn partner_customer_get(configuration: &configuration::Configuration, 
     local_var_req_builder = local_var_req_builder.json(&partner_customer_get_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -7511,7 +7511,7 @@ pub async fn partner_customer_get(configuration: &configuration::Configuration, 
 }
 
 /// The `/partner/customer/oauth_institutions/get` endpoint is used by reseller partners to retrieve OAuth-institution registration information about a single end customer. To learn how to set up a webhook to listen to status update events, visit the [reseller documentation](https://plaid.com/docs/account/resellers/#enabling-end-customers).
-pub async fn partner_customer_oauth_institutions_get(configuration: &configuration::Configuration, partner_customer_o_auth_institutions_get_request: crate::models::PartnerCustomerOAuthInstitutionsGetRequest) -> Result<crate::models::PartnerCustomerOAuthInstitutionsGetResponse, Error<PartnerCustomerOauthInstitutionsGetError>> {
+pub fn partner_customer_oauth_institutions_get(configuration: &configuration::Configuration, partner_customer_o_auth_institutions_get_request: crate::models::PartnerCustomerOAuthInstitutionsGetRequest) -> Result<crate::models::PartnerCustomerOAuthInstitutionsGetResponse, Error<PartnerCustomerOauthInstitutionsGetError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -7549,10 +7549,10 @@ pub async fn partner_customer_oauth_institutions_get(configuration: &configurati
     local_var_req_builder = local_var_req_builder.json(&partner_customer_o_auth_institutions_get_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -7564,7 +7564,7 @@ pub async fn partner_customer_oauth_institutions_get(configuration: &configurati
 }
 
 /// The `/partner/customer/remove` endpoint is used by reseller partners to remove an end customer. Removing an end customer will remove it from view in the Plaid Dashboard and deactivate its API keys. This endpoint can only be used to remove an end customer that has not yet been enabled in Production.
-pub async fn partner_customer_remove(configuration: &configuration::Configuration, partner_customer_remove_request: crate::models::PartnerCustomerRemoveRequest) -> Result<crate::models::PartnerCustomerRemoveResponse, Error<PartnerCustomerRemoveError>> {
+pub fn partner_customer_remove(configuration: &configuration::Configuration, partner_customer_remove_request: crate::models::PartnerCustomerRemoveRequest) -> Result<crate::models::PartnerCustomerRemoveResponse, Error<PartnerCustomerRemoveError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -7602,10 +7602,10 @@ pub async fn partner_customer_remove(configuration: &configuration::Configuratio
     local_var_req_builder = local_var_req_builder.json(&partner_customer_remove_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -7617,7 +7617,7 @@ pub async fn partner_customer_remove(configuration: &configuration::Configuratio
 }
 
 /// The `/payment_initiation/consent/create` endpoint is used to create a payment consent, which can be used to initiate payments on behalf of the user. Payment consents are created with `UNAUTHORISED` status by default and must be authorised by the user before payments can be initiated.  Consents can be limited in time and scope, and have constraints that describe limitations for payments.
-pub async fn payment_initiation_consent_create(configuration: &configuration::Configuration, payment_initiation_consent_create_request: crate::models::PaymentInitiationConsentCreateRequest) -> Result<crate::models::PaymentInitiationConsentCreateResponse, Error<PaymentInitiationConsentCreateError>> {
+pub fn payment_initiation_consent_create(configuration: &configuration::Configuration, payment_initiation_consent_create_request: crate::models::PaymentInitiationConsentCreateRequest) -> Result<crate::models::PaymentInitiationConsentCreateResponse, Error<PaymentInitiationConsentCreateError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -7655,10 +7655,10 @@ pub async fn payment_initiation_consent_create(configuration: &configuration::Co
     local_var_req_builder = local_var_req_builder.json(&payment_initiation_consent_create_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -7670,7 +7670,7 @@ pub async fn payment_initiation_consent_create(configuration: &configuration::Co
 }
 
 /// The `/payment_initiation/consent/get` endpoint can be used to check the status of a payment consent, as well as to receive basic information such as recipient and constraints.
-pub async fn payment_initiation_consent_get(configuration: &configuration::Configuration, payment_initiation_consent_get_request: crate::models::PaymentInitiationConsentGetRequest) -> Result<crate::models::PaymentInitiationConsentGetResponse, Error<PaymentInitiationConsentGetError>> {
+pub fn payment_initiation_consent_get(configuration: &configuration::Configuration, payment_initiation_consent_get_request: crate::models::PaymentInitiationConsentGetRequest) -> Result<crate::models::PaymentInitiationConsentGetResponse, Error<PaymentInitiationConsentGetError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -7708,10 +7708,10 @@ pub async fn payment_initiation_consent_get(configuration: &configuration::Confi
     local_var_req_builder = local_var_req_builder.json(&payment_initiation_consent_get_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -7723,7 +7723,7 @@ pub async fn payment_initiation_consent_get(configuration: &configuration::Confi
 }
 
 /// The `/payment_initiation/consent/payment/execute` endpoint can be used to execute payments using payment consent.
-pub async fn payment_initiation_consent_payment_execute(configuration: &configuration::Configuration, payment_initiation_consent_payment_execute_request: crate::models::PaymentInitiationConsentPaymentExecuteRequest) -> Result<crate::models::PaymentInitiationConsentPaymentExecuteResponse, Error<PaymentInitiationConsentPaymentExecuteError>> {
+pub fn payment_initiation_consent_payment_execute(configuration: &configuration::Configuration, payment_initiation_consent_payment_execute_request: crate::models::PaymentInitiationConsentPaymentExecuteRequest) -> Result<crate::models::PaymentInitiationConsentPaymentExecuteResponse, Error<PaymentInitiationConsentPaymentExecuteError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -7761,10 +7761,10 @@ pub async fn payment_initiation_consent_payment_execute(configuration: &configur
     local_var_req_builder = local_var_req_builder.json(&payment_initiation_consent_payment_execute_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -7776,7 +7776,7 @@ pub async fn payment_initiation_consent_payment_execute(configuration: &configur
 }
 
 /// The `/payment_initiation/consent/revoke` endpoint can be used to revoke the payment consent. Once the consent is revoked, it is not possible to initiate payments using it.
-pub async fn payment_initiation_consent_revoke(configuration: &configuration::Configuration, payment_initiation_consent_revoke_request: crate::models::PaymentInitiationConsentRevokeRequest) -> Result<crate::models::PaymentInitiationConsentRevokeResponse, Error<PaymentInitiationConsentRevokeError>> {
+pub fn payment_initiation_consent_revoke(configuration: &configuration::Configuration, payment_initiation_consent_revoke_request: crate::models::PaymentInitiationConsentRevokeRequest) -> Result<crate::models::PaymentInitiationConsentRevokeResponse, Error<PaymentInitiationConsentRevokeError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -7814,10 +7814,10 @@ pub async fn payment_initiation_consent_revoke(configuration: &configuration::Co
     local_var_req_builder = local_var_req_builder.json(&payment_initiation_consent_revoke_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -7829,7 +7829,7 @@ pub async fn payment_initiation_consent_revoke(configuration: &configuration::Co
 }
 
 /// After creating a payment recipient, you can use the `/payment_initiation/payment/create` endpoint to create a payment to that recipient.  Payments can be one-time or standing order (recurring) and can be denominated in either EUR, GBP or other chosen [currency](https://plaid.com/docs/api/products/payment-initiation/#payment_initiation-payment-create-request-amount-currency).  If making domestic GBP-denominated payments, your recipient must have been created with BACS numbers. In general, EUR-denominated payments will be sent via SEPA Credit Transfer, GBP-denominated payments will be sent via the Faster Payments network and for non-Eurozone markets typically via the local payment scheme, but the payment network used will be determined by the institution. Payments sent via Faster Payments will typically arrive immediately, while payments sent via SEPA Credit Transfer or other local payment schemes will typically arrive in one business day.  Standing orders (recurring payments) must be denominated in GBP and can only be sent to recipients in the UK. Once created, standing order payments cannot be modified or canceled via the API. An end user can cancel or modify a standing order directly on their banking application or website, or by contacting the bank. Standing orders will follow the payment rules of the underlying rails (Faster Payments in UK). Payments can be sent Monday to Friday, excluding bank holidays. If the pre-arranged date falls on a weekend or bank holiday, the payment is made on the next working day. It is not possible to guarantee the exact time the payment will reach the recipient’s account, although at least 90% of standing order payments are sent by 6am.  In the Development environment, payments must be below 5 GBP or other chosen [currency](https://plaid.com/docs/api/products/payment-initiation/#payment_initiation-payment-create-request-amount-currency). For details on any payment limits in Production, contact your Plaid Account Manager.
-pub async fn payment_initiation_payment_create(configuration: &configuration::Configuration, payment_initiation_payment_create_request: crate::models::PaymentInitiationPaymentCreateRequest) -> Result<crate::models::PaymentInitiationPaymentCreateResponse, Error<PaymentInitiationPaymentCreateError>> {
+pub fn payment_initiation_payment_create(configuration: &configuration::Configuration, payment_initiation_payment_create_request: crate::models::PaymentInitiationPaymentCreateRequest) -> Result<crate::models::PaymentInitiationPaymentCreateResponse, Error<PaymentInitiationPaymentCreateError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -7867,10 +7867,10 @@ pub async fn payment_initiation_payment_create(configuration: &configuration::Co
     local_var_req_builder = local_var_req_builder.json(&payment_initiation_payment_create_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -7882,7 +7882,7 @@ pub async fn payment_initiation_payment_create(configuration: &configuration::Co
 }
 
 /// The `/payment_initiation/payment/get` endpoint can be used to check the status of a payment, as well as to receive basic information such as recipient and payment amount. In the case of standing orders, the `/payment_initiation/payment/get` endpoint will provide information about the status of the overall standing order itself; the API cannot be used to retrieve payment status for individual payments within a standing order.
-pub async fn payment_initiation_payment_get(configuration: &configuration::Configuration, payment_initiation_payment_get_request: crate::models::PaymentInitiationPaymentGetRequest) -> Result<crate::models::PaymentInitiationPaymentGetResponse, Error<PaymentInitiationPaymentGetError>> {
+pub fn payment_initiation_payment_get(configuration: &configuration::Configuration, payment_initiation_payment_get_request: crate::models::PaymentInitiationPaymentGetRequest) -> Result<crate::models::PaymentInitiationPaymentGetResponse, Error<PaymentInitiationPaymentGetError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -7920,10 +7920,10 @@ pub async fn payment_initiation_payment_get(configuration: &configuration::Confi
     local_var_req_builder = local_var_req_builder.json(&payment_initiation_payment_get_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -7935,7 +7935,7 @@ pub async fn payment_initiation_payment_get(configuration: &configuration::Confi
 }
 
 /// The `/payment_initiation/payment/list` endpoint can be used to retrieve all created payments. By default, the 10 most recent payments are returned. You can request more payments and paginate through the results using the optional `count` and `cursor` parameters.
-pub async fn payment_initiation_payment_list(configuration: &configuration::Configuration, payment_initiation_payment_list_request: crate::models::PaymentInitiationPaymentListRequest) -> Result<crate::models::PaymentInitiationPaymentListResponse, Error<PaymentInitiationPaymentListError>> {
+pub fn payment_initiation_payment_list(configuration: &configuration::Configuration, payment_initiation_payment_list_request: crate::models::PaymentInitiationPaymentListRequest) -> Result<crate::models::PaymentInitiationPaymentListResponse, Error<PaymentInitiationPaymentListError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -7973,10 +7973,10 @@ pub async fn payment_initiation_payment_list(configuration: &configuration::Conf
     local_var_req_builder = local_var_req_builder.json(&payment_initiation_payment_list_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -7988,7 +7988,7 @@ pub async fn payment_initiation_payment_list(configuration: &configuration::Conf
 }
 
 /// Reverse a settled payment from a Plaid virtual account.  The original payment must be in a settled state to be refunded. To refund partially, specify the amount as part of the request. If the amount is not specified, the refund amount will be equal to all of the remaining payment amount that has not been refunded yet.  The refund will go back to the source account that initiated the payment. The original payment must have been initiated to a Plaid virtual account so that this account can be used to initiate the refund. 
-pub async fn payment_initiation_payment_reverse(configuration: &configuration::Configuration, payment_initiation_payment_reverse_request: crate::models::PaymentInitiationPaymentReverseRequest) -> Result<crate::models::PaymentInitiationPaymentReverseResponse, Error<PaymentInitiationPaymentReverseError>> {
+pub fn payment_initiation_payment_reverse(configuration: &configuration::Configuration, payment_initiation_payment_reverse_request: crate::models::PaymentInitiationPaymentReverseRequest) -> Result<crate::models::PaymentInitiationPaymentReverseResponse, Error<PaymentInitiationPaymentReverseError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -8026,10 +8026,10 @@ pub async fn payment_initiation_payment_reverse(configuration: &configuration::C
     local_var_req_builder = local_var_req_builder.json(&payment_initiation_payment_reverse_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -8041,7 +8041,7 @@ pub async fn payment_initiation_payment_reverse(configuration: &configuration::C
 }
 
 /// Create a payment recipient for payment initiation.  The recipient must be in Europe, within a country that is a member of the Single Euro Payment Area (SEPA) or a non-Eurozone country [supported](https://plaid.com/global) by Plaid. For a standing order (recurring) payment, the recipient must be in the UK.  It is recommended to use `bacs` in the UK and `iban` in EU.  The endpoint is idempotent: if a developer has already made a request with the same payment details, Plaid will return the same `recipient_id`. 
-pub async fn payment_initiation_recipient_create(configuration: &configuration::Configuration, payment_initiation_recipient_create_request: crate::models::PaymentInitiationRecipientCreateRequest) -> Result<crate::models::PaymentInitiationRecipientCreateResponse, Error<PaymentInitiationRecipientCreateError>> {
+pub fn payment_initiation_recipient_create(configuration: &configuration::Configuration, payment_initiation_recipient_create_request: crate::models::PaymentInitiationRecipientCreateRequest) -> Result<crate::models::PaymentInitiationRecipientCreateResponse, Error<PaymentInitiationRecipientCreateError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -8079,10 +8079,10 @@ pub async fn payment_initiation_recipient_create(configuration: &configuration::
     local_var_req_builder = local_var_req_builder.json(&payment_initiation_recipient_create_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -8094,7 +8094,7 @@ pub async fn payment_initiation_recipient_create(configuration: &configuration::
 }
 
 /// Get details about a payment recipient you have previously created.
-pub async fn payment_initiation_recipient_get(configuration: &configuration::Configuration, payment_initiation_recipient_get_request: crate::models::PaymentInitiationRecipientGetRequest) -> Result<crate::models::PaymentInitiationRecipientGetResponse, Error<PaymentInitiationRecipientGetError>> {
+pub fn payment_initiation_recipient_get(configuration: &configuration::Configuration, payment_initiation_recipient_get_request: crate::models::PaymentInitiationRecipientGetRequest) -> Result<crate::models::PaymentInitiationRecipientGetResponse, Error<PaymentInitiationRecipientGetError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -8132,10 +8132,10 @@ pub async fn payment_initiation_recipient_get(configuration: &configuration::Con
     local_var_req_builder = local_var_req_builder.json(&payment_initiation_recipient_get_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -8147,7 +8147,7 @@ pub async fn payment_initiation_recipient_get(configuration: &configuration::Con
 }
 
 /// The `/payment_initiation/recipient/list` endpoint list the payment recipients that you have previously created.
-pub async fn payment_initiation_recipient_list(configuration: &configuration::Configuration, payment_initiation_recipient_list_request: crate::models::PaymentInitiationRecipientListRequest) -> Result<crate::models::PaymentInitiationRecipientListResponse, Error<PaymentInitiationRecipientListError>> {
+pub fn payment_initiation_recipient_list(configuration: &configuration::Configuration, payment_initiation_recipient_list_request: crate::models::PaymentInitiationRecipientListRequest) -> Result<crate::models::PaymentInitiationRecipientListResponse, Error<PaymentInitiationRecipientListError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -8185,10 +8185,10 @@ pub async fn payment_initiation_recipient_list(configuration: &configuration::Co
     local_var_req_builder = local_var_req_builder.json(&payment_initiation_recipient_list_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -8200,7 +8200,7 @@ pub async fn payment_initiation_recipient_list(configuration: &configuration::Co
 }
 
 /// Use `/payment_profile/create` endpoint to create a new payment profile. To initiate the account linking experience, call `/link/token/create` and provide the `payment_profile_token` in the `transfer.payment_profile_token` field. You can then use the `payment_profile_token` when creating transfers using `/transfer/authorization/create` and `/transfer/create`.
-pub async fn payment_profile_create(configuration: &configuration::Configuration, payment_profile_create_request: crate::models::PaymentProfileCreateRequest) -> Result<crate::models::PaymentProfileCreateResponse, Error<PaymentProfileCreateError>> {
+pub fn payment_profile_create(configuration: &configuration::Configuration, payment_profile_create_request: crate::models::PaymentProfileCreateRequest) -> Result<crate::models::PaymentProfileCreateResponse, Error<PaymentProfileCreateError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -8238,10 +8238,10 @@ pub async fn payment_profile_create(configuration: &configuration::Configuration
     local_var_req_builder = local_var_req_builder.json(&payment_profile_create_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -8253,7 +8253,7 @@ pub async fn payment_profile_create(configuration: &configuration::Configuration
 }
 
 /// Use `/payment_profile/get` endpoint to get the status of a given Payment Profile.
-pub async fn payment_profile_get(configuration: &configuration::Configuration, payment_profile_get_request: crate::models::PaymentProfileGetRequest) -> Result<crate::models::PaymentProfileGetResponse, Error<PaymentProfileGetError>> {
+pub fn payment_profile_get(configuration: &configuration::Configuration, payment_profile_get_request: crate::models::PaymentProfileGetRequest) -> Result<crate::models::PaymentProfileGetResponse, Error<PaymentProfileGetError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -8291,10 +8291,10 @@ pub async fn payment_profile_get(configuration: &configuration::Configuration, p
     local_var_req_builder = local_var_req_builder.json(&payment_profile_get_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -8306,7 +8306,7 @@ pub async fn payment_profile_get(configuration: &configuration::Configuration, p
 }
 
 /// Use the `/payment_profile/remove` endpoint to remove a given Payment Profile. Once it’s removed, it can no longer be used to create transfers.
-pub async fn payment_profile_remove(configuration: &configuration::Configuration, payment_profile_remove_request: crate::models::PaymentProfileRemoveRequest) -> Result<crate::models::PaymentProfileRemoveResponse, Error<PaymentProfileRemoveError>> {
+pub fn payment_profile_remove(configuration: &configuration::Configuration, payment_profile_remove_request: crate::models::PaymentProfileRemoveRequest) -> Result<crate::models::PaymentProfileRemoveResponse, Error<PaymentProfileRemoveError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -8344,10 +8344,10 @@ pub async fn payment_profile_remove(configuration: &configuration::Configuration
     local_var_req_builder = local_var_req_builder.json(&payment_profile_remove_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -8359,7 +8359,7 @@ pub async fn payment_profile_remove(configuration: &configuration::Configuration
 }
 
 /// This endpoint returns the account associated with a given processor token.  This endpoint retrieves cached information, rather than extracting fresh information from the institution. As a result, the account balance returned may not be up-to-date; for realtime balance information, use `/processor/balance/get` instead. Note that some information is nullable. 
-pub async fn processor_account_get(configuration: &configuration::Configuration, processor_account_get_request: crate::models::ProcessorAccountGetRequest) -> Result<crate::models::ProcessorAccountGetResponse, Error<ProcessorAccountGetError>> {
+pub fn processor_account_get(configuration: &configuration::Configuration, processor_account_get_request: crate::models::ProcessorAccountGetRequest) -> Result<crate::models::ProcessorAccountGetResponse, Error<ProcessorAccountGetError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -8397,10 +8397,10 @@ pub async fn processor_account_get(configuration: &configuration::Configuration,
     local_var_req_builder = local_var_req_builder.json(&processor_account_get_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -8412,7 +8412,7 @@ pub async fn processor_account_get(configuration: &configuration::Configuration,
 }
 
 /// Used to create a token suitable for sending to Apex to enable Plaid-Apex integrations.
-pub async fn processor_apex_processor_token_create(configuration: &configuration::Configuration, processor_apex_processor_token_create_request: crate::models::ProcessorApexProcessorTokenCreateRequest) -> Result<crate::models::ProcessorTokenCreateResponse, Error<ProcessorApexProcessorTokenCreateError>> {
+pub fn processor_apex_processor_token_create(configuration: &configuration::Configuration, processor_apex_processor_token_create_request: crate::models::ProcessorApexProcessorTokenCreateRequest) -> Result<crate::models::ProcessorTokenCreateResponse, Error<ProcessorApexProcessorTokenCreateError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -8450,10 +8450,10 @@ pub async fn processor_apex_processor_token_create(configuration: &configuration
     local_var_req_builder = local_var_req_builder.json(&processor_apex_processor_token_create_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -8465,7 +8465,7 @@ pub async fn processor_apex_processor_token_create(configuration: &configuration
 }
 
 /// The `/processor/auth/get` endpoint returns the bank account and bank identification number (such as the routing number, for US accounts), for a checking or savings account that''s associated with a given `processor_token`. The endpoint also returns high-level account data and balances when available.  Versioning note: API versions 2019-05-29 and earlier use a different schema for the `numbers` object returned by this endpoint. For details, see [Plaid API versioning](https://plaid.com/docs/api/versioning/#version-2020-09-14). 
-pub async fn processor_auth_get(configuration: &configuration::Configuration, processor_auth_get_request: crate::models::ProcessorAuthGetRequest) -> Result<crate::models::ProcessorAuthGetResponse, Error<ProcessorAuthGetError>> {
+pub fn processor_auth_get(configuration: &configuration::Configuration, processor_auth_get_request: crate::models::ProcessorAuthGetRequest) -> Result<crate::models::ProcessorAuthGetResponse, Error<ProcessorAuthGetError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -8503,10 +8503,10 @@ pub async fn processor_auth_get(configuration: &configuration::Configuration, pr
     local_var_req_builder = local_var_req_builder.json(&processor_auth_get_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -8518,7 +8518,7 @@ pub async fn processor_auth_get(configuration: &configuration::Configuration, pr
 }
 
 /// The `/processor/balance/get` endpoint returns the real-time balance for each of an Item's accounts. While other endpoints may return a balance object, only `/processor/balance/get` forces the available and current balance fields to be refreshed rather than cached. 
-pub async fn processor_balance_get(configuration: &configuration::Configuration, processor_balance_get_request: crate::models::ProcessorBalanceGetRequest) -> Result<crate::models::ProcessorBalanceGetResponse, Error<ProcessorBalanceGetError>> {
+pub fn processor_balance_get(configuration: &configuration::Configuration, processor_balance_get_request: crate::models::ProcessorBalanceGetRequest) -> Result<crate::models::ProcessorBalanceGetResponse, Error<ProcessorBalanceGetError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -8556,10 +8556,10 @@ pub async fn processor_balance_get(configuration: &configuration::Configuration,
     local_var_req_builder = local_var_req_builder.json(&processor_balance_get_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -8571,7 +8571,7 @@ pub async fn processor_balance_get(configuration: &configuration::Configuration,
 }
 
 /// Use the `/processor/bank_transfer/create` endpoint to initiate a new bank transfer as a processor
-pub async fn processor_bank_transfer_create(configuration: &configuration::Configuration, processor_bank_transfer_create_request: crate::models::ProcessorBankTransferCreateRequest) -> Result<crate::models::ProcessorBankTransferCreateResponse, Error<ProcessorBankTransferCreateError>> {
+pub fn processor_bank_transfer_create(configuration: &configuration::Configuration, processor_bank_transfer_create_request: crate::models::ProcessorBankTransferCreateRequest) -> Result<crate::models::ProcessorBankTransferCreateResponse, Error<ProcessorBankTransferCreateError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -8609,10 +8609,10 @@ pub async fn processor_bank_transfer_create(configuration: &configuration::Confi
     local_var_req_builder = local_var_req_builder.json(&processor_bank_transfer_create_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -8624,7 +8624,7 @@ pub async fn processor_bank_transfer_create(configuration: &configuration::Confi
 }
 
 /// The `/processor/identity/get` endpoint allows you to retrieve various account holder information on file with the financial institution, including names, emails, phone numbers, and addresses.
-pub async fn processor_identity_get(configuration: &configuration::Configuration, processor_identity_get_request: crate::models::ProcessorIdentityGetRequest) -> Result<crate::models::ProcessorIdentityGetResponse, Error<ProcessorIdentityGetError>> {
+pub fn processor_identity_get(configuration: &configuration::Configuration, processor_identity_get_request: crate::models::ProcessorIdentityGetRequest) -> Result<crate::models::ProcessorIdentityGetResponse, Error<ProcessorIdentityGetError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -8662,10 +8662,10 @@ pub async fn processor_identity_get(configuration: &configuration::Configuration
     local_var_req_builder = local_var_req_builder.json(&processor_identity_get_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -8677,7 +8677,7 @@ pub async fn processor_identity_get(configuration: &configuration::Configuration
 }
 
 /// The `/processor/identity/match` endpoint generates a match score, which indicates how well the provided identity data matches the identity information on file with the account holder's financial institution.  Fields within the `balances` object will always be null when retrieved by `/identity/match`. Instead, use the free `/accounts/get` endpoint to request balance cached data, or `/accounts/balance/get` for real-time data.  This request may take some time to complete if Identity was not specified as an initial product when creating the Item. This is because Plaid must communicate directly with the institution to retrieve the data.
-pub async fn processor_identity_match(configuration: &configuration::Configuration, processor_identity_match_request: crate::models::ProcessorIdentityMatchRequest) -> Result<crate::models::ProcessorIdentityMatchResponse, Error<ProcessorIdentityMatchError>> {
+pub fn processor_identity_match(configuration: &configuration::Configuration, processor_identity_match_request: crate::models::ProcessorIdentityMatchRequest) -> Result<crate::models::ProcessorIdentityMatchResponse, Error<ProcessorIdentityMatchError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -8715,10 +8715,10 @@ pub async fn processor_identity_match(configuration: &configuration::Configurati
     local_var_req_builder = local_var_req_builder.json(&processor_identity_match_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -8730,7 +8730,7 @@ pub async fn processor_identity_match(configuration: &configuration::Configurati
 }
 
 /// After calling `/processor/signal/evaluate`, call `/processor/signal/decision/report` to report whether the transaction was initiated.
-pub async fn processor_signal_decision_report(configuration: &configuration::Configuration, processor_signal_decision_report_request: crate::models::ProcessorSignalDecisionReportRequest) -> Result<crate::models::ProcessorSignalDecisionReportResponse, Error<ProcessorSignalDecisionReportError>> {
+pub fn processor_signal_decision_report(configuration: &configuration::Configuration, processor_signal_decision_report_request: crate::models::ProcessorSignalDecisionReportRequest) -> Result<crate::models::ProcessorSignalDecisionReportResponse, Error<ProcessorSignalDecisionReportError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -8768,10 +8768,10 @@ pub async fn processor_signal_decision_report(configuration: &configuration::Con
     local_var_req_builder = local_var_req_builder.json(&processor_signal_decision_report_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -8783,7 +8783,7 @@ pub async fn processor_signal_decision_report(configuration: &configuration::Con
 }
 
 /// Use `/processor/signal/evaluate` to evaluate a planned ACH transaction as a processor to get a return risk assessment (such as a risk score and risk tier) and additional risk signals.  In order to obtain a valid score for an ACH transaction, Plaid must have an access token for the account, and the Item must be healthy (receiving product updates) or have recently been in a healthy state. If the transaction does not meet eligibility requirements, an error will be returned corresponding to the underlying cause. If `/processor/signal/evaluate` is called on the same transaction multiple times within a 24-hour period, cached results may be returned. For more information please refer to our error documentation on [item errors](/docs/errors/item/) and [Link in Update Mode](/docs/link/update-mode/).  Note: This request may take some time to complete if Signal is being added to an existing Item. This is because Plaid must communicate directly with the institution when retrieving the data for the first time. To reduce this latency, you can call `/signal/prepare` on the Item before you need to request Signal data.
-pub async fn processor_signal_evaluate(configuration: &configuration::Configuration, processor_signal_evaluate_request: crate::models::ProcessorSignalEvaluateRequest) -> Result<crate::models::ProcessorSignalEvaluateResponse, Error<ProcessorSignalEvaluateError>> {
+pub fn processor_signal_evaluate(configuration: &configuration::Configuration, processor_signal_evaluate_request: crate::models::ProcessorSignalEvaluateRequest) -> Result<crate::models::ProcessorSignalEvaluateResponse, Error<ProcessorSignalEvaluateError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -8821,10 +8821,10 @@ pub async fn processor_signal_evaluate(configuration: &configuration::Configurat
     local_var_req_builder = local_var_req_builder.json(&processor_signal_evaluate_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -8836,7 +8836,7 @@ pub async fn processor_signal_evaluate(configuration: &configuration::Configurat
 }
 
 /// When a processor token is not initialized with Signal, call `/processor/signal/prepare` to opt-in that processor token to the Signal data collection process, which will improve the accuracy of the Signal score.  If this endpoint is called with a processor token that is already initialized with Signal, it will return a 200 response and will not modify the processor token.
-pub async fn processor_signal_prepare(configuration: &configuration::Configuration, processor_signal_prepare_request: crate::models::ProcessorSignalPrepareRequest) -> Result<crate::models::ProcessorSignalPrepareResponse, Error<ProcessorSignalPrepareError>> {
+pub fn processor_signal_prepare(configuration: &configuration::Configuration, processor_signal_prepare_request: crate::models::ProcessorSignalPrepareRequest) -> Result<crate::models::ProcessorSignalPrepareResponse, Error<ProcessorSignalPrepareError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -8874,10 +8874,10 @@ pub async fn processor_signal_prepare(configuration: &configuration::Configurati
     local_var_req_builder = local_var_req_builder.json(&processor_signal_prepare_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -8889,7 +8889,7 @@ pub async fn processor_signal_prepare(configuration: &configuration::Configurati
 }
 
 /// Call the `/processor/signal/return/report` endpoint to report a returned transaction that was previously sent to the `/processor/signal/evaluate` endpoint. Your feedback will be used by the model to incorporate the latest risk trend in your portfolio.
-pub async fn processor_signal_return_report(configuration: &configuration::Configuration, processor_signal_return_report_request: crate::models::ProcessorSignalReturnReportRequest) -> Result<crate::models::ProcessorSignalReturnReportResponse, Error<ProcessorSignalReturnReportError>> {
+pub fn processor_signal_return_report(configuration: &configuration::Configuration, processor_signal_return_report_request: crate::models::ProcessorSignalReturnReportRequest) -> Result<crate::models::ProcessorSignalReturnReportResponse, Error<ProcessorSignalReturnReportError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -8927,10 +8927,10 @@ pub async fn processor_signal_return_report(configuration: &configuration::Confi
     local_var_req_builder = local_var_req_builder.json(&processor_signal_return_report_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -8942,7 +8942,7 @@ pub async fn processor_signal_return_report(configuration: &configuration::Confi
 }
 
 ///  Used to create a token suitable for sending to Stripe to enable Plaid-Stripe integrations. For a detailed guide on integrating Stripe, see [Add Stripe to your app](https://plaid.com/docs/auth/partnerships/stripe/).  Note that the Stripe bank account token is a one-time use token. To store bank account information for later use, you can use a Stripe customer object and create an associated bank account from the token, or you can use a Stripe Custom account and create an associated external bank account from the token. This bank account information should work indefinitely, unless the user's bank account information changes or they revoke Plaid's permissions to access their account. Stripe bank account information cannot be modified once the bank account token has been created. If you ever need to change the bank account details used by Stripe for a specific customer, have the user go through Link again and create a new bank account token from the new `access_token`.  Bank account tokens can also be revoked, using `/item/remove`.
-pub async fn processor_stripe_bank_account_token_create(configuration: &configuration::Configuration, processor_stripe_bank_account_token_create_request: crate::models::ProcessorStripeBankAccountTokenCreateRequest) -> Result<crate::models::ProcessorStripeBankAccountTokenCreateResponse, Error<ProcessorStripeBankAccountTokenCreateError>> {
+pub fn processor_stripe_bank_account_token_create(configuration: &configuration::Configuration, processor_stripe_bank_account_token_create_request: crate::models::ProcessorStripeBankAccountTokenCreateRequest) -> Result<crate::models::ProcessorStripeBankAccountTokenCreateResponse, Error<ProcessorStripeBankAccountTokenCreateError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -8980,10 +8980,10 @@ pub async fn processor_stripe_bank_account_token_create(configuration: &configur
     local_var_req_builder = local_var_req_builder.json(&processor_stripe_bank_account_token_create_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -8995,7 +8995,7 @@ pub async fn processor_stripe_bank_account_token_create(configuration: &configur
 }
 
 /// Used to create a token suitable for sending to one of Plaid's partners to enable integrations. Note that Stripe partnerships use bank account tokens instead; see `/processor/stripe/bank_account_token/create` for creating tokens for use with Stripe integrations. Once created, a processor token for a given Item cannot be modified or updated. If the account must be linked to a new or different partner resource, create a new Item by having the user go through the Link flow again; a new processor token can then be created from the new `access_token`. Processor tokens can also be revoked, using `/item/remove`.
-pub async fn processor_token_create(configuration: &configuration::Configuration, processor_token_create_request: crate::models::ProcessorTokenCreateRequest) -> Result<crate::models::ProcessorTokenCreateResponse, Error<ProcessorTokenCreateError>> {
+pub fn processor_token_create(configuration: &configuration::Configuration, processor_token_create_request: crate::models::ProcessorTokenCreateRequest) -> Result<crate::models::ProcessorTokenCreateResponse, Error<ProcessorTokenCreateError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -9033,10 +9033,10 @@ pub async fn processor_token_create(configuration: &configuration::Configuration
     local_var_req_builder = local_var_req_builder.json(&processor_token_create_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -9048,7 +9048,7 @@ pub async fn processor_token_create(configuration: &configuration::Configuration
 }
 
 /// Used to get a processor token's product permissions. The `products` field will be an empty list if the processor can access all available products.
-pub async fn processor_token_permissions_get(configuration: &configuration::Configuration, processor_token_permissions_get_request: crate::models::ProcessorTokenPermissionsGetRequest) -> Result<crate::models::ProcessorTokenPermissionsGetResponse, Error<ProcessorTokenPermissionsGetError>> {
+pub fn processor_token_permissions_get(configuration: &configuration::Configuration, processor_token_permissions_get_request: crate::models::ProcessorTokenPermissionsGetRequest) -> Result<crate::models::ProcessorTokenPermissionsGetResponse, Error<ProcessorTokenPermissionsGetError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -9086,10 +9086,10 @@ pub async fn processor_token_permissions_get(configuration: &configuration::Conf
     local_var_req_builder = local_var_req_builder.json(&processor_token_permissions_get_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -9101,7 +9101,7 @@ pub async fn processor_token_permissions_get(configuration: &configuration::Conf
 }
 
 /// Used to control a processor's access to products on the given processor token. By default, a processor will have access to all available products on the corresponding item. To restrict access to a particular set of products, call this endpoint with the desired products. To restore access to all available products, call this endpoint with an empty list. This endpoint can be called multiple times as your needs and your processor's needs change.
-pub async fn processor_token_permissions_set(configuration: &configuration::Configuration, processor_token_permissions_set_request: crate::models::ProcessorTokenPermissionsSetRequest) -> Result<crate::models::ProcessorTokenPermissionsSetResponse, Error<ProcessorTokenPermissionsSetError>> {
+pub fn processor_token_permissions_set(configuration: &configuration::Configuration, processor_token_permissions_set_request: crate::models::ProcessorTokenPermissionsSetRequest) -> Result<crate::models::ProcessorTokenPermissionsSetResponse, Error<ProcessorTokenPermissionsSetError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -9139,10 +9139,10 @@ pub async fn processor_token_permissions_set(configuration: &configuration::Conf
     local_var_req_builder = local_var_req_builder.json(&processor_token_permissions_set_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -9154,7 +9154,7 @@ pub async fn processor_token_permissions_set(configuration: &configuration::Conf
 }
 
 /// This endpoint allows you, the processor, to update the webhook URL associated with a processor token. This request triggers a `WEBHOOK_UPDATE_ACKNOWLEDGED` webhook to the newly specified webhook URL.
-pub async fn processor_token_webhook_update(configuration: &configuration::Configuration, processor_token_webhook_update_request: crate::models::ProcessorTokenWebhookUpdateRequest) -> Result<crate::models::ProcessorTokenWebhookUpdateResponse, Error<ProcessorTokenWebhookUpdateError>> {
+pub fn processor_token_webhook_update(configuration: &configuration::Configuration, processor_token_webhook_update_request: crate::models::ProcessorTokenWebhookUpdateRequest) -> Result<crate::models::ProcessorTokenWebhookUpdateResponse, Error<ProcessorTokenWebhookUpdateError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -9192,10 +9192,10 @@ pub async fn processor_token_webhook_update(configuration: &configuration::Confi
     local_var_req_builder = local_var_req_builder.json(&processor_token_webhook_update_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -9207,7 +9207,7 @@ pub async fn processor_token_webhook_update(configuration: &configuration::Confi
 }
 
 /// The `/processor/transactions/get` endpoint allows developers to receive user-authorized transaction data for credit, depository, and some loan-type accounts (only those with account subtype `student`; coverage may be limited). Transaction data is standardized across financial institutions, and in many cases transactions are linked to a clean name, entity type, location, and category. Similarly, account data is standardized and returned with a clean name, number, balance, and other meta information where available.  Transactions are returned in reverse-chronological order, and the sequence of transaction ordering is stable and will not shift.  Transactions are not immutable and can also be removed altogether by the institution; a removed transaction will no longer appear in `/processor/transactions/get`.  For more details, see [Pending and posted transactions](https://plaid.com/docs/transactions/transactions-data/#pending-and-posted-transactions).  Due to the potentially large number of transactions associated with a processor token, results are paginated. Manipulate the `count` and `offset` parameters in conjunction with the `total_transactions` response body field to fetch all available transactions.  Data returned by `/processor/transactions/get` will be the data available for the processor token as of the most recent successful check for new transactions. Plaid typically checks for new data multiple times a day, but these checks may occur less frequently, such as once a day, depending on the institution. To force Plaid to check for new transactions, you can use the `/processor/transactions/refresh` endpoint.  Note that data may not be immediately available to `/processor/transactions/get`. Plaid will begin to prepare transactions data upon Item link, if Link was initialized with `transactions`, or upon the first call to `/processor/transactions/get`, if it wasn't. If no transaction history is ready when `/processor/transactions/get` is called, it will return a `PRODUCT_NOT_READY` error.  To receive Transactions webhooks for a processor token, set its webhook URL via the [`/processor/token/webhook/update`](https://plaid.com/docs/api/processors/#processortokenwebhookupdate) endpoint.
-pub async fn processor_transactions_get(configuration: &configuration::Configuration, processor_transactions_get_request: crate::models::ProcessorTransactionsGetRequest) -> Result<crate::models::ProcessorTransactionsGetResponse, Error<ProcessorTransactionsGetError>> {
+pub fn processor_transactions_get(configuration: &configuration::Configuration, processor_transactions_get_request: crate::models::ProcessorTransactionsGetRequest) -> Result<crate::models::ProcessorTransactionsGetResponse, Error<ProcessorTransactionsGetError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -9245,10 +9245,10 @@ pub async fn processor_transactions_get(configuration: &configuration::Configura
     local_var_req_builder = local_var_req_builder.json(&processor_transactions_get_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -9260,7 +9260,7 @@ pub async fn processor_transactions_get(configuration: &configuration::Configura
 }
 
 /// The `/processor/transactions/recurring/get` endpoint allows developers to receive a summary of the recurring outflow and inflow streams (expenses and deposits) from a user’s checking, savings or credit card accounts. Additionally, Plaid provides key insights about each recurring stream including the category, merchant, last amount, and more. Developers can use these insights to build tools and experiences that help their users better manage cash flow, monitor subscriptions, reduce spend, and stay on track with bill payments.  This endpoint is offered as an add-on to Transactions. To request access to this endpoint, submit a [product access request](https://dashboard.plaid.com/team/products) or contact your Plaid account manager.  This endpoint can only be called on a processor token that has already been initialized with Transactions (either during Link, by specifying it in `/link/token/create`; or after Link, by calling `/processor/transactions/get` or `/processor/transactions/sync`). Once all historical transactions have been fetched, call `/processor/transactions/recurring/get` to receive the Recurring Transactions streams and subscribe to the [`RECURRING_TRANSACTIONS_UPDATE`](https://plaid.com/docs/api/products/transactions/#recurring_transactions_update) webhook. To know when historical transactions have been fetched, if you are using `/processor/transactions/sync` listen for the [`SYNC_UPDATES_AVAILABLE`](https://plaid.com/docs/api/products/transactions/#SyncUpdatesAvailableWebhook-historical-update-complete) webhook and check that the `historical_update_complete` field in the payload is `true`. If using `/processor/transactions/get`, listen for the [`HISTORICAL_UPDATE`](https://plaid.com/docs/api/products/transactions/#historical_update) webhook.  After the initial call, you can call `/processor/transactions/recurring/get` endpoint at any point in the future to retrieve the latest summary of recurring streams. Listen to the [`RECURRING_TRANSACTIONS_UPDATE`](https://plaid.com/docs/api/products/transactions/#recurring_transactions_update) webhook to be notified when new updates are available.  To receive Transactions webhooks for a processor token, set its webhook URL via the [`/processor/token/webhook/update`](https://plaid.com/docs/api/processors/#processortokenwebhookupdate) endpoint.
-pub async fn processor_transactions_recurring_get(configuration: &configuration::Configuration, processor_transactions_recurring_get_request: crate::models::ProcessorTransactionsRecurringGetRequest) -> Result<crate::models::ProcessorTransactionsRecurringGetResponse, Error<ProcessorTransactionsRecurringGetError>> {
+pub fn processor_transactions_recurring_get(configuration: &configuration::Configuration, processor_transactions_recurring_get_request: crate::models::ProcessorTransactionsRecurringGetRequest) -> Result<crate::models::ProcessorTransactionsRecurringGetResponse, Error<ProcessorTransactionsRecurringGetError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -9298,10 +9298,10 @@ pub async fn processor_transactions_recurring_get(configuration: &configuration:
     local_var_req_builder = local_var_req_builder.json(&processor_transactions_recurring_get_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -9313,7 +9313,7 @@ pub async fn processor_transactions_recurring_get(configuration: &configuration:
 }
 
 /// `/processor/transactions/refresh` is an optional endpoint for users of the Transactions product. It initiates an on-demand extraction to fetch the newest transactions for a processor token. This on-demand extraction takes place in addition to the periodic extractions that automatically occur multiple times a day for any Transactions-enabled processor token. If changes to transactions are discovered after calling `/processor/transactions/refresh`, Plaid will fire a webhook: for `/transactions/sync` users, [`SYNC_UPDATES_AVAILABLE`](https://plaid.com/docs/api/products/transactions/#sync_updates_available) will be fired if there are any transactions updated, added, or removed. For users of both `/processor/transactions/sync` and `/processor/transactions/get`, [`TRANSACTIONS_REMOVED`](https://plaid.com/docs/api/products/transactions/#transactions_removed) will be fired if any removed transactions are detected, and [`DEFAULT_UPDATE`](https://plaid.com/docs/api/products/transactions/#default_update) will be fired if any new transactions are detected. New transactions can be fetched by calling `/processor/transactions/get` or `/processor/transactions/sync`. Note that the `/processor/transactions/refresh` endpoint is not supported for Capital One (`ins_128026`) and will result in a `PRODUCT_NOT_SUPPORTED` error if called on a processor token from that institution.  `/processor/transactions/refresh` is offered as an add-on to Transactions and has a separate [fee model](/docs/account/billing/#per-request-flat-fee). To request access to this endpoint, submit a [product access request](https://dashboard.plaid.com/team/products) or contact your Plaid account manager.
-pub async fn processor_transactions_refresh(configuration: &configuration::Configuration, processor_transactions_refresh_request: crate::models::ProcessorTransactionsRefreshRequest) -> Result<crate::models::ProcessorTransactionsRefreshResponse, Error<ProcessorTransactionsRefreshError>> {
+pub fn processor_transactions_refresh(configuration: &configuration::Configuration, processor_transactions_refresh_request: crate::models::ProcessorTransactionsRefreshRequest) -> Result<crate::models::ProcessorTransactionsRefreshResponse, Error<ProcessorTransactionsRefreshError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -9351,10 +9351,10 @@ pub async fn processor_transactions_refresh(configuration: &configuration::Confi
     local_var_req_builder = local_var_req_builder.json(&processor_transactions_refresh_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -9366,7 +9366,7 @@ pub async fn processor_transactions_refresh(configuration: &configuration::Confi
 }
 
 /// This endpoint replaces `/processor/transactions/get` and its associated webhooks for most common use-cases.  The `/processor/transactions/sync` endpoint allows developers to subscribe to all transactions associated with a processor token and get updates synchronously in a stream-like manner, using a cursor to track which updates have already been seen. `/processor/transactions/sync` provides the same functionality as `/processor/transactions/get` and can be used instead of `/processor/transactions/get` to simplify the process of tracking transactions updates.  This endpoint provides user-authorized transaction data for `credit`, `depository`, and some loan-type accounts (only those with account subtype `student`; coverage may be limited). For transaction history from `investments` accounts, use `/investments/transactions/get` instead.  Returned transactions data is grouped into three types of update, indicating whether the transaction was added, removed, or modified since the last call to the API.  In the first call to `/processor/transactions/sync` for a processor token, the endpoint will return all historical transactions data associated with that processor token up until the time of the API call (as \"adds\"), which then generates a `next_cursor` for that processor token. In subsequent calls, send the `next_cursor` to receive only the changes that have occurred since the previous call.  Due to the potentially large number of transactions associated with a processor token, results are paginated. The `has_more` field specifies if additional calls are necessary to fetch all available transaction updates. Call `/processor/transactions/sync` with the new cursor, pulling all updates, until `has_more` is `false`.  When retrieving paginated updates, track both the `next_cursor` from the latest response and the original cursor from the first call in which `has_more` was `true`; if a call to `/processor/transactions/sync` fails when retrieving a paginated update, which can occur as a result of the [`TRANSACTIONS_SYNC_MUTATION_DURING_PAGINATION`](https://plaid.com/docs/errors/transactions/#transactions_sync_mutation_during_pagination) error, the entire pagination request loop must be restarted beginning with the cursor for the first page of the update, rather than retrying only the single request that failed.  Whenever new or updated transaction data becomes available, `/processor/transactions/sync` will provide these updates. Plaid typically checks for new data multiple times a day, but these checks may occur less frequently, such as once a day, depending on the institution. To force Plaid to check for new transactions, use the `/processor/transactions/refresh` endpoint.  Note that for newly created processor tokens, data may not be immediately available to `/processor/transactions/sync`. Plaid begins preparing transactions data when the corresponding Item is created, but the process can take anywhere from a few seconds to several minutes to complete, depending on the number of transactions available.  To receive Transactions webhooks for a processor token, set its webhook URL via the [`/processor/token/webhook/update`](https://plaid.com/docs/api/processors/#processortokenwebhookupdate) endpoint.
-pub async fn processor_transactions_sync(configuration: &configuration::Configuration, processor_transactions_sync_request: crate::models::ProcessorTransactionsSyncRequest) -> Result<crate::models::ProcessorTransactionsSyncResponse, Error<ProcessorTransactionsSyncError>> {
+pub fn processor_transactions_sync(configuration: &configuration::Configuration, processor_transactions_sync_request: crate::models::ProcessorTransactionsSyncRequest) -> Result<crate::models::ProcessorTransactionsSyncResponse, Error<ProcessorTransactionsSyncError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -9404,10 +9404,10 @@ pub async fn processor_transactions_sync(configuration: &configuration::Configur
     local_var_req_builder = local_var_req_builder.json(&processor_transactions_sync_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -9419,7 +9419,7 @@ pub async fn processor_transactions_sync(configuration: &configuration::Configur
 }
 
 /// Use the `/sandbox/bank_income/fire_webhook` endpoint to manually trigger a Bank Income webhook in the Sandbox environment.
-pub async fn sandbox_bank_income_fire_webhook(configuration: &configuration::Configuration, sandbox_bank_income_fire_webhook_request: crate::models::SandboxBankIncomeFireWebhookRequest) -> Result<crate::models::SandboxBankIncomeFireWebhookResponse, Error<SandboxBankIncomeFireWebhookError>> {
+pub fn sandbox_bank_income_fire_webhook(configuration: &configuration::Configuration, sandbox_bank_income_fire_webhook_request: crate::models::SandboxBankIncomeFireWebhookRequest) -> Result<crate::models::SandboxBankIncomeFireWebhookResponse, Error<SandboxBankIncomeFireWebhookError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -9457,10 +9457,10 @@ pub async fn sandbox_bank_income_fire_webhook(configuration: &configuration::Con
     local_var_req_builder = local_var_req_builder.json(&sandbox_bank_income_fire_webhook_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -9472,7 +9472,7 @@ pub async fn sandbox_bank_income_fire_webhook(configuration: &configuration::Con
 }
 
 /// Use the `/sandbox/bank_transfer/fire_webhook` endpoint to manually trigger a Bank Transfers webhook in the Sandbox environment.
-pub async fn sandbox_bank_transfer_fire_webhook(configuration: &configuration::Configuration, sandbox_bank_transfer_fire_webhook_request: crate::models::SandboxBankTransferFireWebhookRequest) -> Result<crate::models::SandboxBankTransferFireWebhookResponse, Error<SandboxBankTransferFireWebhookError>> {
+pub fn sandbox_bank_transfer_fire_webhook(configuration: &configuration::Configuration, sandbox_bank_transfer_fire_webhook_request: crate::models::SandboxBankTransferFireWebhookRequest) -> Result<crate::models::SandboxBankTransferFireWebhookResponse, Error<SandboxBankTransferFireWebhookError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -9510,10 +9510,10 @@ pub async fn sandbox_bank_transfer_fire_webhook(configuration: &configuration::C
     local_var_req_builder = local_var_req_builder.json(&sandbox_bank_transfer_fire_webhook_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -9525,7 +9525,7 @@ pub async fn sandbox_bank_transfer_fire_webhook(configuration: &configuration::C
 }
 
 /// Use the `/sandbox/bank_transfer/simulate` endpoint to simulate a bank transfer event in the Sandbox environment.  Note that while an event will be simulated and will appear when using endpoints such as `/bank_transfer/event/sync` or `/bank_transfer/event/list`, no transactions will actually take place and funds will not move between accounts, even within the Sandbox.
-pub async fn sandbox_bank_transfer_simulate(configuration: &configuration::Configuration, sandbox_bank_transfer_simulate_request: crate::models::SandboxBankTransferSimulateRequest) -> Result<crate::models::SandboxBankTransferSimulateResponse, Error<SandboxBankTransferSimulateError>> {
+pub fn sandbox_bank_transfer_simulate(configuration: &configuration::Configuration, sandbox_bank_transfer_simulate_request: crate::models::SandboxBankTransferSimulateRequest) -> Result<crate::models::SandboxBankTransferSimulateResponse, Error<SandboxBankTransferSimulateError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -9563,10 +9563,10 @@ pub async fn sandbox_bank_transfer_simulate(configuration: &configuration::Confi
     local_var_req_builder = local_var_req_builder.json(&sandbox_bank_transfer_simulate_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -9578,7 +9578,7 @@ pub async fn sandbox_bank_transfer_simulate(configuration: &configuration::Confi
 }
 
 /// Use the `/sandbox/income/fire_webhook` endpoint to manually trigger a Payroll or Document Income webhook in the Sandbox environment.
-pub async fn sandbox_income_fire_webhook(configuration: &configuration::Configuration, sandbox_income_fire_webhook_request: crate::models::SandboxIncomeFireWebhookRequest) -> Result<crate::models::SandboxIncomeFireWebhookResponse, Error<SandboxIncomeFireWebhookError>> {
+pub fn sandbox_income_fire_webhook(configuration: &configuration::Configuration, sandbox_income_fire_webhook_request: crate::models::SandboxIncomeFireWebhookRequest) -> Result<crate::models::SandboxIncomeFireWebhookResponse, Error<SandboxIncomeFireWebhookError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -9616,10 +9616,10 @@ pub async fn sandbox_income_fire_webhook(configuration: &configuration::Configur
     local_var_req_builder = local_var_req_builder.json(&sandbox_income_fire_webhook_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -9631,7 +9631,7 @@ pub async fn sandbox_income_fire_webhook(configuration: &configuration::Configur
 }
 
 /// The `/sandbox/item/fire_webhook` endpoint is used to test that code correctly handles webhooks. This endpoint can trigger the following webhooks:  `DEFAULT_UPDATE`: Transactions update webhook to be fired for a given Sandbox Item. If the Item does not support Transactions, a `SANDBOX_PRODUCT_NOT_ENABLED` error will result.  `NEW_ACCOUNTS_AVAILABLE`: Webhook to be fired for a given Sandbox Item created with Account Select v2.  `AUTH_DATA_UPDATE`: Webhook to be fired for a given Sandbox Item created with Auth as an enabled product.  `LOGIN_REPAIRED`: Fired when an Item recovers from the `ITEM_LOGIN_REQUIRED` without the user going through update mode in your app.  `RECURRING_TRANSACTIONS_UPDATE`: Recurring Transactions webhook to be fired for a given Sandbox Item. If the Item does not support Recurring Transactions, a `SANDBOX_PRODUCT_NOT_ENABLED` error will result.  `SYNC_UPDATES_AVAILABLE`: Transactions webhook to be fired for a given Sandbox Item.  If the Item does not support Transactions, a `SANDBOX_PRODUCT_NOT_ENABLED` error will result.  `PRODUCT_READY`: Assets webhook to be fired when a given asset report has been successfully generated. If the Item does not support Assets, a `SANDBOX_PRODUCT_NOT_ENABLED` error will result.  `ERROR`: Assets webhook to be fired when asset report generation has failed. If the Item does not support Assets, a `SANDBOX_PRODUCT_NOT_ENABLED` error will result.  Note that this endpoint is provided for developer ease-of-use and is not required for testing webhooks; webhooks will also fire in Sandbox under the same conditions that they would in Production or Development (except for webhooks of type `TRANSFER`).
-pub async fn sandbox_item_fire_webhook(configuration: &configuration::Configuration, sandbox_item_fire_webhook_request: crate::models::SandboxItemFireWebhookRequest) -> Result<crate::models::SandboxItemFireWebhookResponse, Error<SandboxItemFireWebhookError>> {
+pub fn sandbox_item_fire_webhook(configuration: &configuration::Configuration, sandbox_item_fire_webhook_request: crate::models::SandboxItemFireWebhookRequest) -> Result<crate::models::SandboxItemFireWebhookResponse, Error<SandboxItemFireWebhookError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -9669,10 +9669,10 @@ pub async fn sandbox_item_fire_webhook(configuration: &configuration::Configurat
     local_var_req_builder = local_var_req_builder.json(&sandbox_item_fire_webhook_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -9684,7 +9684,7 @@ pub async fn sandbox_item_fire_webhook(configuration: &configuration::Configurat
 }
 
 /// `/sandbox/item/reset_login/` forces an Item into an `ITEM_LOGIN_REQUIRED` state in order to simulate an Item whose login is no longer valid. This makes it easy to test Link's [update mode](https://plaid.com/docs/link/update-mode) flow in the Sandbox environment.  After calling `/sandbox/item/reset_login`, You can then use Plaid Link update mode to restore the Item to a good state. An `ITEM_LOGIN_REQUIRED` webhook will also be fired after a call to this endpoint, if one is associated with the Item.   In the Sandbox, Items will transition to an `ITEM_LOGIN_REQUIRED` error state automatically after 30 days, even if this endpoint is not called.
-pub async fn sandbox_item_reset_login(configuration: &configuration::Configuration, sandbox_item_reset_login_request: crate::models::SandboxItemResetLoginRequest) -> Result<crate::models::SandboxItemResetLoginResponse, Error<SandboxItemResetLoginError>> {
+pub fn sandbox_item_reset_login(configuration: &configuration::Configuration, sandbox_item_reset_login_request: crate::models::SandboxItemResetLoginRequest) -> Result<crate::models::SandboxItemResetLoginResponse, Error<SandboxItemResetLoginError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -9722,10 +9722,10 @@ pub async fn sandbox_item_reset_login(configuration: &configuration::Configurati
     local_var_req_builder = local_var_req_builder.json(&sandbox_item_reset_login_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -9737,7 +9737,7 @@ pub async fn sandbox_item_reset_login(configuration: &configuration::Configurati
 }
 
 /// The `/sandbox/item/set_verification_status` endpoint can be used to change the verification status of an Item in in the Sandbox in order to simulate the Automated Micro-deposit flow.  For more information on testing Automated Micro-deposits in Sandbox, see [Auth full coverage testing](https://plaid.com/docs/auth/coverage/testing#).
-pub async fn sandbox_item_set_verification_status(configuration: &configuration::Configuration, sandbox_item_set_verification_status_request: crate::models::SandboxItemSetVerificationStatusRequest) -> Result<crate::models::SandboxItemSetVerificationStatusResponse, Error<SandboxItemSetVerificationStatusError>> {
+pub fn sandbox_item_set_verification_status(configuration: &configuration::Configuration, sandbox_item_set_verification_status_request: crate::models::SandboxItemSetVerificationStatusRequest) -> Result<crate::models::SandboxItemSetVerificationStatusResponse, Error<SandboxItemSetVerificationStatusError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -9775,10 +9775,10 @@ pub async fn sandbox_item_set_verification_status(configuration: &configuration:
     local_var_req_builder = local_var_req_builder.json(&sandbox_item_set_verification_status_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -9790,7 +9790,7 @@ pub async fn sandbox_item_set_verification_status(configuration: &configuration:
 }
 
 /// Save the selected accounts when connecting to the Platypus Oauth institution
-pub async fn sandbox_oauth_select_accounts(configuration: &configuration::Configuration, sandbox_oauth_select_accounts_request: crate::models::SandboxOauthSelectAccountsRequest) -> Result<::std::collections::HashMap<String, serde_json::Value>, Error<SandboxOauthSelectAccountsError>> {
+pub fn sandbox_oauth_select_accounts(configuration: &configuration::Configuration, sandbox_oauth_select_accounts_request: crate::models::SandboxOauthSelectAccountsRequest) -> Result<::std::collections::HashMap<String, serde_json::Value>, Error<SandboxOauthSelectAccountsError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -9828,10 +9828,10 @@ pub async fn sandbox_oauth_select_accounts(configuration: &configuration::Config
     local_var_req_builder = local_var_req_builder.json(&sandbox_oauth_select_accounts_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -9843,7 +9843,7 @@ pub async fn sandbox_oauth_select_accounts(configuration: &configuration::Config
 }
 
 /// `/sandbox/payment_profile/reset_login/` forces a Payment Profile into a state where the login is no longer valid. This makes it easy to test update mode for Payment Profile in the Sandbox environment.   After calling `/sandbox/payment_profile/reset_login`, calls to the `/transfer/authorization/create` with the Payment Profile will result in a `decision_rationale` `PAYMENT_PROFILE_LOGIN_REQUIRED`. You can then use update mode for Payment Profile to restore it into a good state.   In order to invoke this endpoint, you must first [create a Payment Profile](https://plaid.com/docs/transfer/add-to-app/#create-a-payment-profile-optional) and [go through the Link flow](https://plaid.com/docs/transfer/add-to-app/#create-a-link-token).
-pub async fn sandbox_payment_profile_reset_login(configuration: &configuration::Configuration, sandbox_payment_profile_reset_login_request: crate::models::SandboxPaymentProfileResetLoginRequest) -> Result<crate::models::SandboxPaymentProfileResetLoginResponse, Error<SandboxPaymentProfileResetLoginError>> {
+pub fn sandbox_payment_profile_reset_login(configuration: &configuration::Configuration, sandbox_payment_profile_reset_login_request: crate::models::SandboxPaymentProfileResetLoginRequest) -> Result<crate::models::SandboxPaymentProfileResetLoginResponse, Error<SandboxPaymentProfileResetLoginError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -9881,10 +9881,10 @@ pub async fn sandbox_payment_profile_reset_login(configuration: &configuration::
     local_var_req_builder = local_var_req_builder.json(&sandbox_payment_profile_reset_login_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -9896,7 +9896,7 @@ pub async fn sandbox_payment_profile_reset_login(configuration: &configuration::
 }
 
 /// Use the `/sandbox/processor_token/create` endpoint to create a valid `processor_token` for an arbitrary institution ID and test credentials. The created `processor_token` corresponds to a new Sandbox Item. You can then use this `processor_token` with the `/processor/` API endpoints in Sandbox. You can also use `/sandbox/processor_token/create` with the [`user_custom` test username](https://plaid.com/docs/sandbox/user-custom) to generate a test account with custom data.
-pub async fn sandbox_processor_token_create(configuration: &configuration::Configuration, sandbox_processor_token_create_request: crate::models::SandboxProcessorTokenCreateRequest) -> Result<crate::models::SandboxProcessorTokenCreateResponse, Error<SandboxProcessorTokenCreateError>> {
+pub fn sandbox_processor_token_create(configuration: &configuration::Configuration, sandbox_processor_token_create_request: crate::models::SandboxProcessorTokenCreateRequest) -> Result<crate::models::SandboxProcessorTokenCreateResponse, Error<SandboxProcessorTokenCreateError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -9934,10 +9934,10 @@ pub async fn sandbox_processor_token_create(configuration: &configuration::Confi
     local_var_req_builder = local_var_req_builder.json(&sandbox_processor_token_create_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -9949,7 +9949,7 @@ pub async fn sandbox_processor_token_create(configuration: &configuration::Confi
 }
 
 /// Use the `/sandbox/public_token/create` endpoint to create a valid `public_token`  for an arbitrary institution ID, initial products, and test credentials. The created `public_token` maps to a new Sandbox Item. You can then call `/item/public_token/exchange` to exchange the `public_token` for an `access_token` and perform all API actions. `/sandbox/public_token/create` can also be used with the [`user_custom` test username](https://plaid.com/docs/sandbox/user-custom) to generate a test account with custom data. `/sandbox/public_token/create` cannot be used with OAuth institutions.
-pub async fn sandbox_public_token_create(configuration: &configuration::Configuration, sandbox_public_token_create_request: crate::models::SandboxPublicTokenCreateRequest) -> Result<crate::models::SandboxPublicTokenCreateResponse, Error<SandboxPublicTokenCreateError>> {
+pub fn sandbox_public_token_create(configuration: &configuration::Configuration, sandbox_public_token_create_request: crate::models::SandboxPublicTokenCreateRequest) -> Result<crate::models::SandboxPublicTokenCreateResponse, Error<SandboxPublicTokenCreateError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -9987,10 +9987,10 @@ pub async fn sandbox_public_token_create(configuration: &configuration::Configur
     local_var_req_builder = local_var_req_builder.json(&sandbox_public_token_create_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -10002,7 +10002,7 @@ pub async fn sandbox_public_token_create(configuration: &configuration::Configur
 }
 
 /// Use the `/sandbox/transfer/fire_webhook` endpoint to manually trigger a `TRANSFER_EVENTS_UPDATE` webhook in the Sandbox environment.
-pub async fn sandbox_transfer_fire_webhook(configuration: &configuration::Configuration, sandbox_transfer_fire_webhook_request: crate::models::SandboxTransferFireWebhookRequest) -> Result<crate::models::SandboxTransferFireWebhookResponse, Error<SandboxTransferFireWebhookError>> {
+pub fn sandbox_transfer_fire_webhook(configuration: &configuration::Configuration, sandbox_transfer_fire_webhook_request: crate::models::SandboxTransferFireWebhookRequest) -> Result<crate::models::SandboxTransferFireWebhookResponse, Error<SandboxTransferFireWebhookError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -10040,10 +10040,10 @@ pub async fn sandbox_transfer_fire_webhook(configuration: &configuration::Config
     local_var_req_builder = local_var_req_builder.json(&sandbox_transfer_fire_webhook_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -10055,7 +10055,7 @@ pub async fn sandbox_transfer_fire_webhook(configuration: &configuration::Config
 }
 
 /// Use the `/sandbox/transfer/ledger/deposit/simulate` endpoint to simulate a ledger deposit event in the Sandbox environment.
-pub async fn sandbox_transfer_ledger_deposit_simulate(configuration: &configuration::Configuration, sandbox_transfer_ledger_deposit_simulate_request: crate::models::SandboxTransferLedgerDepositSimulateRequest) -> Result<crate::models::SandboxTransferLedgerDepositSimulateResponse, Error<SandboxTransferLedgerDepositSimulateError>> {
+pub fn sandbox_transfer_ledger_deposit_simulate(configuration: &configuration::Configuration, sandbox_transfer_ledger_deposit_simulate_request: crate::models::SandboxTransferLedgerDepositSimulateRequest) -> Result<crate::models::SandboxTransferLedgerDepositSimulateResponse, Error<SandboxTransferLedgerDepositSimulateError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -10093,10 +10093,10 @@ pub async fn sandbox_transfer_ledger_deposit_simulate(configuration: &configurat
     local_var_req_builder = local_var_req_builder.json(&sandbox_transfer_ledger_deposit_simulate_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -10108,7 +10108,7 @@ pub async fn sandbox_transfer_ledger_deposit_simulate(configuration: &configurat
 }
 
 /// Use the `/sandbox/transfer/ledger/simulate_available` endpoint to simulate converting pending balance to available balance for all originators in the Sandbox environment.
-pub async fn sandbox_transfer_ledger_simulate_available(configuration: &configuration::Configuration, sandbox_transfer_ledger_simulate_available_request: crate::models::SandboxTransferLedgerSimulateAvailableRequest) -> Result<crate::models::SandboxTransferLedgerSimulateAvailableResponse, Error<SandboxTransferLedgerSimulateAvailableError>> {
+pub fn sandbox_transfer_ledger_simulate_available(configuration: &configuration::Configuration, sandbox_transfer_ledger_simulate_available_request: crate::models::SandboxTransferLedgerSimulateAvailableRequest) -> Result<crate::models::SandboxTransferLedgerSimulateAvailableResponse, Error<SandboxTransferLedgerSimulateAvailableError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -10146,10 +10146,10 @@ pub async fn sandbox_transfer_ledger_simulate_available(configuration: &configur
     local_var_req_builder = local_var_req_builder.json(&sandbox_transfer_ledger_simulate_available_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -10161,7 +10161,7 @@ pub async fn sandbox_transfer_ledger_simulate_available(configuration: &configur
 }
 
 /// Use the `/sandbox/transfer/ledger/withdraw/simulate` endpoint to simulate a ledger withdraw event in the Sandbox environment.
-pub async fn sandbox_transfer_ledger_withdraw_simulate(configuration: &configuration::Configuration, sandbox_transfer_ledger_withdraw_simulate_request: crate::models::SandboxTransferLedgerWithdrawSimulateRequest) -> Result<crate::models::SandboxTransferLedgerWithdrawSimulateResponse, Error<SandboxTransferLedgerWithdrawSimulateError>> {
+pub fn sandbox_transfer_ledger_withdraw_simulate(configuration: &configuration::Configuration, sandbox_transfer_ledger_withdraw_simulate_request: crate::models::SandboxTransferLedgerWithdrawSimulateRequest) -> Result<crate::models::SandboxTransferLedgerWithdrawSimulateResponse, Error<SandboxTransferLedgerWithdrawSimulateError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -10199,10 +10199,10 @@ pub async fn sandbox_transfer_ledger_withdraw_simulate(configuration: &configura
     local_var_req_builder = local_var_req_builder.json(&sandbox_transfer_ledger_withdraw_simulate_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -10214,7 +10214,7 @@ pub async fn sandbox_transfer_ledger_withdraw_simulate(configuration: &configura
 }
 
 /// Use the `/sandbox/transfer/refund/simulate` endpoint to simulate a refund event in the Sandbox environment.  Note that while an event will be simulated and will appear when using endpoints such as `/transfer/event/sync` or `/transfer/event/list`, no transactions will actually take place and funds will not move between accounts, even within the Sandbox.
-pub async fn sandbox_transfer_refund_simulate(configuration: &configuration::Configuration, sandbox_transfer_refund_simulate_request: crate::models::SandboxTransferRefundSimulateRequest) -> Result<crate::models::SandboxTransferRefundSimulateResponse, Error<SandboxTransferRefundSimulateError>> {
+pub fn sandbox_transfer_refund_simulate(configuration: &configuration::Configuration, sandbox_transfer_refund_simulate_request: crate::models::SandboxTransferRefundSimulateRequest) -> Result<crate::models::SandboxTransferRefundSimulateResponse, Error<SandboxTransferRefundSimulateError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -10252,10 +10252,10 @@ pub async fn sandbox_transfer_refund_simulate(configuration: &configuration::Con
     local_var_req_builder = local_var_req_builder.json(&sandbox_transfer_refund_simulate_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -10267,7 +10267,7 @@ pub async fn sandbox_transfer_refund_simulate(configuration: &configuration::Con
 }
 
 /// Use the `/sandbox/transfer/repayment/simulate` endpoint to trigger the creation of a repayment. As a side effect of calling this route, a repayment is created that includes all unreimbursed returns of guaranteed transfers. If there are no such returns, an 400 error is returned.
-pub async fn sandbox_transfer_repayment_simulate(configuration: &configuration::Configuration, sandbox_transfer_repayment_simulate_request: crate::models::SandboxTransferRepaymentSimulateRequest) -> Result<crate::models::SandboxTransferRepaymentSimulateResponse, Error<SandboxTransferRepaymentSimulateError>> {
+pub fn sandbox_transfer_repayment_simulate(configuration: &configuration::Configuration, sandbox_transfer_repayment_simulate_request: crate::models::SandboxTransferRepaymentSimulateRequest) -> Result<crate::models::SandboxTransferRepaymentSimulateResponse, Error<SandboxTransferRepaymentSimulateError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -10305,10 +10305,10 @@ pub async fn sandbox_transfer_repayment_simulate(configuration: &configuration::
     local_var_req_builder = local_var_req_builder.json(&sandbox_transfer_repayment_simulate_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -10320,7 +10320,7 @@ pub async fn sandbox_transfer_repayment_simulate(configuration: &configuration::
 }
 
 /// Use the `/sandbox/transfer/simulate` endpoint to simulate a transfer event in the Sandbox environment.  Note that while an event will be simulated and will appear when using endpoints such as `/transfer/event/sync` or `/transfer/event/list`, no transactions will actually take place and funds will not move between accounts, even within the Sandbox.
-pub async fn sandbox_transfer_simulate(configuration: &configuration::Configuration, sandbox_transfer_simulate_request: crate::models::SandboxTransferSimulateRequest) -> Result<crate::models::SandboxTransferSimulateResponse, Error<SandboxTransferSimulateError>> {
+pub fn sandbox_transfer_simulate(configuration: &configuration::Configuration, sandbox_transfer_simulate_request: crate::models::SandboxTransferSimulateRequest) -> Result<crate::models::SandboxTransferSimulateResponse, Error<SandboxTransferSimulateError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -10358,10 +10358,10 @@ pub async fn sandbox_transfer_simulate(configuration: &configuration::Configurat
     local_var_req_builder = local_var_req_builder.json(&sandbox_transfer_simulate_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -10373,7 +10373,7 @@ pub async fn sandbox_transfer_simulate(configuration: &configuration::Configurat
 }
 
 /// Use the `/sandbox/transfer/sweep/simulate` endpoint to create a sweep and associated events in the Sandbox environment. Upon calling this endpoint, all transfers with a sweep status of `swept` will become `swept_settled`, all `posted` or `pending` transfers with a sweep status of `unswept` will become `swept`, and all `returned` transfers with a sweep status of `swept` will become `return_swept`.
-pub async fn sandbox_transfer_sweep_simulate(configuration: &configuration::Configuration, sandbox_transfer_sweep_simulate_request: crate::models::SandboxTransferSweepSimulateRequest) -> Result<crate::models::SandboxTransferSweepSimulateResponse, Error<SandboxTransferSweepSimulateError>> {
+pub fn sandbox_transfer_sweep_simulate(configuration: &configuration::Configuration, sandbox_transfer_sweep_simulate_request: crate::models::SandboxTransferSweepSimulateRequest) -> Result<crate::models::SandboxTransferSweepSimulateResponse, Error<SandboxTransferSweepSimulateError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -10411,10 +10411,10 @@ pub async fn sandbox_transfer_sweep_simulate(configuration: &configuration::Conf
     local_var_req_builder = local_var_req_builder.json(&sandbox_transfer_sweep_simulate_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -10426,7 +10426,7 @@ pub async fn sandbox_transfer_sweep_simulate(configuration: &configuration::Conf
 }
 
 /// Use the `/sandbox/transfer/test_clock/advance` endpoint to advance a `test_clock` in the Sandbox environment.  A test clock object represents an independent timeline and has a `virtual_time` field indicating the current timestamp of the timeline. A test clock can be advanced by incrementing `virtual_time`, but may never go back to a lower `virtual_time`.  If a test clock is advanced, we will simulate the changes that ought to occur during the time that elapsed.  For example, a client creates a weekly recurring transfer with a test clock set at t. When the client advances the test clock by setting `virtual_time` = t + 15 days, 2 new originations should be created, along with the webhook events.  The advancement of the test clock from its current `virtual_time` should be limited such that there are no more than 20 originations resulting from the advance operation on each `recurring_transfer` associated with the `test_clock`.  For example, if the recurring transfer associated with this test clock originates once every 4 weeks, you can advance the `virtual_time` up to 80 weeks on each API call.
-pub async fn sandbox_transfer_test_clock_advance(configuration: &configuration::Configuration, sandbox_transfer_test_clock_advance_request: crate::models::SandboxTransferTestClockAdvanceRequest) -> Result<crate::models::SandboxTransferTestClockAdvanceResponse, Error<SandboxTransferTestClockAdvanceError>> {
+pub fn sandbox_transfer_test_clock_advance(configuration: &configuration::Configuration, sandbox_transfer_test_clock_advance_request: crate::models::SandboxTransferTestClockAdvanceRequest) -> Result<crate::models::SandboxTransferTestClockAdvanceResponse, Error<SandboxTransferTestClockAdvanceError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -10464,10 +10464,10 @@ pub async fn sandbox_transfer_test_clock_advance(configuration: &configuration::
     local_var_req_builder = local_var_req_builder.json(&sandbox_transfer_test_clock_advance_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -10479,7 +10479,7 @@ pub async fn sandbox_transfer_test_clock_advance(configuration: &configuration::
 }
 
 /// Use the `/sandbox/transfer/test_clock/create` endpoint to create a `test_clock` in the Sandbox environment.  A test clock object represents an independent timeline and has a `virtual_time` field indicating the current timestamp of the timeline. Test clocks are used for testing recurring transfers in Sandbox.  A test clock can be associated with up to 5 recurring transfers.
-pub async fn sandbox_transfer_test_clock_create(configuration: &configuration::Configuration, sandbox_transfer_test_clock_create_request: crate::models::SandboxTransferTestClockCreateRequest) -> Result<crate::models::SandboxTransferTestClockCreateResponse, Error<SandboxTransferTestClockCreateError>> {
+pub fn sandbox_transfer_test_clock_create(configuration: &configuration::Configuration, sandbox_transfer_test_clock_create_request: crate::models::SandboxTransferTestClockCreateRequest) -> Result<crate::models::SandboxTransferTestClockCreateResponse, Error<SandboxTransferTestClockCreateError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -10517,10 +10517,10 @@ pub async fn sandbox_transfer_test_clock_create(configuration: &configuration::C
     local_var_req_builder = local_var_req_builder.json(&sandbox_transfer_test_clock_create_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -10532,7 +10532,7 @@ pub async fn sandbox_transfer_test_clock_create(configuration: &configuration::C
 }
 
 /// Use the `/sandbox/transfer/test_clock/get` endpoint to get a `test_clock` in the Sandbox environment.
-pub async fn sandbox_transfer_test_clock_get(configuration: &configuration::Configuration, sandbox_transfer_test_clock_get_request: crate::models::SandboxTransferTestClockGetRequest) -> Result<crate::models::SandboxTransferTestClockGetResponse, Error<SandboxTransferTestClockGetError>> {
+pub fn sandbox_transfer_test_clock_get(configuration: &configuration::Configuration, sandbox_transfer_test_clock_get_request: crate::models::SandboxTransferTestClockGetRequest) -> Result<crate::models::SandboxTransferTestClockGetResponse, Error<SandboxTransferTestClockGetError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -10570,10 +10570,10 @@ pub async fn sandbox_transfer_test_clock_get(configuration: &configuration::Conf
     local_var_req_builder = local_var_req_builder.json(&sandbox_transfer_test_clock_get_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -10585,7 +10585,7 @@ pub async fn sandbox_transfer_test_clock_get(configuration: &configuration::Conf
 }
 
 /// Use the `/sandbox/transfer/test_clock/list` endpoint to see a list of all your test clocks in the Sandbox environment, by ascending `virtual_time`. Results are paginated; use the `count` and `offset` query parameters to retrieve the desired test clocks.
-pub async fn sandbox_transfer_test_clock_list(configuration: &configuration::Configuration, sandbox_transfer_test_clock_list_request: crate::models::SandboxTransferTestClockListRequest) -> Result<crate::models::SandboxTransferTestClockListResponse, Error<SandboxTransferTestClockListError>> {
+pub fn sandbox_transfer_test_clock_list(configuration: &configuration::Configuration, sandbox_transfer_test_clock_list_request: crate::models::SandboxTransferTestClockListRequest) -> Result<crate::models::SandboxTransferTestClockListResponse, Error<SandboxTransferTestClockListError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -10623,10 +10623,10 @@ pub async fn sandbox_transfer_test_clock_list(configuration: &configuration::Con
     local_var_req_builder = local_var_req_builder.json(&sandbox_transfer_test_clock_list_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -10638,7 +10638,7 @@ pub async fn sandbox_transfer_test_clock_list(configuration: &configuration::Con
 }
 
 /// After calling `/signal/evaluate`, call `/signal/decision/report` to report whether the transaction was initiated.
-pub async fn signal_decision_report(configuration: &configuration::Configuration, signal_decision_report_request: crate::models::SignalDecisionReportRequest) -> Result<crate::models::SignalDecisionReportResponse, Error<SignalDecisionReportError>> {
+pub fn signal_decision_report(configuration: &configuration::Configuration, signal_decision_report_request: crate::models::SignalDecisionReportRequest) -> Result<crate::models::SignalDecisionReportResponse, Error<SignalDecisionReportError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -10676,10 +10676,10 @@ pub async fn signal_decision_report(configuration: &configuration::Configuration
     local_var_req_builder = local_var_req_builder.json(&signal_decision_report_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -10691,7 +10691,7 @@ pub async fn signal_decision_report(configuration: &configuration::Configuration
 }
 
 /// Use `/signal/evaluate` to evaluate a planned ACH transaction to get a return risk assessment (such as a risk score and risk tier) and additional risk signals.  In order to obtain a valid score for an ACH transaction, Plaid must have an access token for the account, and the Item must be healthy (receiving product updates) or have recently been in a healthy state. If the transaction does not meet eligibility requirements, an error will be returned corresponding to the underlying cause. If `/signal/evaluate` is called on the same transaction multiple times within a 24-hour period, cached results may be returned. For more information please refer to the error documentation on [Item errors](/docs/errors/item/) and [Link in Update Mode](/docs/link/update-mode/).  Note: This request may take some time to complete if Signal is being added to an existing Item. This is because Plaid must communicate directly with the institution when retrieving the data for the first time.
-pub async fn signal_evaluate(configuration: &configuration::Configuration, signal_evaluate_request: crate::models::SignalEvaluateRequest) -> Result<crate::models::SignalEvaluateResponse, Error<SignalEvaluateError>> {
+pub fn signal_evaluate(configuration: &configuration::Configuration, signal_evaluate_request: crate::models::SignalEvaluateRequest) -> Result<crate::models::SignalEvaluateResponse, Error<SignalEvaluateError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -10729,10 +10729,10 @@ pub async fn signal_evaluate(configuration: &configuration::Configuration, signa
     local_var_req_builder = local_var_req_builder.json(&signal_evaluate_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -10744,7 +10744,7 @@ pub async fn signal_evaluate(configuration: &configuration::Configuration, signa
 }
 
 /// When Link is not initialized with Signal, call `/signal/prepare` to opt-in that Item to the Signal data collection process, developing a Signal score.  If you are using other Plaid products after Link, e.g. Identity or Assets, call `/signal/prepare` after those product calls are complete.  Example flow: Link is initialized with Auth, call `/auth/get` for the account and routing number, call `/identity/get` to retrieve bank ownership details, then call `/signal/prepare` to begin Signal data collection. Later, once you have obtained details about the proposed transaction from the user, call `/signal/evaluate` for a Signal score. For more information please see [Recommendations for initializing Link with specific product combinations](https://www.plaid.com/docs/link/initializing-products/#recommendations-for-initializing-link-with-specific-product-combinations).  If run on an Item that is already initialized with Signal, this endpoint will return a 200 response and will not modify the Item.
-pub async fn signal_prepare(configuration: &configuration::Configuration, signal_prepare_request: crate::models::SignalPrepareRequest) -> Result<crate::models::SignalPrepareResponse, Error<SignalPrepareError>> {
+pub fn signal_prepare(configuration: &configuration::Configuration, signal_prepare_request: crate::models::SignalPrepareRequest) -> Result<crate::models::SignalPrepareResponse, Error<SignalPrepareError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -10782,10 +10782,10 @@ pub async fn signal_prepare(configuration: &configuration::Configuration, signal
     local_var_req_builder = local_var_req_builder.json(&signal_prepare_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -10797,7 +10797,7 @@ pub async fn signal_prepare(configuration: &configuration::Configuration, signal
 }
 
 /// Call the `/signal/return/report` endpoint to report a returned transaction that was previously sent to the `/signal/evaluate` endpoint. Your feedback will be used by the model to incorporate the latest risk trend in your portfolio.
-pub async fn signal_return_report(configuration: &configuration::Configuration, signal_return_report_request: crate::models::SignalReturnReportRequest) -> Result<crate::models::SignalReturnReportResponse, Error<SignalReturnReportError>> {
+pub fn signal_return_report(configuration: &configuration::Configuration, signal_return_report_request: crate::models::SignalReturnReportRequest) -> Result<crate::models::SignalReturnReportResponse, Error<SignalReturnReportError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -10835,10 +10835,10 @@ pub async fn signal_return_report(configuration: &configuration::Configuration, 
     local_var_req_builder = local_var_req_builder.json(&signal_return_report_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -10850,7 +10850,7 @@ pub async fn signal_return_report(configuration: &configuration::Configuration, 
 }
 
 /// The `/statements/download` endpoint retrieves a single statement PDF in binary format.  The response will contain a `Plaid-Content-Hash` header containing a SHA 256 checksum of the statement. This can be used to verify that the file being sent by Plaid is the same file that was downloaded to your system.
-pub async fn statements_download(configuration: &configuration::Configuration, statements_download_request: crate::models::StatementsDownloadRequest) -> Result<std::path::PathBuf, Error<StatementsDownloadError>> {
+pub fn statements_download(configuration: &configuration::Configuration, statements_download_request: crate::models::StatementsDownloadRequest) -> Result<std::path::PathBuf, Error<StatementsDownloadError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -10888,10 +10888,10 @@ pub async fn statements_download(configuration: &configuration::Configuration, s
     local_var_req_builder = local_var_req_builder.json(&statements_download_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -10903,7 +10903,7 @@ pub async fn statements_download(configuration: &configuration::Configuration, s
 }
 
 /// The `/statements/list` endpoint retrieves a list of all statements associated with the provided item.
-pub async fn statements_list(configuration: &configuration::Configuration, statements_list_request: crate::models::StatementsListRequest) -> Result<crate::models::StatementsListResponse, Error<StatementsListError>> {
+pub fn statements_list(configuration: &configuration::Configuration, statements_list_request: crate::models::StatementsListRequest) -> Result<crate::models::StatementsListResponse, Error<StatementsListError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -10941,10 +10941,10 @@ pub async fn statements_list(configuration: &configuration::Configuration, state
     local_var_req_builder = local_var_req_builder.json(&statements_list_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -10956,7 +10956,7 @@ pub async fn statements_list(configuration: &configuration::Configuration, state
 }
 
 /// The `/beta/transactions/v1/enhance` endpoint enriches raw transaction data provided directly by clients.  The product is currently in beta.
-pub async fn transactions_enhance(configuration: &configuration::Configuration, transactions_enhance_get_request: crate::models::TransactionsEnhanceGetRequest) -> Result<crate::models::TransactionsEnhanceGetResponse, Error<TransactionsEnhanceError>> {
+pub fn transactions_enhance(configuration: &configuration::Configuration, transactions_enhance_get_request: crate::models::TransactionsEnhanceGetRequest) -> Result<crate::models::TransactionsEnhanceGetResponse, Error<TransactionsEnhanceError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -10994,10 +10994,10 @@ pub async fn transactions_enhance(configuration: &configuration::Configuration, 
     local_var_req_builder = local_var_req_builder.json(&transactions_enhance_get_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -11009,7 +11009,7 @@ pub async fn transactions_enhance(configuration: &configuration::Configuration, 
 }
 
 /// The `/transactions/enrich` endpoint enriches raw transaction data generated by your own banking products or retrieved from other non-Plaid sources.
-pub async fn transactions_enrich(configuration: &configuration::Configuration, transactions_enrich_request: crate::models::TransactionsEnrichRequest) -> Result<crate::models::TransactionsEnrichResponse, Error<TransactionsEnrichError>> {
+pub fn transactions_enrich(configuration: &configuration::Configuration, transactions_enrich_request: crate::models::TransactionsEnrichRequest) -> Result<crate::models::TransactionsEnrichResponse, Error<TransactionsEnrichError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -11047,10 +11047,10 @@ pub async fn transactions_enrich(configuration: &configuration::Configuration, t
     local_var_req_builder = local_var_req_builder.json(&transactions_enrich_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -11062,7 +11062,7 @@ pub async fn transactions_enrich(configuration: &configuration::Configuration, t
 }
 
 /// Note: All new implementations are encouraged to use `/transactions/sync` rather than `/transactions/get`. `/transactions/sync` provides the same functionality as `/transactions/get` and improves developer ease-of-use for handling transactions updates.  The `/transactions/get` endpoint allows developers to receive user-authorized transaction data for credit, depository, and some loan-type accounts (only those with account subtype `student`; coverage may be limited). For transaction history from investments accounts, use the [Investments endpoint](https://plaid.com/docs/api/products/investments/) instead. Transaction data is standardized across financial institutions, and in many cases transactions are linked to a clean name, entity type, location, and category. Similarly, account data is standardized and returned with a clean name, number, balance, and other meta information where available.  Transactions are returned in reverse-chronological order, and the sequence of transaction ordering is stable and will not shift.  Transactions are not immutable and can also be removed altogether by the institution; a removed transaction will no longer appear in `/transactions/get`.  For more details, see [Pending and posted transactions](https://plaid.com/docs/transactions/transactions-data/#pending-and-posted-transactions).  Due to the potentially large number of transactions associated with an Item, results are paginated. Manipulate the `count` and `offset` parameters in conjunction with the `total_transactions` response body field to fetch all available transactions.  Data returned by `/transactions/get` will be the data available for the Item as of the most recent successful check for new transactions. Plaid typically checks for new data multiple times a day, but these checks may occur less frequently, such as once a day, depending on the institution. An Item's `status.transactions.last_successful_update` field will show the timestamp of the most recent successful update. To force Plaid to check for new transactions, you can use the `/transactions/refresh` endpoint.  Note that data may not be immediately available to `/transactions/get`. Plaid will begin to prepare transactions data upon Item link, if Link was initialized with `transactions`, or upon the first call to `/transactions/get`, if it wasn't. To be alerted when transaction data is ready to be fetched, listen for the [`INITIAL_UPDATE`](https://plaid.com/docs/api/products/transactions/#initial_update) and [`HISTORICAL_UPDATE`](https://plaid.com/docs/api/products/transactions/#historical_update) webhooks. If no transaction history is ready when `/transactions/get` is called, it will return a `PRODUCT_NOT_READY` error.
-pub async fn transactions_get(configuration: &configuration::Configuration, transactions_get_request: crate::models::TransactionsGetRequest) -> Result<crate::models::TransactionsGetResponse, Error<TransactionsGetError>> {
+pub fn transactions_get(configuration: &configuration::Configuration, transactions_get_request: crate::models::TransactionsGetRequest) -> Result<crate::models::TransactionsGetResponse, Error<TransactionsGetError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -11100,10 +11100,10 @@ pub async fn transactions_get(configuration: &configuration::Configuration, tran
     local_var_req_builder = local_var_req_builder.json(&transactions_get_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -11115,7 +11115,7 @@ pub async fn transactions_get(configuration: &configuration::Configuration, tran
 }
 
 /// The `/transactions/recurring/get` endpoint allows developers to receive a summary of the recurring outflow and inflow streams (expenses and deposits) from a user’s checking, savings or credit card accounts. Additionally, Plaid provides key insights about each recurring stream including the category, merchant, last amount, and more. Developers can use these insights to build tools and experiences that help their users better manage cash flow, monitor subscriptions, reduce spend, and stay on track with bill payments.  This endpoint is offered as an add-on to Transactions. To request access to this endpoint, submit a [product access request](https://dashboard.plaid.com/team/products) or contact your Plaid account manager.  This endpoint can only be called on an Item that has already been initialized with Transactions (either during Link, by specifying it in `/link/token/create`; or after Link, by calling `/transactions/get` or `/transactions/sync`). For optimal results, we strongly recommend customers using Recurring Transactions to request at least 180 days of history when initializing items with Transactions (using the [`days_requested`](https://plaid.com/docs/api/tokens/#link-token-create-request-transactions-days-requested) option). Once all historical transactions have been fetched, call `/transactions/recurring/get` to receive the Recurring Transactions streams and subscribe to the [`RECURRING_TRANSACTIONS_UPDATE`](https://plaid.com/docs/api/products/transactions/#recurring_transactions_update) webhook. To know when historical transactions have been fetched, if you are using `/transactions/sync` listen for the [`SYNC_UPDATES_AVAILABLE`](https://plaid.com/docs/api/products/transactions/#SyncUpdatesAvailableWebhook-historical-update-complete) webhook and check that the `historical_update_complete` field in the payload is `true`. If using `/transactions/get`, listen for the [`HISTORICAL_UPDATE`](https://plaid.com/docs/api/products/transactions/#historical_update) webhook.  After the initial call, you can call `/transactions/recurring/get` endpoint at any point in the future to retrieve the latest summary of recurring streams. Listen to the [`RECURRING_TRANSACTIONS_UPDATE`](https://plaid.com/docs/api/products/transactions/#recurring_transactions_update) webhook to be notified when new updates are available.
-pub async fn transactions_recurring_get(configuration: &configuration::Configuration, transactions_recurring_get_request: crate::models::TransactionsRecurringGetRequest) -> Result<crate::models::TransactionsRecurringGetResponse, Error<TransactionsRecurringGetError>> {
+pub fn transactions_recurring_get(configuration: &configuration::Configuration, transactions_recurring_get_request: crate::models::TransactionsRecurringGetRequest) -> Result<crate::models::TransactionsRecurringGetResponse, Error<TransactionsRecurringGetError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -11153,10 +11153,10 @@ pub async fn transactions_recurring_get(configuration: &configuration::Configura
     local_var_req_builder = local_var_req_builder.json(&transactions_recurring_get_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -11168,7 +11168,7 @@ pub async fn transactions_recurring_get(configuration: &configuration::Configura
 }
 
 /// `/transactions/refresh` is an optional endpoint for users of the Transactions product. It initiates an on-demand extraction to fetch the newest transactions for an Item. This on-demand extraction takes place in addition to the periodic extractions that automatically occur multiple times a day for any Transactions-enabled Item. If changes to transactions are discovered after calling `/transactions/refresh`, Plaid will fire a webhook: for `/transactions/sync` users, [`SYNC_UPDATES_AVAILABLE`](https://plaid.com/docs/api/products/transactions/#sync_updates_available) will be fired if there are any transactions updated, added, or removed. For users of both `/transactions/sync` and `/transactions/get`, [`TRANSACTIONS_REMOVED`](https://plaid.com/docs/api/products/transactions/#transactions_removed) will be fired if any removed transactions are detected, and [`DEFAULT_UPDATE`](https://plaid.com/docs/api/products/transactions/#default_update) will be fired if any new transactions are detected. New transactions can be fetched by calling `/transactions/get` or `/transactions/sync`. Note that the `/transactions/refresh` endpoint is not supported for Capital One (`ins_128026`) and will result in a `PRODUCT_NOT_SUPPORTED` error if called on an Item from that institution.  `/transactions/refresh` is offered as an add-on to Transactions and has a separate [fee model](/docs/account/billing/#per-request-flat-fee). To request access to this endpoint, submit a [product access request](https://dashboard.plaid.com/team/products) or contact your Plaid account manager.
-pub async fn transactions_refresh(configuration: &configuration::Configuration, transactions_refresh_request: crate::models::TransactionsRefreshRequest) -> Result<crate::models::TransactionsRefreshResponse, Error<TransactionsRefreshError>> {
+pub fn transactions_refresh(configuration: &configuration::Configuration, transactions_refresh_request: crate::models::TransactionsRefreshRequest) -> Result<crate::models::TransactionsRefreshResponse, Error<TransactionsRefreshError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -11206,10 +11206,10 @@ pub async fn transactions_refresh(configuration: &configuration::Configuration, 
     local_var_req_builder = local_var_req_builder.json(&transactions_refresh_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -11221,7 +11221,7 @@ pub async fn transactions_refresh(configuration: &configuration::Configuration, 
 }
 
 /// The `/transactions/rules/v1/create` endpoint creates transaction categorization rules.  Rules will be applied on the Item's transactions returned in `/transactions/get` response.  The product is currently in beta. To request access, contact transactions-feedback@plaid.com.
-pub async fn transactions_rules_create(configuration: &configuration::Configuration, transactions_rules_create_request: crate::models::TransactionsRulesCreateRequest) -> Result<crate::models::TransactionsRulesCreateResponse, Error<TransactionsRulesCreateError>> {
+pub fn transactions_rules_create(configuration: &configuration::Configuration, transactions_rules_create_request: crate::models::TransactionsRulesCreateRequest) -> Result<crate::models::TransactionsRulesCreateResponse, Error<TransactionsRulesCreateError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -11259,10 +11259,10 @@ pub async fn transactions_rules_create(configuration: &configuration::Configurat
     local_var_req_builder = local_var_req_builder.json(&transactions_rules_create_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -11274,7 +11274,7 @@ pub async fn transactions_rules_create(configuration: &configuration::Configurat
 }
 
 /// The `/transactions/rules/v1/list` returns a list of transaction rules created for the Item associated with the access token.
-pub async fn transactions_rules_list(configuration: &configuration::Configuration, transactions_rules_list_request: crate::models::TransactionsRulesListRequest) -> Result<crate::models::TransactionsRulesListResponse, Error<TransactionsRulesListError>> {
+pub fn transactions_rules_list(configuration: &configuration::Configuration, transactions_rules_list_request: crate::models::TransactionsRulesListRequest) -> Result<crate::models::TransactionsRulesListResponse, Error<TransactionsRulesListError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -11312,10 +11312,10 @@ pub async fn transactions_rules_list(configuration: &configuration::Configuratio
     local_var_req_builder = local_var_req_builder.json(&transactions_rules_list_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -11327,7 +11327,7 @@ pub async fn transactions_rules_list(configuration: &configuration::Configuratio
 }
 
 /// The `/transactions/rules/v1/remove` endpoint is used to remove a transaction rule.
-pub async fn transactions_rules_remove(configuration: &configuration::Configuration, transactions_rules_remove_request: crate::models::TransactionsRulesRemoveRequest) -> Result<crate::models::TransactionsRulesRemoveResponse, Error<TransactionsRulesRemoveError>> {
+pub fn transactions_rules_remove(configuration: &configuration::Configuration, transactions_rules_remove_request: crate::models::TransactionsRulesRemoveRequest) -> Result<crate::models::TransactionsRulesRemoveResponse, Error<TransactionsRulesRemoveError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -11365,10 +11365,10 @@ pub async fn transactions_rules_remove(configuration: &configuration::Configurat
     local_var_req_builder = local_var_req_builder.json(&transactions_rules_remove_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -11380,7 +11380,7 @@ pub async fn transactions_rules_remove(configuration: &configuration::Configurat
 }
 
 /// The `/transactions/sync` endpoint allows developers to subscribe to all transactions associated with an Item and get updates synchronously in a stream-like manner, using a cursor to track which updates have already been seen.  `/transactions/sync` provides the same functionality as `/transactions/get` and can be used instead of `/transactions/get` to simplify the process of tracking transactions updates. To learn more about migrating from `/transactions/get`, see the [Transactions Sync migration guide](https://plaid.com/docs/transactions/sync-migration/).  This endpoint provides user-authorized transaction data for `credit`, `depository`, and some loan-type accounts (only those with account subtype `student`; coverage may be limited). For transaction history from `investments` accounts, use `/investments/transactions/get` instead.  Returned transactions data is grouped into three types of update, indicating whether the transaction was added, removed, or modified since the last call to the API.  In the first call to `/transactions/sync` for an Item, the endpoint will return all historical transactions data associated with that Item up until the time of the API call (as \"adds\"), which then generates a `next_cursor` for that Item. In subsequent calls, send the `next_cursor` to receive only the changes that have occurred since the previous call.  Due to the potentially large number of transactions associated with an Item, results are paginated. The `has_more` field specifies if additional calls are necessary to fetch all available transaction updates. Call `/transactions/sync` with the new cursor, pulling all updates, until `has_more` is `false`.  When retrieving paginated updates, track both the `next_cursor` from the latest response and the original cursor from the first call in which `has_more` was `true`; if a call to `/transactions/sync` fails due to the [`TRANSACTIONS_SYNC_MUTATION_DURING_PAGINATION`](https://plaid.com/docs/errors/transactions/#transactions_sync_mutation_during_pagination) error, the entire pagination request loop must be restarted beginning with the cursor for the first page of the update, rather than retrying only the single request that failed.  Whenever new or updated transaction data becomes available, `/transactions/sync` will provide these updates. Plaid typically checks for new data multiple times a day, but these checks may occur less frequently, such as once a day, depending on the institution. An Item's `status.transactions.last_successful_update` field will show the timestamp of the most recent successful update. To force Plaid to check for new transactions, use the `/transactions/refresh` endpoint.  For newly created Items, data may not be immediately available to `/transactions/sync`. Plaid begins preparing transactions data when the Item is created, but the process can take anywhere from a few seconds to several minutes to complete, depending on the number of transactions available.  To be alerted when new data is available, listen for the [`SYNC_UPDATES_AVAILABLE`](https://plaid.com/docs/api/products/transactions/#sync_updates_available) webhook.  `/transactions/sync` does not directly return balance data. To get the balance for an account, call `/accounts/get`, which is a free-to-use endpoint that will return the cached balance as of the last successful transactions update.
-pub async fn transactions_sync(configuration: &configuration::Configuration, transactions_sync_request: crate::models::TransactionsSyncRequest) -> Result<crate::models::TransactionsSyncResponse, Error<TransactionsSyncError>> {
+pub fn transactions_sync(configuration: &configuration::Configuration, transactions_sync_request: crate::models::TransactionsSyncRequest) -> Result<crate::models::TransactionsSyncResponse, Error<TransactionsSyncError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -11418,10 +11418,10 @@ pub async fn transactions_sync(configuration: &configuration::Configuration, tra
     local_var_req_builder = local_var_req_builder.json(&transactions_sync_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -11433,7 +11433,7 @@ pub async fn transactions_sync(configuration: &configuration::Configuration, tra
 }
 
 /// The `/beta/transactions/user_insights/v1/get` gets user insights for clients who have enriched data with `/transactions/enrich`.  The product is currently in beta.
-pub async fn transactions_user_insights_get(configuration: &configuration::Configuration, transactions_user_insights_get_request: crate::models::TransactionsUserInsightsGetRequest) -> Result<crate::models::TransactionsUserInsightsGetResponse, Error<TransactionsUserInsightsGetError>> {
+pub fn transactions_user_insights_get(configuration: &configuration::Configuration, transactions_user_insights_get_request: crate::models::TransactionsUserInsightsGetRequest) -> Result<crate::models::TransactionsUserInsightsGetResponse, Error<TransactionsUserInsightsGetError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -11471,10 +11471,10 @@ pub async fn transactions_user_insights_get(configuration: &configuration::Confi
     local_var_req_builder = local_var_req_builder.json(&transactions_user_insights_get_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -11486,7 +11486,7 @@ pub async fn transactions_user_insights_get(configuration: &configuration::Confi
 }
 
 /// Use the `/transfer/authorization/create` endpoint to authorize a transfer. This endpoint must be called prior to calling `/transfer/create`.  There are three possible outcomes to calling this endpoint: If the `authorization.decision` in the response is `declined`, the proposed transfer has failed the risk check and you cannot proceed with the transfer. If the `authorization.decision` is `approved`, and the `authorization.rationale_code` is `null`, the transfer has passed the risk check and you can proceed to call `/transfer/create`. If the `authorization.decision` is `approved` and the `authorization.rationale_code` is non-`null`, the risk check could not be run: you may proceed with the transfer, but should perform your own risk evaluation. For more details, see the response schema.  In Plaid's Sandbox environment the decisions will be returned as follows:    - To approve a transfer with `null` rationale code, make an authorization request with an `amount` less than the available balance in the account.    - To approve a transfer with the rationale code `MANUALLY_VERIFIED_ITEM`, create an Item in Link through the [Same Day Micro-deposits flow](https://plaid.com/docs/auth/coverage/testing/#testing-same-day-micro-deposits).    - To approve a transfer with the rationale code `ITEM_LOGIN_REQUIRED`, [reset the login for an Item](https://plaid.com/docs/sandbox/#item_login_required).    - To decline a transfer with the rationale code `NSF`, the available balance on the account must be less than the authorization `amount`. See [Create Sandbox test data](https://plaid.com/docs/sandbox/user-custom/) for details on how to customize data in Sandbox.    - To decline a transfer with the rationale code `RISK`, the available balance on the account must be exactly $0. See [Create Sandbox test data](https://plaid.com/docs/sandbox/user-custom/) for details on how to customize data in Sandbox.
-pub async fn transfer_authorization_create(configuration: &configuration::Configuration, transfer_authorization_create_request: crate::models::TransferAuthorizationCreateRequest) -> Result<crate::models::TransferAuthorizationCreateResponse, Error<TransferAuthorizationCreateError>> {
+pub fn transfer_authorization_create(configuration: &configuration::Configuration, transfer_authorization_create_request: crate::models::TransferAuthorizationCreateRequest) -> Result<crate::models::TransferAuthorizationCreateResponse, Error<TransferAuthorizationCreateError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -11524,10 +11524,10 @@ pub async fn transfer_authorization_create(configuration: &configuration::Config
     local_var_req_builder = local_var_req_builder.json(&transfer_authorization_create_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -11539,7 +11539,7 @@ pub async fn transfer_authorization_create(configuration: &configuration::Config
 }
 
 /// Use the `/transfer/balance/get` endpoint to view a balance held with Plaid.
-pub async fn transfer_balance_get(configuration: &configuration::Configuration, transfer_balance_get_request: crate::models::TransferBalanceGetRequest) -> Result<crate::models::TransferBalanceGetResponse, Error<TransferBalanceGetError>> {
+pub fn transfer_balance_get(configuration: &configuration::Configuration, transfer_balance_get_request: crate::models::TransferBalanceGetRequest) -> Result<crate::models::TransferBalanceGetResponse, Error<TransferBalanceGetError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -11577,10 +11577,10 @@ pub async fn transfer_balance_get(configuration: &configuration::Configuration, 
     local_var_req_builder = local_var_req_builder.json(&transfer_balance_get_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -11592,7 +11592,7 @@ pub async fn transfer_balance_get(configuration: &configuration::Configuration, 
 }
 
 /// Use the `/transfer/cancel` endpoint to cancel a transfer.  A transfer is eligible for cancellation if the `cancellable` property returned by `/transfer/get` is `true`.
-pub async fn transfer_cancel(configuration: &configuration::Configuration, transfer_cancel_request: crate::models::TransferCancelRequest) -> Result<crate::models::TransferCancelResponse, Error<TransferCancelError>> {
+pub fn transfer_cancel(configuration: &configuration::Configuration, transfer_cancel_request: crate::models::TransferCancelRequest) -> Result<crate::models::TransferCancelResponse, Error<TransferCancelError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -11630,10 +11630,10 @@ pub async fn transfer_cancel(configuration: &configuration::Configuration, trans
     local_var_req_builder = local_var_req_builder.json(&transfer_cancel_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -11645,7 +11645,7 @@ pub async fn transfer_cancel(configuration: &configuration::Configuration, trans
 }
 
 /// Use the `/transfer/capabilities/get` endpoint to determine the RTP eligibility information of a transfer. To simulate RTP eligibility in Sandbox, log in using the username `user_good` and password `pass_good` and use the first two checking and savings accounts in the \"First Platypus Bank\" institution (ending in 0000 or 1111), which will return `true`. Any other account will return `false`.
-pub async fn transfer_capabilities_get(configuration: &configuration::Configuration, transfer_capabilities_get_request: crate::models::TransferCapabilitiesGetRequest) -> Result<crate::models::TransferCapabilitiesGetResponse, Error<TransferCapabilitiesGetError>> {
+pub fn transfer_capabilities_get(configuration: &configuration::Configuration, transfer_capabilities_get_request: crate::models::TransferCapabilitiesGetRequest) -> Result<crate::models::TransferCapabilitiesGetResponse, Error<TransferCapabilitiesGetError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -11683,10 +11683,10 @@ pub async fn transfer_capabilities_get(configuration: &configuration::Configurat
     local_var_req_builder = local_var_req_builder.json(&transfer_capabilities_get_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -11698,7 +11698,7 @@ pub async fn transfer_capabilities_get(configuration: &configuration::Configurat
 }
 
 /// Use the `/transfer/configuration/get` endpoint to view your transfer product configurations.
-pub async fn transfer_configuration_get(configuration: &configuration::Configuration, transfer_configuration_get_request: crate::models::TransferConfigurationGetRequest) -> Result<crate::models::TransferConfigurationGetResponse, Error<TransferConfigurationGetError>> {
+pub fn transfer_configuration_get(configuration: &configuration::Configuration, transfer_configuration_get_request: crate::models::TransferConfigurationGetRequest) -> Result<crate::models::TransferConfigurationGetResponse, Error<TransferConfigurationGetError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -11736,10 +11736,10 @@ pub async fn transfer_configuration_get(configuration: &configuration::Configura
     local_var_req_builder = local_var_req_builder.json(&transfer_configuration_get_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -11751,7 +11751,7 @@ pub async fn transfer_configuration_get(configuration: &configuration::Configura
 }
 
 /// Use the `/transfer/create` endpoint to initiate a new transfer.
-pub async fn transfer_create(configuration: &configuration::Configuration, transfer_create_request: crate::models::TransferCreateRequest) -> Result<crate::models::TransferCreateResponse, Error<TransferCreateError>> {
+pub fn transfer_create(configuration: &configuration::Configuration, transfer_create_request: crate::models::TransferCreateRequest) -> Result<crate::models::TransferCreateResponse, Error<TransferCreateError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -11789,10 +11789,10 @@ pub async fn transfer_create(configuration: &configuration::Configuration, trans
     local_var_req_builder = local_var_req_builder.json(&transfer_create_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -11804,7 +11804,7 @@ pub async fn transfer_create(configuration: &configuration::Configuration, trans
 }
 
 /// Third-party sender customers can use `/transfer/diligence/document/upload` endpoint to upload a document on behalf of its end customer (i.e. originator) to Plaid. You’ll need to send a request of type multipart/form-data. You must provide the `client_id` in the `PLAID-CLIENT-ID` header and `secret` in the `PLAID-SECRET` header.
-pub async fn transfer_diligence_document_upload(configuration: &configuration::Configuration, transfer_diligence_document_upload_request: crate::models::TransferDiligenceDocumentUploadRequest) -> Result<crate::models::TransferDiligenceDocumentUploadResponse, Error<TransferDiligenceDocumentUploadError>> {
+pub fn transfer_diligence_document_upload(configuration: &configuration::Configuration, transfer_diligence_document_upload_request: crate::models::TransferDiligenceDocumentUploadRequest) -> Result<crate::models::TransferDiligenceDocumentUploadResponse, Error<TransferDiligenceDocumentUploadError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -11842,10 +11842,10 @@ pub async fn transfer_diligence_document_upload(configuration: &configuration::C
     local_var_req_builder = local_var_req_builder.json(&transfer_diligence_document_upload_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -11857,7 +11857,7 @@ pub async fn transfer_diligence_document_upload(configuration: &configuration::C
 }
 
 /// Use the `/transfer/diligence/submit` endpoint to submit transfer diligence on behalf of the originator (i.e., the end customer).
-pub async fn transfer_diligence_submit(configuration: &configuration::Configuration, transfer_diligence_submit_request: crate::models::TransferDiligenceSubmitRequest) -> Result<crate::models::TransferDiligenceSubmitResponse, Error<TransferDiligenceSubmitError>> {
+pub fn transfer_diligence_submit(configuration: &configuration::Configuration, transfer_diligence_submit_request: crate::models::TransferDiligenceSubmitRequest) -> Result<crate::models::TransferDiligenceSubmitResponse, Error<TransferDiligenceSubmitError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -11895,10 +11895,10 @@ pub async fn transfer_diligence_submit(configuration: &configuration::Configurat
     local_var_req_builder = local_var_req_builder.json(&transfer_diligence_submit_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -11910,7 +11910,7 @@ pub async fn transfer_diligence_submit(configuration: &configuration::Configurat
 }
 
 /// Use the `/transfer/event/list` endpoint to get a list of transfer events based on specified filter criteria.
-pub async fn transfer_event_list(configuration: &configuration::Configuration, transfer_event_list_request: crate::models::TransferEventListRequest) -> Result<crate::models::TransferEventListResponse, Error<TransferEventListError>> {
+pub fn transfer_event_list(configuration: &configuration::Configuration, transfer_event_list_request: crate::models::TransferEventListRequest) -> Result<crate::models::TransferEventListResponse, Error<TransferEventListError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -11948,10 +11948,10 @@ pub async fn transfer_event_list(configuration: &configuration::Configuration, t
     local_var_req_builder = local_var_req_builder.json(&transfer_event_list_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -11963,7 +11963,7 @@ pub async fn transfer_event_list(configuration: &configuration::Configuration, t
 }
 
 /// `/transfer/event/sync` allows you to request up to the next 25 transfer events that happened after a specific `event_id`. Use the `/transfer/event/sync` endpoint to guarantee you have seen all transfer events.
-pub async fn transfer_event_sync(configuration: &configuration::Configuration, transfer_event_sync_request: crate::models::TransferEventSyncRequest) -> Result<crate::models::TransferEventSyncResponse, Error<TransferEventSyncError>> {
+pub fn transfer_event_sync(configuration: &configuration::Configuration, transfer_event_sync_request: crate::models::TransferEventSyncRequest) -> Result<crate::models::TransferEventSyncResponse, Error<TransferEventSyncError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -12001,10 +12001,10 @@ pub async fn transfer_event_sync(configuration: &configuration::Configuration, t
     local_var_req_builder = local_var_req_builder.json(&transfer_event_sync_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -12016,7 +12016,7 @@ pub async fn transfer_event_sync(configuration: &configuration::Configuration, t
 }
 
 /// The `/transfer/get` endpoint fetches information about the transfer corresponding to the given `transfer_id`.
-pub async fn transfer_get(configuration: &configuration::Configuration, transfer_get_request: crate::models::TransferGetRequest) -> Result<crate::models::TransferGetResponse, Error<TransferGetError>> {
+pub fn transfer_get(configuration: &configuration::Configuration, transfer_get_request: crate::models::TransferGetRequest) -> Result<crate::models::TransferGetResponse, Error<TransferGetError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -12054,10 +12054,10 @@ pub async fn transfer_get(configuration: &configuration::Configuration, transfer
     local_var_req_builder = local_var_req_builder.json(&transfer_get_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -12069,7 +12069,7 @@ pub async fn transfer_get(configuration: &configuration::Configuration, transfer
 }
 
 /// Use the `/transfer/intent/create` endpoint to generate a transfer intent object and invoke the Transfer UI.
-pub async fn transfer_intent_create(configuration: &configuration::Configuration, transfer_intent_create_request: crate::models::TransferIntentCreateRequest) -> Result<crate::models::TransferIntentCreateResponse, Error<TransferIntentCreateError>> {
+pub fn transfer_intent_create(configuration: &configuration::Configuration, transfer_intent_create_request: crate::models::TransferIntentCreateRequest) -> Result<crate::models::TransferIntentCreateResponse, Error<TransferIntentCreateError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -12107,10 +12107,10 @@ pub async fn transfer_intent_create(configuration: &configuration::Configuration
     local_var_req_builder = local_var_req_builder.json(&transfer_intent_create_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -12122,7 +12122,7 @@ pub async fn transfer_intent_create(configuration: &configuration::Configuration
 }
 
 /// Use the `/transfer/intent/get` endpoint to retrieve more information about a transfer intent.
-pub async fn transfer_intent_get(configuration: &configuration::Configuration, request_body: ::std::collections::HashMap<String, serde_json::Value>) -> Result<crate::models::TransferIntentGetResponse, Error<TransferIntentGetError>> {
+pub fn transfer_intent_get(configuration: &configuration::Configuration, request_body: ::std::collections::HashMap<String, serde_json::Value>) -> Result<crate::models::TransferIntentGetResponse, Error<TransferIntentGetError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -12160,10 +12160,10 @@ pub async fn transfer_intent_get(configuration: &configuration::Configuration, r
     local_var_req_builder = local_var_req_builder.json(&request_body);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -12175,7 +12175,7 @@ pub async fn transfer_intent_get(configuration: &configuration::Configuration, r
 }
 
 /// Use the `/transfer/ledger/deposit` endpoint to deposit funds into Plaid Ledger.
-pub async fn transfer_ledger_deposit(configuration: &configuration::Configuration, transfer_ledger_deposit_request: crate::models::TransferLedgerDepositRequest) -> Result<crate::models::TransferLedgerDepositResponse, Error<TransferLedgerDepositError>> {
+pub fn transfer_ledger_deposit(configuration: &configuration::Configuration, transfer_ledger_deposit_request: crate::models::TransferLedgerDepositRequest) -> Result<crate::models::TransferLedgerDepositResponse, Error<TransferLedgerDepositError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -12213,10 +12213,10 @@ pub async fn transfer_ledger_deposit(configuration: &configuration::Configuratio
     local_var_req_builder = local_var_req_builder.json(&transfer_ledger_deposit_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -12228,7 +12228,7 @@ pub async fn transfer_ledger_deposit(configuration: &configuration::Configuratio
 }
 
 /// Use the `/transfer/ledger/distribute` endpoint to move available balance between the ledgers of the platform and one of its originators.
-pub async fn transfer_ledger_distribute(configuration: &configuration::Configuration, transfer_ledger_distribute_request: crate::models::TransferLedgerDistributeRequest) -> Result<crate::models::TransferLedgerDistributeResponse, Error<TransferLedgerDistributeError>> {
+pub fn transfer_ledger_distribute(configuration: &configuration::Configuration, transfer_ledger_distribute_request: crate::models::TransferLedgerDistributeRequest) -> Result<crate::models::TransferLedgerDistributeResponse, Error<TransferLedgerDistributeError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -12266,10 +12266,10 @@ pub async fn transfer_ledger_distribute(configuration: &configuration::Configura
     local_var_req_builder = local_var_req_builder.json(&transfer_ledger_distribute_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -12281,7 +12281,7 @@ pub async fn transfer_ledger_distribute(configuration: &configuration::Configura
 }
 
 /// Use the `/transfer/ledger/get` endpoint to view a balance on the ledger held with Plaid.
-pub async fn transfer_ledger_get(configuration: &configuration::Configuration, transfer_ledger_get_request: crate::models::TransferLedgerGetRequest) -> Result<crate::models::TransferLedgerGetResponse, Error<TransferLedgerGetError>> {
+pub fn transfer_ledger_get(configuration: &configuration::Configuration, transfer_ledger_get_request: crate::models::TransferLedgerGetRequest) -> Result<crate::models::TransferLedgerGetResponse, Error<TransferLedgerGetError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -12319,10 +12319,10 @@ pub async fn transfer_ledger_get(configuration: &configuration::Configuration, t
     local_var_req_builder = local_var_req_builder.json(&transfer_ledger_get_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -12334,7 +12334,7 @@ pub async fn transfer_ledger_get(configuration: &configuration::Configuration, t
 }
 
 /// Use the `/transfer/ledger/withdraw` endpoint to withdraw funds from a Plaid Ledger balance.
-pub async fn transfer_ledger_withdraw(configuration: &configuration::Configuration, transfer_ledger_withdraw_request: crate::models::TransferLedgerWithdrawRequest) -> Result<crate::models::TransferLedgerWithdrawResponse, Error<TransferLedgerWithdrawError>> {
+pub fn transfer_ledger_withdraw(configuration: &configuration::Configuration, transfer_ledger_withdraw_request: crate::models::TransferLedgerWithdrawRequest) -> Result<crate::models::TransferLedgerWithdrawResponse, Error<TransferLedgerWithdrawError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -12372,10 +12372,10 @@ pub async fn transfer_ledger_withdraw(configuration: &configuration::Configurati
     local_var_req_builder = local_var_req_builder.json(&transfer_ledger_withdraw_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -12387,7 +12387,7 @@ pub async fn transfer_ledger_withdraw(configuration: &configuration::Configurati
 }
 
 /// Use the `/transfer/list` endpoint to see a list of all your transfers and their statuses. Results are paginated; use the `count` and `offset` query parameters to retrieve the desired transfers. 
-pub async fn transfer_list(configuration: &configuration::Configuration, transfer_list_request: crate::models::TransferListRequest) -> Result<crate::models::TransferListResponse, Error<TransferListError>> {
+pub fn transfer_list(configuration: &configuration::Configuration, transfer_list_request: crate::models::TransferListRequest) -> Result<crate::models::TransferListResponse, Error<TransferListError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -12425,10 +12425,10 @@ pub async fn transfer_list(configuration: &configuration::Configuration, transfe
     local_var_req_builder = local_var_req_builder.json(&transfer_list_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -12440,7 +12440,7 @@ pub async fn transfer_list(configuration: &configuration::Configuration, transfe
 }
 
 /// Use the `/transfer/metrics/get` endpoint to view your transfer product usage metrics.
-pub async fn transfer_metrics_get(configuration: &configuration::Configuration, transfer_metrics_get_request: crate::models::TransferMetricsGetRequest) -> Result<crate::models::TransferMetricsGetResponse, Error<TransferMetricsGetError>> {
+pub fn transfer_metrics_get(configuration: &configuration::Configuration, transfer_metrics_get_request: crate::models::TransferMetricsGetRequest) -> Result<crate::models::TransferMetricsGetResponse, Error<TransferMetricsGetError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -12478,10 +12478,10 @@ pub async fn transfer_metrics_get(configuration: &configuration::Configuration, 
     local_var_req_builder = local_var_req_builder.json(&transfer_metrics_get_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -12493,7 +12493,7 @@ pub async fn transfer_metrics_get(configuration: &configuration::Configuration, 
 }
 
 /// As an alternative to adding Items via Link, you can also use the `/transfer/migrate_account` endpoint to migrate known account and routing numbers to Plaid Items.  Note that Items created in this way are not compatible with endpoints for other products, such as `/accounts/balance/get`, and can only be used with Transfer endpoints.  If you require access to other endpoints, create the Item through Link instead.  Access to `/transfer/migrate_account` is not enabled by default; to obtain access, contact your Plaid Account Manager.
-pub async fn transfer_migrate_account(configuration: &configuration::Configuration, transfer_migrate_account_request: crate::models::TransferMigrateAccountRequest) -> Result<crate::models::TransferMigrateAccountResponse, Error<TransferMigrateAccountError>> {
+pub fn transfer_migrate_account(configuration: &configuration::Configuration, transfer_migrate_account_request: crate::models::TransferMigrateAccountRequest) -> Result<crate::models::TransferMigrateAccountResponse, Error<TransferMigrateAccountError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -12531,10 +12531,10 @@ pub async fn transfer_migrate_account(configuration: &configuration::Configurati
     local_var_req_builder = local_var_req_builder.json(&transfer_migrate_account_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -12546,7 +12546,7 @@ pub async fn transfer_migrate_account(configuration: &configuration::Configurati
 }
 
 /// Use the `/transfer/originator/create` endpoint to create a new originator and return an `originator_client_id`.
-pub async fn transfer_originator_create(configuration: &configuration::Configuration, transfer_originator_create_request: crate::models::TransferOriginatorCreateRequest) -> Result<crate::models::TransferOriginatorCreateResponse, Error<TransferOriginatorCreateError>> {
+pub fn transfer_originator_create(configuration: &configuration::Configuration, transfer_originator_create_request: crate::models::TransferOriginatorCreateRequest) -> Result<crate::models::TransferOriginatorCreateResponse, Error<TransferOriginatorCreateError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -12584,10 +12584,10 @@ pub async fn transfer_originator_create(configuration: &configuration::Configura
     local_var_req_builder = local_var_req_builder.json(&transfer_originator_create_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -12599,7 +12599,7 @@ pub async fn transfer_originator_create(configuration: &configuration::Configura
 }
 
 /// Use the `/transfer/originator/funding_account/update` endpoint to update the funding account associated with the originator.
-pub async fn transfer_originator_funding_account_update(configuration: &configuration::Configuration, transfer_originator_funding_account_update_request: crate::models::TransferOriginatorFundingAccountUpdateRequest) -> Result<crate::models::TransferOriginatorFundingAccountUpdateResponse, Error<TransferOriginatorFundingAccountUpdateError>> {
+pub fn transfer_originator_funding_account_update(configuration: &configuration::Configuration, transfer_originator_funding_account_update_request: crate::models::TransferOriginatorFundingAccountUpdateRequest) -> Result<crate::models::TransferOriginatorFundingAccountUpdateResponse, Error<TransferOriginatorFundingAccountUpdateError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -12637,10 +12637,10 @@ pub async fn transfer_originator_funding_account_update(configuration: &configur
     local_var_req_builder = local_var_req_builder.json(&transfer_originator_funding_account_update_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -12652,7 +12652,7 @@ pub async fn transfer_originator_funding_account_update(configuration: &configur
 }
 
 /// The `/transfer/originator/get` endpoint gets status updates for an originator's onboarding process. This information is also available via the Transfer page on the Plaid dashboard.
-pub async fn transfer_originator_get(configuration: &configuration::Configuration, transfer_originator_get_request: crate::models::TransferOriginatorGetRequest) -> Result<crate::models::TransferOriginatorGetResponse, Error<TransferOriginatorGetError>> {
+pub fn transfer_originator_get(configuration: &configuration::Configuration, transfer_originator_get_request: crate::models::TransferOriginatorGetRequest) -> Result<crate::models::TransferOriginatorGetResponse, Error<TransferOriginatorGetError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -12690,10 +12690,10 @@ pub async fn transfer_originator_get(configuration: &configuration::Configuratio
     local_var_req_builder = local_var_req_builder.json(&transfer_originator_get_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -12705,7 +12705,7 @@ pub async fn transfer_originator_get(configuration: &configuration::Configuratio
 }
 
 /// The `/transfer/originator/list` endpoint gets status updates for all of your originators' onboarding. This information is also available via the Plaid dashboard.
-pub async fn transfer_originator_list(configuration: &configuration::Configuration, transfer_originator_list_request: crate::models::TransferOriginatorListRequest) -> Result<crate::models::TransferOriginatorListResponse, Error<TransferOriginatorListError>> {
+pub fn transfer_originator_list(configuration: &configuration::Configuration, transfer_originator_list_request: crate::models::TransferOriginatorListRequest) -> Result<crate::models::TransferOriginatorListResponse, Error<TransferOriginatorListError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -12743,10 +12743,10 @@ pub async fn transfer_originator_list(configuration: &configuration::Configurati
     local_var_req_builder = local_var_req_builder.json(&transfer_originator_list_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -12758,7 +12758,7 @@ pub async fn transfer_originator_list(configuration: &configuration::Configurati
 }
 
 /// The `/transfer/questionnaire/create` endpoint generates a Plaid-hosted onboarding UI URL. Redirect the originator to this URL to provide their due diligence information and agree to Plaid’s terms for ACH money movement.
-pub async fn transfer_questionnaire_create(configuration: &configuration::Configuration, transfer_questionnaire_create_request: crate::models::TransferQuestionnaireCreateRequest) -> Result<crate::models::TransferQuestionnaireCreateResponse, Error<TransferQuestionnaireCreateError>> {
+pub fn transfer_questionnaire_create(configuration: &configuration::Configuration, transfer_questionnaire_create_request: crate::models::TransferQuestionnaireCreateRequest) -> Result<crate::models::TransferQuestionnaireCreateResponse, Error<TransferQuestionnaireCreateError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -12796,10 +12796,10 @@ pub async fn transfer_questionnaire_create(configuration: &configuration::Config
     local_var_req_builder = local_var_req_builder.json(&transfer_questionnaire_create_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -12811,7 +12811,7 @@ pub async fn transfer_questionnaire_create(configuration: &configuration::Config
 }
 
 /// Use the `/transfer/recurring/cancel` endpoint to cancel a recurring transfer.  Scheduled transfer that hasn't been submitted to bank will be cancelled.
-pub async fn transfer_recurring_cancel(configuration: &configuration::Configuration, transfer_recurring_cancel_request: crate::models::TransferRecurringCancelRequest) -> Result<crate::models::TransferRecurringCancelResponse, Error<TransferRecurringCancelError>> {
+pub fn transfer_recurring_cancel(configuration: &configuration::Configuration, transfer_recurring_cancel_request: crate::models::TransferRecurringCancelRequest) -> Result<crate::models::TransferRecurringCancelResponse, Error<TransferRecurringCancelError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -12849,10 +12849,10 @@ pub async fn transfer_recurring_cancel(configuration: &configuration::Configurat
     local_var_req_builder = local_var_req_builder.json(&transfer_recurring_cancel_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -12864,7 +12864,7 @@ pub async fn transfer_recurring_cancel(configuration: &configuration::Configurat
 }
 
 /// Use the `/transfer/recurring/create` endpoint to initiate a new recurring transfer. This capability is not currently supported for Transfer UI or Platform Payments (beta) customers.
-pub async fn transfer_recurring_create(configuration: &configuration::Configuration, transfer_recurring_create_request: crate::models::TransferRecurringCreateRequest) -> Result<crate::models::TransferRecurringCreateResponse, Error<TransferRecurringCreateError>> {
+pub fn transfer_recurring_create(configuration: &configuration::Configuration, transfer_recurring_create_request: crate::models::TransferRecurringCreateRequest) -> Result<crate::models::TransferRecurringCreateResponse, Error<TransferRecurringCreateError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -12902,10 +12902,10 @@ pub async fn transfer_recurring_create(configuration: &configuration::Configurat
     local_var_req_builder = local_var_req_builder.json(&transfer_recurring_create_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -12917,7 +12917,7 @@ pub async fn transfer_recurring_create(configuration: &configuration::Configurat
 }
 
 /// The `/transfer/recurring/get` fetches information about the recurring transfer corresponding to the given `recurring_transfer_id`.
-pub async fn transfer_recurring_get(configuration: &configuration::Configuration, transfer_recurring_get_request: crate::models::TransferRecurringGetRequest) -> Result<crate::models::TransferRecurringGetResponse, Error<TransferRecurringGetError>> {
+pub fn transfer_recurring_get(configuration: &configuration::Configuration, transfer_recurring_get_request: crate::models::TransferRecurringGetRequest) -> Result<crate::models::TransferRecurringGetResponse, Error<TransferRecurringGetError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -12955,10 +12955,10 @@ pub async fn transfer_recurring_get(configuration: &configuration::Configuration
     local_var_req_builder = local_var_req_builder.json(&transfer_recurring_get_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -12970,7 +12970,7 @@ pub async fn transfer_recurring_get(configuration: &configuration::Configuration
 }
 
 /// Use the `/transfer/recurring/list` endpoint to see a list of all your recurring transfers and their statuses. Results are paginated; use the `count` and `offset` query parameters to retrieve the desired recurring transfers. 
-pub async fn transfer_recurring_list(configuration: &configuration::Configuration, transfer_recurring_list_request: crate::models::TransferRecurringListRequest) -> Result<crate::models::TransferRecurringListResponse, Error<TransferRecurringListError>> {
+pub fn transfer_recurring_list(configuration: &configuration::Configuration, transfer_recurring_list_request: crate::models::TransferRecurringListRequest) -> Result<crate::models::TransferRecurringListResponse, Error<TransferRecurringListError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -13008,10 +13008,10 @@ pub async fn transfer_recurring_list(configuration: &configuration::Configuratio
     local_var_req_builder = local_var_req_builder.json(&transfer_recurring_list_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -13023,7 +13023,7 @@ pub async fn transfer_recurring_list(configuration: &configuration::Configuratio
 }
 
 /// Use the `/transfer/refund/cancel` endpoint to cancel a refund.  A refund is eligible for cancellation if it has not yet been submitted to the payment network.
-pub async fn transfer_refund_cancel(configuration: &configuration::Configuration, transfer_refund_cancel_request: crate::models::TransferRefundCancelRequest) -> Result<crate::models::TransferRefundCancelResponse, Error<TransferRefundCancelError>> {
+pub fn transfer_refund_cancel(configuration: &configuration::Configuration, transfer_refund_cancel_request: crate::models::TransferRefundCancelRequest) -> Result<crate::models::TransferRefundCancelResponse, Error<TransferRefundCancelError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -13061,10 +13061,10 @@ pub async fn transfer_refund_cancel(configuration: &configuration::Configuration
     local_var_req_builder = local_var_req_builder.json(&transfer_refund_cancel_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -13076,7 +13076,7 @@ pub async fn transfer_refund_cancel(configuration: &configuration::Configuration
 }
 
 /// Use the `/transfer/refund/create` endpoint to create a refund for a transfer. A transfer can be refunded if the transfer was initiated in the past 180 days.  Processing of the refund will not occur until at least 4 business days following the transfer's settlement date, plus any hold/settlement delays. This 3-day window helps better protect your business from regular ACH returns. Consumer initiated returns (unauthorized returns) could still happen for about 60 days from the settlement date. If the original transfer is canceled, returned or failed, all pending refunds will automatically be canceled. Processed refunds cannot be revoked.
-pub async fn transfer_refund_create(configuration: &configuration::Configuration, transfer_refund_create_request: crate::models::TransferRefundCreateRequest) -> Result<crate::models::TransferRefundCreateResponse, Error<TransferRefundCreateError>> {
+pub fn transfer_refund_create(configuration: &configuration::Configuration, transfer_refund_create_request: crate::models::TransferRefundCreateRequest) -> Result<crate::models::TransferRefundCreateResponse, Error<TransferRefundCreateError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -13114,10 +13114,10 @@ pub async fn transfer_refund_create(configuration: &configuration::Configuration
     local_var_req_builder = local_var_req_builder.json(&transfer_refund_create_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -13129,7 +13129,7 @@ pub async fn transfer_refund_create(configuration: &configuration::Configuration
 }
 
 /// The `/transfer/refund/get` endpoint fetches information about the refund corresponding to the given `refund_id`.
-pub async fn transfer_refund_get(configuration: &configuration::Configuration, transfer_refund_get_request: crate::models::TransferRefundGetRequest) -> Result<crate::models::TransferRefundGetResponse, Error<TransferRefundGetError>> {
+pub fn transfer_refund_get(configuration: &configuration::Configuration, transfer_refund_get_request: crate::models::TransferRefundGetRequest) -> Result<crate::models::TransferRefundGetResponse, Error<TransferRefundGetError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -13167,10 +13167,10 @@ pub async fn transfer_refund_get(configuration: &configuration::Configuration, t
     local_var_req_builder = local_var_req_builder.json(&transfer_refund_get_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -13182,7 +13182,7 @@ pub async fn transfer_refund_get(configuration: &configuration::Configuration, t
 }
 
 /// The `/transfer/repayment/list` endpoint fetches repayments matching the given filters. Repayments are returned in reverse-chronological order (most recent first) starting at the given `start_time`.
-pub async fn transfer_repayment_list(configuration: &configuration::Configuration, transfer_repayment_list_request: crate::models::TransferRepaymentListRequest) -> Result<crate::models::TransferRepaymentListResponse, Error<TransferRepaymentListError>> {
+pub fn transfer_repayment_list(configuration: &configuration::Configuration, transfer_repayment_list_request: crate::models::TransferRepaymentListRequest) -> Result<crate::models::TransferRepaymentListResponse, Error<TransferRepaymentListError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -13220,10 +13220,10 @@ pub async fn transfer_repayment_list(configuration: &configuration::Configuratio
     local_var_req_builder = local_var_req_builder.json(&transfer_repayment_list_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -13235,7 +13235,7 @@ pub async fn transfer_repayment_list(configuration: &configuration::Configuratio
 }
 
 /// The `/transfer/repayment/return/list` endpoint retrieves the set of returns that were batched together into the specified repayment. The sum of amounts of returns retrieved by this request equals the amount of the repayment.
-pub async fn transfer_repayment_return_list(configuration: &configuration::Configuration, transfer_repayment_return_list_request: crate::models::TransferRepaymentReturnListRequest) -> Result<crate::models::TransferRepaymentReturnListResponse, Error<TransferRepaymentReturnListError>> {
+pub fn transfer_repayment_return_list(configuration: &configuration::Configuration, transfer_repayment_return_list_request: crate::models::TransferRepaymentReturnListRequest) -> Result<crate::models::TransferRepaymentReturnListResponse, Error<TransferRepaymentReturnListError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -13273,10 +13273,10 @@ pub async fn transfer_repayment_return_list(configuration: &configuration::Confi
     local_var_req_builder = local_var_req_builder.json(&transfer_repayment_return_list_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -13288,7 +13288,7 @@ pub async fn transfer_repayment_return_list(configuration: &configuration::Confi
 }
 
 /// The `/transfer/sweep/get` endpoint fetches a sweep corresponding to the given `sweep_id`.
-pub async fn transfer_sweep_get(configuration: &configuration::Configuration, transfer_sweep_get_request: crate::models::TransferSweepGetRequest) -> Result<crate::models::TransferSweepGetResponse, Error<TransferSweepGetError>> {
+pub fn transfer_sweep_get(configuration: &configuration::Configuration, transfer_sweep_get_request: crate::models::TransferSweepGetRequest) -> Result<crate::models::TransferSweepGetResponse, Error<TransferSweepGetError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -13326,10 +13326,10 @@ pub async fn transfer_sweep_get(configuration: &configuration::Configuration, tr
     local_var_req_builder = local_var_req_builder.json(&transfer_sweep_get_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -13341,7 +13341,7 @@ pub async fn transfer_sweep_get(configuration: &configuration::Configuration, tr
 }
 
 /// The `/transfer/sweep/list` endpoint fetches sweeps matching the given filters.
-pub async fn transfer_sweep_list(configuration: &configuration::Configuration, transfer_sweep_list_request: crate::models::TransferSweepListRequest) -> Result<crate::models::TransferSweepListResponse, Error<TransferSweepListError>> {
+pub fn transfer_sweep_list(configuration: &configuration::Configuration, transfer_sweep_list_request: crate::models::TransferSweepListRequest) -> Result<crate::models::TransferSweepListResponse, Error<TransferSweepListError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -13379,10 +13379,10 @@ pub async fn transfer_sweep_list(configuration: &configuration::Configuration, t
     local_var_req_builder = local_var_req_builder.json(&transfer_sweep_list_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -13394,7 +13394,7 @@ pub async fn transfer_sweep_list(configuration: &configuration::Configuration, t
 }
 
 /// This endpoint should be called for each of your end users before they begin a Plaid income flow. This provides you a single token to access all income data associated with the user. You should only create one per end user.  If you call the endpoint multiple times with the same `client_user_id`, the first creation call will succeed and the rest will fail with an error message indicating that the user has been created for the given `client_user_id`.  Ensure that you store the `user_token` along with your user's identifier in your database, as it is not possible to retrieve a previously created `user_token`.
-pub async fn user_create(configuration: &configuration::Configuration, user_create_request: crate::models::UserCreateRequest) -> Result<crate::models::UserCreateResponse, Error<UserCreateError>> {
+pub fn user_create(configuration: &configuration::Configuration, user_create_request: crate::models::UserCreateRequest) -> Result<crate::models::UserCreateResponse, Error<UserCreateError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -13432,10 +13432,10 @@ pub async fn user_create(configuration: &configuration::Configuration, user_crea
     local_var_req_builder = local_var_req_builder.json(&user_create_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -13447,7 +13447,7 @@ pub async fn user_create(configuration: &configuration::Configuration, user_crea
 }
 
 /// This endpoint is used to update user information associated with an existing `user_token`. The `user_token` should be in the response of `/user/create` call  If you call the endpoint with a non-exist `user_token`, the call will fail with an error message indicating that the user token is not found.
-pub async fn user_update(configuration: &configuration::Configuration, user_update_request: crate::models::UserUpdateRequest) -> Result<crate::models::UserUpdateResponse, Error<UserUpdateError>> {
+pub fn user_update(configuration: &configuration::Configuration, user_update_request: crate::models::UserUpdateRequest) -> Result<crate::models::UserUpdateResponse, Error<UserUpdateError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -13485,10 +13485,10 @@ pub async fn user_update(configuration: &configuration::Configuration, user_upda
     local_var_req_builder = local_var_req_builder.json(&user_update_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -13500,7 +13500,7 @@ pub async fn user_update(configuration: &configuration::Configuration, user_upda
 }
 
 /// Create an e-wallet. The response is the newly created e-wallet object.
-pub async fn wallet_create(configuration: &configuration::Configuration, wallet_create_request: crate::models::WalletCreateRequest) -> Result<crate::models::WalletCreateResponse, Error<WalletCreateError>> {
+pub fn wallet_create(configuration: &configuration::Configuration, wallet_create_request: crate::models::WalletCreateRequest) -> Result<crate::models::WalletCreateResponse, Error<WalletCreateError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -13538,10 +13538,10 @@ pub async fn wallet_create(configuration: &configuration::Configuration, wallet_
     local_var_req_builder = local_var_req_builder.json(&wallet_create_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -13553,7 +13553,7 @@ pub async fn wallet_create(configuration: &configuration::Configuration, wallet_
 }
 
 /// Fetch an e-wallet. The response includes the current balance.
-pub async fn wallet_get(configuration: &configuration::Configuration, wallet_get_request: crate::models::WalletGetRequest) -> Result<crate::models::WalletGetResponse, Error<WalletGetError>> {
+pub fn wallet_get(configuration: &configuration::Configuration, wallet_get_request: crate::models::WalletGetRequest) -> Result<crate::models::WalletGetResponse, Error<WalletGetError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -13591,10 +13591,10 @@ pub async fn wallet_get(configuration: &configuration::Configuration, wallet_get
     local_var_req_builder = local_var_req_builder.json(&wallet_get_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -13606,7 +13606,7 @@ pub async fn wallet_get(configuration: &configuration::Configuration, wallet_get
 }
 
 /// This endpoint lists all e-wallets in descending order of creation.
-pub async fn wallet_list(configuration: &configuration::Configuration, wallet_list_request: crate::models::WalletListRequest) -> Result<crate::models::WalletListResponse, Error<WalletListError>> {
+pub fn wallet_list(configuration: &configuration::Configuration, wallet_list_request: crate::models::WalletListRequest) -> Result<crate::models::WalletListResponse, Error<WalletListError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -13644,10 +13644,10 @@ pub async fn wallet_list(configuration: &configuration::Configuration, wallet_li
     local_var_req_builder = local_var_req_builder.json(&wallet_list_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -13659,7 +13659,7 @@ pub async fn wallet_list(configuration: &configuration::Configuration, wallet_li
 }
 
 /// Execute a transaction using the specified e-wallet. Specify the e-wallet to debit from, the counterparty to credit to, the idempotency key to prevent duplicate transactions, the amount and reference for the transaction. Transactions will settle in seconds to several days, depending on the underlying payment rail.
-pub async fn wallet_transaction_execute(configuration: &configuration::Configuration, wallet_transaction_execute_request: crate::models::WalletTransactionExecuteRequest) -> Result<crate::models::WalletTransactionExecuteResponse, Error<WalletTransactionExecuteError>> {
+pub fn wallet_transaction_execute(configuration: &configuration::Configuration, wallet_transaction_execute_request: crate::models::WalletTransactionExecuteRequest) -> Result<crate::models::WalletTransactionExecuteResponse, Error<WalletTransactionExecuteError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -13697,10 +13697,10 @@ pub async fn wallet_transaction_execute(configuration: &configuration::Configura
     local_var_req_builder = local_var_req_builder.json(&wallet_transaction_execute_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -13712,7 +13712,7 @@ pub async fn wallet_transaction_execute(configuration: &configuration::Configura
 }
 
 /// Fetch a specific e-wallet transaction
-pub async fn wallet_transaction_get(configuration: &configuration::Configuration, wallet_transaction_get_request: crate::models::WalletTransactionGetRequest) -> Result<crate::models::WalletTransactionGetResponse, Error<WalletTransactionGetError>> {
+pub fn wallet_transaction_get(configuration: &configuration::Configuration, wallet_transaction_get_request: crate::models::WalletTransactionGetRequest) -> Result<crate::models::WalletTransactionGetResponse, Error<WalletTransactionGetError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -13750,10 +13750,10 @@ pub async fn wallet_transaction_get(configuration: &configuration::Configuration
     local_var_req_builder = local_var_req_builder.json(&wallet_transaction_get_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -13765,7 +13765,7 @@ pub async fn wallet_transaction_get(configuration: &configuration::Configuration
 }
 
 /// This endpoint lists the latest transactions of the specified e-wallet. Transactions are returned in descending order by the `created_at` time.
-pub async fn wallet_transaction_list(configuration: &configuration::Configuration, wallet_transaction_list_request: crate::models::WalletTransactionListRequest) -> Result<crate::models::WalletTransactionListResponse, Error<WalletTransactionListError>> {
+pub fn wallet_transaction_list(configuration: &configuration::Configuration, wallet_transaction_list_request: crate::models::WalletTransactionListRequest) -> Result<crate::models::WalletTransactionListResponse, Error<WalletTransactionListError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -13803,10 +13803,10 @@ pub async fn wallet_transaction_list(configuration: &configuration::Configuratio
     local_var_req_builder = local_var_req_builder.json(&wallet_transaction_list_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -13818,7 +13818,7 @@ pub async fn wallet_transaction_list(configuration: &configuration::Configuratio
 }
 
 /// Create a new entity watchlist screening to check your customer against watchlists defined in the associated entity watchlist program. If your associated program has ongoing screening enabled, this is the profile information that will be used to monitor your customer over time.
-pub async fn watchlist_screening_entity_create(configuration: &configuration::Configuration, watchlist_screening_entity_create_request: crate::models::WatchlistScreeningEntityCreateRequest) -> Result<crate::models::WatchlistScreeningEntityCreateResponse, Error<WatchlistScreeningEntityCreateError>> {
+pub fn watchlist_screening_entity_create(configuration: &configuration::Configuration, watchlist_screening_entity_create_request: crate::models::WatchlistScreeningEntityCreateRequest) -> Result<crate::models::WatchlistScreeningEntityCreateResponse, Error<WatchlistScreeningEntityCreateError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -13856,10 +13856,10 @@ pub async fn watchlist_screening_entity_create(configuration: &configuration::Co
     local_var_req_builder = local_var_req_builder.json(&watchlist_screening_entity_create_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -13871,7 +13871,7 @@ pub async fn watchlist_screening_entity_create(configuration: &configuration::Co
 }
 
 /// Retrieve an entity watchlist screening.
-pub async fn watchlist_screening_entity_get(configuration: &configuration::Configuration, watchlist_screening_entity_get_request: crate::models::WatchlistScreeningEntityGetRequest) -> Result<crate::models::WatchlistScreeningEntityGetResponse, Error<WatchlistScreeningEntityGetError>> {
+pub fn watchlist_screening_entity_get(configuration: &configuration::Configuration, watchlist_screening_entity_get_request: crate::models::WatchlistScreeningEntityGetRequest) -> Result<crate::models::WatchlistScreeningEntityGetResponse, Error<WatchlistScreeningEntityGetError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -13909,10 +13909,10 @@ pub async fn watchlist_screening_entity_get(configuration: &configuration::Confi
     local_var_req_builder = local_var_req_builder.json(&watchlist_screening_entity_get_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -13924,7 +13924,7 @@ pub async fn watchlist_screening_entity_get(configuration: &configuration::Confi
 }
 
 /// List all changes to the entity watchlist screening in reverse-chronological order. If the watchlist screening has not been edited, no history will be returned.
-pub async fn watchlist_screening_entity_history_list(configuration: &configuration::Configuration, watchlist_screening_entity_history_list_request: crate::models::WatchlistScreeningEntityHistoryListRequest) -> Result<crate::models::WatchlistScreeningEntityHistoryListResponse, Error<WatchlistScreeningEntityHistoryListError>> {
+pub fn watchlist_screening_entity_history_list(configuration: &configuration::Configuration, watchlist_screening_entity_history_list_request: crate::models::WatchlistScreeningEntityHistoryListRequest) -> Result<crate::models::WatchlistScreeningEntityHistoryListResponse, Error<WatchlistScreeningEntityHistoryListError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -13962,10 +13962,10 @@ pub async fn watchlist_screening_entity_history_list(configuration: &configurati
     local_var_req_builder = local_var_req_builder.json(&watchlist_screening_entity_history_list_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -13977,7 +13977,7 @@ pub async fn watchlist_screening_entity_history_list(configuration: &configurati
 }
 
 /// List all hits for the entity watchlist screening.
-pub async fn watchlist_screening_entity_hit_list(configuration: &configuration::Configuration, watchlist_screening_entity_hit_list_request: crate::models::WatchlistScreeningEntityHitListRequest) -> Result<crate::models::WatchlistScreeningEntityHitListResponse, Error<WatchlistScreeningEntityHitListError>> {
+pub fn watchlist_screening_entity_hit_list(configuration: &configuration::Configuration, watchlist_screening_entity_hit_list_request: crate::models::WatchlistScreeningEntityHitListRequest) -> Result<crate::models::WatchlistScreeningEntityHitListResponse, Error<WatchlistScreeningEntityHitListError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -14015,10 +14015,10 @@ pub async fn watchlist_screening_entity_hit_list(configuration: &configuration::
     local_var_req_builder = local_var_req_builder.json(&watchlist_screening_entity_hit_list_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -14030,7 +14030,7 @@ pub async fn watchlist_screening_entity_hit_list(configuration: &configuration::
 }
 
 /// List all entity screenings.
-pub async fn watchlist_screening_entity_list(configuration: &configuration::Configuration, watchlist_screening_entity_list_request: crate::models::WatchlistScreeningEntityListRequest) -> Result<crate::models::WatchlistScreeningEntityListResponse, Error<WatchlistScreeningEntityListError>> {
+pub fn watchlist_screening_entity_list(configuration: &configuration::Configuration, watchlist_screening_entity_list_request: crate::models::WatchlistScreeningEntityListRequest) -> Result<crate::models::WatchlistScreeningEntityListResponse, Error<WatchlistScreeningEntityListError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -14068,10 +14068,10 @@ pub async fn watchlist_screening_entity_list(configuration: &configuration::Conf
     local_var_req_builder = local_var_req_builder.json(&watchlist_screening_entity_list_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -14083,7 +14083,7 @@ pub async fn watchlist_screening_entity_list(configuration: &configuration::Conf
 }
 
 /// Get an entity watchlist screening program
-pub async fn watchlist_screening_entity_program_get(configuration: &configuration::Configuration, watchlist_screening_entity_program_get_request: crate::models::WatchlistScreeningEntityProgramGetRequest) -> Result<crate::models::WatchlistScreeningEntityProgramGetResponse, Error<WatchlistScreeningEntityProgramGetError>> {
+pub fn watchlist_screening_entity_program_get(configuration: &configuration::Configuration, watchlist_screening_entity_program_get_request: crate::models::WatchlistScreeningEntityProgramGetRequest) -> Result<crate::models::WatchlistScreeningEntityProgramGetResponse, Error<WatchlistScreeningEntityProgramGetError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -14121,10 +14121,10 @@ pub async fn watchlist_screening_entity_program_get(configuration: &configuratio
     local_var_req_builder = local_var_req_builder.json(&watchlist_screening_entity_program_get_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -14136,7 +14136,7 @@ pub async fn watchlist_screening_entity_program_get(configuration: &configuratio
 }
 
 /// List all entity watchlist screening programs
-pub async fn watchlist_screening_entity_program_list(configuration: &configuration::Configuration, watchlist_screening_entity_program_list_request: crate::models::WatchlistScreeningEntityProgramListRequest) -> Result<crate::models::WatchlistScreeningEntityProgramListResponse, Error<WatchlistScreeningEntityProgramListError>> {
+pub fn watchlist_screening_entity_program_list(configuration: &configuration::Configuration, watchlist_screening_entity_program_list_request: crate::models::WatchlistScreeningEntityProgramListRequest) -> Result<crate::models::WatchlistScreeningEntityProgramListResponse, Error<WatchlistScreeningEntityProgramListError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -14174,10 +14174,10 @@ pub async fn watchlist_screening_entity_program_list(configuration: &configurati
     local_var_req_builder = local_var_req_builder.json(&watchlist_screening_entity_program_list_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -14189,7 +14189,7 @@ pub async fn watchlist_screening_entity_program_list(configuration: &configurati
 }
 
 /// Create a review for an entity watchlist screening. Reviews are compliance reports created by users in your organization regarding the relevance of potential hits found by Plaid.
-pub async fn watchlist_screening_entity_review_create(configuration: &configuration::Configuration, watchlist_screening_entity_review_create_request: crate::models::WatchlistScreeningEntityReviewCreateRequest) -> Result<crate::models::WatchlistScreeningEntityReviewCreateResponse, Error<WatchlistScreeningEntityReviewCreateError>> {
+pub fn watchlist_screening_entity_review_create(configuration: &configuration::Configuration, watchlist_screening_entity_review_create_request: crate::models::WatchlistScreeningEntityReviewCreateRequest) -> Result<crate::models::WatchlistScreeningEntityReviewCreateResponse, Error<WatchlistScreeningEntityReviewCreateError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -14227,10 +14227,10 @@ pub async fn watchlist_screening_entity_review_create(configuration: &configurat
     local_var_req_builder = local_var_req_builder.json(&watchlist_screening_entity_review_create_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -14242,7 +14242,7 @@ pub async fn watchlist_screening_entity_review_create(configuration: &configurat
 }
 
 /// List all reviews for a particular entity watchlist screening. Reviews are compliance reports created by users in your organization regarding the relevance of potential hits found by Plaid.
-pub async fn watchlist_screening_entity_review_list(configuration: &configuration::Configuration, watchlist_screening_entity_review_list_request: crate::models::WatchlistScreeningEntityReviewListRequest) -> Result<crate::models::WatchlistScreeningEntityReviewListResponse, Error<WatchlistScreeningEntityReviewListError>> {
+pub fn watchlist_screening_entity_review_list(configuration: &configuration::Configuration, watchlist_screening_entity_review_list_request: crate::models::WatchlistScreeningEntityReviewListRequest) -> Result<crate::models::WatchlistScreeningEntityReviewListResponse, Error<WatchlistScreeningEntityReviewListError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -14280,10 +14280,10 @@ pub async fn watchlist_screening_entity_review_list(configuration: &configuratio
     local_var_req_builder = local_var_req_builder.json(&watchlist_screening_entity_review_list_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -14295,7 +14295,7 @@ pub async fn watchlist_screening_entity_review_list(configuration: &configuratio
 }
 
 /// Update an entity watchlist screening.
-pub async fn watchlist_screening_entity_update(configuration: &configuration::Configuration, watchlist_screening_entity_update_request: crate::models::WatchlistScreeningEntityUpdateRequest) -> Result<crate::models::WatchlistScreeningEntityUpdateResponse, Error<WatchlistScreeningEntityUpdateError>> {
+pub fn watchlist_screening_entity_update(configuration: &configuration::Configuration, watchlist_screening_entity_update_request: crate::models::WatchlistScreeningEntityUpdateRequest) -> Result<crate::models::WatchlistScreeningEntityUpdateResponse, Error<WatchlistScreeningEntityUpdateError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -14333,10 +14333,10 @@ pub async fn watchlist_screening_entity_update(configuration: &configuration::Co
     local_var_req_builder = local_var_req_builder.json(&watchlist_screening_entity_update_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -14348,7 +14348,7 @@ pub async fn watchlist_screening_entity_update(configuration: &configuration::Co
 }
 
 /// Create a new Watchlist Screening to check your customer against watchlists defined in the associated Watchlist Program. If your associated program has ongoing screening enabled, this is the profile information that will be used to monitor your customer over time.
-pub async fn watchlist_screening_individual_create(configuration: &configuration::Configuration, watchlist_screening_individual_create_request: crate::models::WatchlistScreeningIndividualCreateRequest) -> Result<crate::models::WatchlistScreeningIndividualCreateResponse, Error<WatchlistScreeningIndividualCreateError>> {
+pub fn watchlist_screening_individual_create(configuration: &configuration::Configuration, watchlist_screening_individual_create_request: crate::models::WatchlistScreeningIndividualCreateRequest) -> Result<crate::models::WatchlistScreeningIndividualCreateResponse, Error<WatchlistScreeningIndividualCreateError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -14386,10 +14386,10 @@ pub async fn watchlist_screening_individual_create(configuration: &configuration
     local_var_req_builder = local_var_req_builder.json(&watchlist_screening_individual_create_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -14401,7 +14401,7 @@ pub async fn watchlist_screening_individual_create(configuration: &configuration
 }
 
 /// Retrieve a previously created individual watchlist screening
-pub async fn watchlist_screening_individual_get(configuration: &configuration::Configuration, watchlist_screening_individual_get_request: crate::models::WatchlistScreeningIndividualGetRequest) -> Result<crate::models::WatchlistScreeningIndividualGetResponse, Error<WatchlistScreeningIndividualGetError>> {
+pub fn watchlist_screening_individual_get(configuration: &configuration::Configuration, watchlist_screening_individual_get_request: crate::models::WatchlistScreeningIndividualGetRequest) -> Result<crate::models::WatchlistScreeningIndividualGetResponse, Error<WatchlistScreeningIndividualGetError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -14439,10 +14439,10 @@ pub async fn watchlist_screening_individual_get(configuration: &configuration::C
     local_var_req_builder = local_var_req_builder.json(&watchlist_screening_individual_get_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -14454,7 +14454,7 @@ pub async fn watchlist_screening_individual_get(configuration: &configuration::C
 }
 
 /// List all changes to the individual watchlist screening in reverse-chronological order. If the watchlist screening has not been edited, no history will be returned.
-pub async fn watchlist_screening_individual_history_list(configuration: &configuration::Configuration, watchlist_screening_individual_history_list_request: crate::models::WatchlistScreeningIndividualHistoryListRequest) -> Result<crate::models::WatchlistScreeningIndividualHistoryListResponse, Error<WatchlistScreeningIndividualHistoryListError>> {
+pub fn watchlist_screening_individual_history_list(configuration: &configuration::Configuration, watchlist_screening_individual_history_list_request: crate::models::WatchlistScreeningIndividualHistoryListRequest) -> Result<crate::models::WatchlistScreeningIndividualHistoryListResponse, Error<WatchlistScreeningIndividualHistoryListError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -14492,10 +14492,10 @@ pub async fn watchlist_screening_individual_history_list(configuration: &configu
     local_var_req_builder = local_var_req_builder.json(&watchlist_screening_individual_history_list_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -14507,7 +14507,7 @@ pub async fn watchlist_screening_individual_history_list(configuration: &configu
 }
 
 /// List all hits found by Plaid for a particular individual watchlist screening.
-pub async fn watchlist_screening_individual_hit_list(configuration: &configuration::Configuration, watchlist_screening_individual_hit_list_request: crate::models::WatchlistScreeningIndividualHitListRequest) -> Result<crate::models::WatchlistScreeningIndividualHitListResponse, Error<WatchlistScreeningIndividualHitListError>> {
+pub fn watchlist_screening_individual_hit_list(configuration: &configuration::Configuration, watchlist_screening_individual_hit_list_request: crate::models::WatchlistScreeningIndividualHitListRequest) -> Result<crate::models::WatchlistScreeningIndividualHitListResponse, Error<WatchlistScreeningIndividualHitListError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -14545,10 +14545,10 @@ pub async fn watchlist_screening_individual_hit_list(configuration: &configurati
     local_var_req_builder = local_var_req_builder.json(&watchlist_screening_individual_hit_list_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -14560,7 +14560,7 @@ pub async fn watchlist_screening_individual_hit_list(configuration: &configurati
 }
 
 /// List previously created watchlist screenings for individuals
-pub async fn watchlist_screening_individual_list(configuration: &configuration::Configuration, watchlist_screening_individual_list_request: crate::models::WatchlistScreeningIndividualListRequest) -> Result<crate::models::WatchlistScreeningIndividualListResponse, Error<WatchlistScreeningIndividualListError>> {
+pub fn watchlist_screening_individual_list(configuration: &configuration::Configuration, watchlist_screening_individual_list_request: crate::models::WatchlistScreeningIndividualListRequest) -> Result<crate::models::WatchlistScreeningIndividualListResponse, Error<WatchlistScreeningIndividualListError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -14598,10 +14598,10 @@ pub async fn watchlist_screening_individual_list(configuration: &configuration::
     local_var_req_builder = local_var_req_builder.json(&watchlist_screening_individual_list_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -14613,7 +14613,7 @@ pub async fn watchlist_screening_individual_list(configuration: &configuration::
 }
 
 /// Get an individual watchlist screening program
-pub async fn watchlist_screening_individual_program_get(configuration: &configuration::Configuration, watchlist_screening_individual_program_get_request: crate::models::WatchlistScreeningIndividualProgramGetRequest) -> Result<crate::models::WatchlistScreeningIndividualProgramGetResponse, Error<WatchlistScreeningIndividualProgramGetError>> {
+pub fn watchlist_screening_individual_program_get(configuration: &configuration::Configuration, watchlist_screening_individual_program_get_request: crate::models::WatchlistScreeningIndividualProgramGetRequest) -> Result<crate::models::WatchlistScreeningIndividualProgramGetResponse, Error<WatchlistScreeningIndividualProgramGetError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -14651,10 +14651,10 @@ pub async fn watchlist_screening_individual_program_get(configuration: &configur
     local_var_req_builder = local_var_req_builder.json(&watchlist_screening_individual_program_get_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -14666,7 +14666,7 @@ pub async fn watchlist_screening_individual_program_get(configuration: &configur
 }
 
 /// List all individual watchlist screening programs
-pub async fn watchlist_screening_individual_program_list(configuration: &configuration::Configuration, watchlist_screening_individual_program_list_request: crate::models::WatchlistScreeningIndividualProgramListRequest) -> Result<crate::models::WatchlistScreeningIndividualProgramListResponse, Error<WatchlistScreeningIndividualProgramListError>> {
+pub fn watchlist_screening_individual_program_list(configuration: &configuration::Configuration, watchlist_screening_individual_program_list_request: crate::models::WatchlistScreeningIndividualProgramListRequest) -> Result<crate::models::WatchlistScreeningIndividualProgramListResponse, Error<WatchlistScreeningIndividualProgramListError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -14704,10 +14704,10 @@ pub async fn watchlist_screening_individual_program_list(configuration: &configu
     local_var_req_builder = local_var_req_builder.json(&watchlist_screening_individual_program_list_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -14719,7 +14719,7 @@ pub async fn watchlist_screening_individual_program_list(configuration: &configu
 }
 
 /// Create a review for the individual watchlist screening. Reviews are compliance reports created by users in your organization regarding the relevance of potential hits found by Plaid.
-pub async fn watchlist_screening_individual_review_create(configuration: &configuration::Configuration, watchlist_screening_individual_review_create_request: crate::models::WatchlistScreeningIndividualReviewCreateRequest) -> Result<crate::models::WatchlistScreeningIndividualReviewCreateResponse, Error<WatchlistScreeningIndividualReviewCreateError>> {
+pub fn watchlist_screening_individual_review_create(configuration: &configuration::Configuration, watchlist_screening_individual_review_create_request: crate::models::WatchlistScreeningIndividualReviewCreateRequest) -> Result<crate::models::WatchlistScreeningIndividualReviewCreateResponse, Error<WatchlistScreeningIndividualReviewCreateError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -14757,10 +14757,10 @@ pub async fn watchlist_screening_individual_review_create(configuration: &config
     local_var_req_builder = local_var_req_builder.json(&watchlist_screening_individual_review_create_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -14772,7 +14772,7 @@ pub async fn watchlist_screening_individual_review_create(configuration: &config
 }
 
 /// List all reviews for the individual watchlist screening.
-pub async fn watchlist_screening_individual_review_list(configuration: &configuration::Configuration, watchlist_screening_individual_review_list_request: crate::models::WatchlistScreeningIndividualReviewListRequest) -> Result<crate::models::WatchlistScreeningIndividualReviewListResponse, Error<WatchlistScreeningIndividualReviewListError>> {
+pub fn watchlist_screening_individual_review_list(configuration: &configuration::Configuration, watchlist_screening_individual_review_list_request: crate::models::WatchlistScreeningIndividualReviewListRequest) -> Result<crate::models::WatchlistScreeningIndividualReviewListResponse, Error<WatchlistScreeningIndividualReviewListError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -14810,10 +14810,10 @@ pub async fn watchlist_screening_individual_review_list(configuration: &configur
     local_var_req_builder = local_var_req_builder.json(&watchlist_screening_individual_review_list_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -14825,7 +14825,7 @@ pub async fn watchlist_screening_individual_review_list(configuration: &configur
 }
 
 /// Update a specific individual watchlist screening. This endpoint can be used to add additional customer information, correct outdated information, add a reference id, assign the individual to a reviewer, and update which program it is associated with. Please note that you may not update `search_terms` and `status` at the same time since editing `search_terms` may trigger an automatic `status` change.
-pub async fn watchlist_screening_individual_update(configuration: &configuration::Configuration, watchlist_screening_individual_update_request: crate::models::WatchlistScreeningIndividualUpdateRequest) -> Result<crate::models::WatchlistScreeningIndividualUpdateResponse, Error<WatchlistScreeningIndividualUpdateError>> {
+pub fn watchlist_screening_individual_update(configuration: &configuration::Configuration, watchlist_screening_individual_update_request: crate::models::WatchlistScreeningIndividualUpdateRequest) -> Result<crate::models::WatchlistScreeningIndividualUpdateResponse, Error<WatchlistScreeningIndividualUpdateError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -14863,10 +14863,10 @@ pub async fn watchlist_screening_individual_update(configuration: &configuration
     local_var_req_builder = local_var_req_builder.json(&watchlist_screening_individual_update_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -14878,7 +14878,7 @@ pub async fn watchlist_screening_individual_update(configuration: &configuration
 }
 
 /// Plaid signs all outgoing webhooks and provides JSON Web Tokens (JWTs) so that you can verify the authenticity of any incoming webhooks to your application. A message signature is included in the `Plaid-Verification` header.  The `/webhook_verification_key/get` endpoint provides a JSON Web Key (JWK) that can be used to verify a JWT.
-pub async fn webhook_verification_key_get(configuration: &configuration::Configuration, webhook_verification_key_get_request: crate::models::WebhookVerificationKeyGetRequest) -> Result<crate::models::WebhookVerificationKeyGetResponse, Error<WebhookVerificationKeyGetError>> {
+pub fn webhook_verification_key_get(configuration: &configuration::Configuration, webhook_verification_key_get_request: crate::models::WebhookVerificationKeyGetRequest) -> Result<crate::models::WebhookVerificationKeyGetResponse, Error<WebhookVerificationKeyGetError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -14916,10 +14916,10 @@ pub async fn webhook_verification_key_get(configuration: &configuration::Configu
     local_var_req_builder = local_var_req_builder.json(&webhook_verification_key_get_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let mut local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
