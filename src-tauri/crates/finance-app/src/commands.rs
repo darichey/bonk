@@ -208,7 +208,7 @@ pub async fn create_link_token(plaid_config: State<'_, Configuration>) -> Result
     Ok(plaid_api::link_token_create(
         &plaid_config,
         LinkTokenCreateRequest {
-            products: Some(vec![Products::Auth, Products::Transactions]),
+            products: Some(Some(vec![Products::Auth, Products::Transactions])),
             ..LinkTokenCreateRequest::new(
                 "finance-app".to_string(),
                 "en".to_string(),
@@ -234,7 +234,8 @@ pub async fn exchange_public_token(
         &plaid_config,
         plaid::models::ItemPublicTokenExchangeRequest {
             public_token,
-            ..Default::default()
+            client_id: None,
+            secret: None,
         },
     )
     .await
@@ -265,7 +266,9 @@ pub async fn plaid_get_transactions(
             access_token: plaid_access_token.get(),
             start_date: "2023-01-01".to_string(),
             end_date: "2023-11-20".to_string(),
-            ..Default::default()
+            client_id: None,
+            options: None,
+            secret: None,
         },
     )
     .await
