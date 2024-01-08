@@ -338,6 +338,8 @@ name = "bonk-plaid"
 version = "0.1.0"
 dependencies = [
  "bonk-ast-errorless",
+ "chrono",
+ "clap 4.4.13",
  "plaid",
  "reqwest",
  "rouille",

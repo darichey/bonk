@@ -1,3 +1,6 @@
+use bonk_ast_errorless::{Account, Amount, Ledger, Posting, Transaction};
+use chrono::NaiveDate;
+use clap::Parser;
 use plaid::{
     apis::{configuration::Configuration, plaid_api},
     models::{
@@ -17,9 +20,52 @@ use std::{
     time::Duration,
 };
 
+/// Produces a partial Bonk ledger by importing transactions from Plaid.
+#[derive(Parser, Debug)]
+#[command()]
+struct Args {}
+
 fn main() -> Result<(), Box<dyn Error>> {
-    let access_token = get_plaid_access_token()?;
-    println!("access_token: {}", access_token);
+    let args = Args::parse();
+
+    let config = plaid_config()?;
+    let access_token = plaid_get_access_token(&config)?;
+
+    let mut transactions = plaid_get_transactions(&config, &access_token)?;
+    transactions.sort_by(
+        |PlaidTransaction { date: date_a, .. }, PlaidTransaction { date: date_b, .. }| {
+            date_a.cmp(date_b)
+        },
+    );
+    let transactions = transactions
+        .into_iter()
+        .map(
+            |PlaidTransaction {
+                 account,
+                 amount,
+                 date,
+                 name,
+             }| {
+                Transaction {
+                    date: NaiveDate::parse_from_str(&date, "%Y-%m-%d").unwrap(),
+                    description: name,
+                    postings: vec![Posting {
+                        account: Account {
+                            path: vec![account.to_lowercase().replace(' ', "_")],
+                        },
+                        amount: Amount {
+                            cents: (amount * 100.0) as i32,
+                        },
+                    }],
+                }
+            },
+        )
+        .collect();
+
+    let ledger = Ledger { transactions };
+
+    println!("{}", ledger);
+
     Ok(())
 }
 
@@ -54,9 +100,8 @@ fn handle_post(request: &Request, public_token: Arc<Mutex<Option<String>>>) -> R
     Response::empty_204()
 }
 
-fn get_plaid_access_token() -> Result<String, Box<dyn Error>> {
-    let config = plaid_config()?;
-    let link_token = create_link_token(&config)?;
+fn plaid_get_access_token(config: &Configuration) -> Result<String, Box<dyn Error>> {
+    let link_token = plaid_create_link_token(config)?;
 
     let public_token: Arc<Mutex<Option<String>>> = Arc::new(Mutex::new(None));
 
@@ -82,12 +127,12 @@ fn get_plaid_access_token() -> Result<String, Box<dyn Error>> {
         }
     };
 
-    let access_token = exchange_public_token(&config, &public_token)?;
+    let access_token = plaid_exchange_public_token(config, &public_token)?;
 
     Ok(access_token)
 }
 
-fn create_link_token(config: &Configuration) -> Result<String, Box<dyn Error>> {
+fn plaid_create_link_token(config: &Configuration) -> Result<String, Box<dyn Error>> {
     Ok(plaid_api::link_token_create(
         config,
         LinkTokenCreateRequest {
@@ -103,7 +148,7 @@ fn create_link_token(config: &Configuration) -> Result<String, Box<dyn Error>> {
     .link_token)
 }
 
-fn exchange_public_token(
+fn plaid_exchange_public_token(
     config: &Configuration,
     public_token: &str,
 ) -> Result<String, Box<dyn Error>> {
