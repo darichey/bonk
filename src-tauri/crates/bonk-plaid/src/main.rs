@@ -12,10 +12,11 @@ use reqwest::header::HeaderMap;
 use rouille::{router, Request, Response, Server};
 use serde::Serialize;
 use std::{
-    collections::HashMap,
     env,
     error::Error,
+    fs,
     ops::Deref,
+    path::PathBuf,
     sync::{Arc, Mutex},
     time::Duration,
 };
@@ -23,15 +24,45 @@ use std::{
 /// Produces a partial Bonk ledger by importing transactions from Plaid.
 #[derive(Parser, Debug)]
 #[command()]
-struct Args {}
+struct Args {
+    /// The earliest transaction date (e.g., "2023-01-01").
+    #[arg(short, long)]
+    start_date: String,
+
+    /// The latest transaction date (e.g., "2023-12-31").
+    #[arg(short, long)]
+    end_date: String,
+
+    /// The Bonk account to associate the imported transactions to (e.g., "assets:my_checking").
+    #[arg(short, long)]
+    account: String,
+
+    #[arg(short, long)]
+    /// The path to output the ledger to (e.g., "./foo.partial.bonk").
+    output: PathBuf,
+}
 
 fn main() -> Result<(), Box<dyn Error>> {
-    let args = Args::parse();
+    let Args {
+        start_date,
+        end_date,
+        account,
+        output,
+    } = Args::parse();
+
+    let account = Account {
+        path: account
+            .split(':')
+            .map(|s| s.to_string())
+            .collect::<Vec<_>>(),
+    };
 
     let config = plaid_config()?;
     let access_token = plaid_get_access_token(&config)?;
 
-    let mut transactions = plaid_get_transactions(&config, &access_token)?;
+    println!("Got access token");
+
+    let mut transactions = plaid_get_transactions(&config, &access_token, &start_date, &end_date)?;
     transactions.sort_by(
         |PlaidTransaction { date: date_a, .. }, PlaidTransaction { date: date_b, .. }| {
             date_a.cmp(date_b)
@@ -39,32 +70,23 @@ fn main() -> Result<(), Box<dyn Error>> {
     );
     let transactions = transactions
         .into_iter()
-        .map(
-            |PlaidTransaction {
-                 account,
-                 amount,
-                 date,
-                 name,
-             }| {
-                Transaction {
-                    date: NaiveDate::parse_from_str(&date, "%Y-%m-%d").unwrap(),
-                    description: name,
-                    postings: vec![Posting {
-                        account: Account {
-                            path: vec![account.to_lowercase().replace(' ', "_")],
-                        },
-                        amount: Amount {
-                            cents: (amount * 100.0) as i32,
-                        },
-                    }],
-                }
-            },
-        )
+        .map(|PlaidTransaction { amount, date, name }| Transaction {
+            date: NaiveDate::parse_from_str(&date, "%Y-%m-%d").unwrap(),
+            description: name,
+            postings: vec![Posting {
+                account: account.clone(),
+                amount: Amount {
+                    cents: (amount * 100.0) as i32,
+                },
+            }],
+        })
         .collect();
 
     let ledger = Ledger { transactions };
 
-    println!("{}", ledger);
+    fs::write(&output, ledger.to_string())?;
+
+    println!("Ledger written to {}", output.display());
 
     Ok(())
 }
@@ -118,7 +140,9 @@ fn plaid_get_access_token(config: &Configuration) -> Result<String, Box<dyn Erro
         .unwrap()
     };
 
-    webbrowser::open(&format!("http://localhost:{}", server.server_addr().port()))?;
+    let url = format!("http://localhost:{}", server.server_addr().port());
+    println!("Open {url} to link with Plaid");
+    webbrowser::open(&url)?;
 
     let public_token = loop {
         server.poll_timeout(Duration::from_millis(100));
@@ -126,6 +150,8 @@ fn plaid_get_access_token(config: &Configuration) -> Result<String, Box<dyn Erro
             break public_token.clone();
         }
     };
+
+    println!("Plaid link done");
 
     let access_token = plaid_exchange_public_token(config, &public_token)?;
 
@@ -167,7 +193,6 @@ fn plaid_exchange_public_token(
 
 #[derive(Serialize)]
 struct PlaidTransaction {
-    account: String,
     amount: f64,
     date: String,
     name: String,
@@ -176,33 +201,25 @@ struct PlaidTransaction {
 fn plaid_get_transactions(
     config: &Configuration,
     access_token: &str,
+    start_date: &str,
+    end_date: &str,
 ) -> Result<Vec<PlaidTransaction>, Box<dyn Error>> {
     let response = plaid_api::transactions_get(
         config,
         TransactionsGetRequest {
             access_token: access_token.to_string(),
-            start_date: "2023-01-01".to_string(),
-            end_date: "2023-11-20".to_string(),
+            start_date: start_date.to_string(),
+            end_date: end_date.to_string(),
             client_id: None,
             options: None,
             secret: None,
         },
     )?;
 
-    let accounts: HashMap<String, String> = response
-        .accounts
-        .into_iter()
-        .map(|account| (account.account_id, account.name))
-        .collect();
-
     let transactions = response
         .transactions
         .into_iter()
         .map(|transaction| PlaidTransaction {
-            account: accounts
-                .get(&transaction.account_id)
-                .expect("unknown account id")
-                .clone(),
             amount: transaction.amount,
             date: transaction.date,
             name: transaction.name,
