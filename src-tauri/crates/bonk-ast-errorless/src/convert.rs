@@ -1,4 +1,4 @@
-use chrono::NaiveDate;
+use crate::Date;
 
 #[derive(Debug)]
 pub struct AstHasErrors;
@@ -22,8 +22,7 @@ impl TryFrom<bonk_ast::Transaction<'_>> for crate::Transaction {
 
     fn try_from(value: bonk_ast::Transaction<'_>) -> Result<Self, Self::Error> {
         Ok(crate::Transaction {
-            date: NaiveDate::parse_from_str(value.date().ok_or(AstHasErrors)?, "%Y-%m-%d")
-                .map_err(|_| AstHasErrors)?,
+            date: value.date().and_then(Date::parse).ok_or(AstHasErrors)?,
             description: value.description().ok_or(AstHasErrors)?.to_string(),
             postings: value
                 .postings()

@@ -1,7 +1,6 @@
 mod convert;
 mod ser;
 
-use chrono::NaiveDate;
 use convert::AstHasErrors;
 
 pub fn parse(src: &str) -> Result<Ledger, AstHasErrors> {
@@ -16,9 +15,40 @@ pub struct Ledger {
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Transaction {
-    pub date: NaiveDate,
+    pub date: Date,
     pub description: String,
     pub postings: Vec<Posting>,
+}
+
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct Date {
+    pub year: u32,
+    pub month: u32,
+    pub day: u32,
+}
+
+impl Date {
+    pub fn new(year: u32, month: u32, day: u32) -> Self {
+        Self { year, month, day }
+    }
+
+    pub fn parse(date: &str) -> Option<Self> {
+        if let &[year, month, day] = &date.split('-').collect::<Vec<_>>()[..] {
+            Some(Self {
+                year: year.parse().ok()?,
+                month: month.parse().ok()?,
+                day: day.parse().ok()?,
+            })
+        } else {
+            None
+        }
+    }
+}
+
+impl ToString for Date {
+    fn to_string(&self) -> String {
+        format!("{}-{:0>2}-{:0>2}", self.year, self.month, self.day)
+    }
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]

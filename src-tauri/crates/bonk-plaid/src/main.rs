@@ -1,5 +1,4 @@
-use bonk_ast_errorless::{Account, Amount, Ledger, Posting, Transaction};
-use chrono::NaiveDate;
+use bonk_ast_errorless::{Account, Amount, Date, Ledger, Posting, Transaction};
 use clap::Parser;
 use plaid::{
     apis::{configuration::Configuration, plaid_api},
@@ -66,7 +65,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     let transactions = transactions
         .into_iter()
         .map(|PlaidTransaction { amount, date, name }| Transaction {
-            date: NaiveDate::parse_from_str(&date, "%Y-%m-%d").unwrap(),
+            date: Date::parse(&date).unwrap(),
             description: name,
             postings: vec![Posting {
                 account: account.clone(),

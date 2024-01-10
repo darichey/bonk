@@ -1,7 +1,6 @@
 use std::{error::Error, io};
 
-use bonk_ast_errorless::{Account, Amount, Ledger, Posting, Transaction};
-use chrono::NaiveDate;
+use bonk_ast_errorless::{Account, Amount, Date, Ledger, Posting, Transaction};
 use csv::Reader;
 use serde::Deserialize;
 
@@ -28,7 +27,7 @@ pub fn do_import<D: io::Read>(
             } = result?;
 
             Ok(Transaction {
-                date: NaiveDate::parse_from_str(&date, "%Y-%m-%d")?,
+                date: Date::parse(&date).ok_or("Couldn't parse date")?,
                 description,
                 postings: vec![Posting {
                     account: account.clone(),
@@ -43,8 +42,7 @@ pub fn do_import<D: io::Read>(
 
 #[cfg(test)]
 mod tests {
-    use bonk_ast_errorless::{Account, Amount, Ledger, Posting, Transaction};
-    use chrono::NaiveDate;
+    use bonk_ast_errorless::{Account, Amount, Date, Ledger, Posting, Transaction};
 
     use crate::do_import;
 
@@ -60,7 +58,7 @@ mod tests {
             Ledger {
                 transactions: vec![
                     Transaction {
-                        date: NaiveDate::from_ymd_opt(2023, 1, 1).unwrap(),
+                        date: Date::new(2023, 1, 1),
                         description: "Salary Deposit".to_string(),
                         postings: vec![Posting {
                             account: Account::parse("assets:my_checking"),
@@ -68,7 +66,7 @@ mod tests {
                         }]
                     },
                     Transaction {
-                        date: NaiveDate::from_ymd_opt(2023, 1, 2).unwrap(),
+                        date: Date::new(2023, 1, 2),
                         description: "Grocery Shopping".to_string(),
                         postings: vec![Posting {
                             account: Account::parse("assets:my_checking"),

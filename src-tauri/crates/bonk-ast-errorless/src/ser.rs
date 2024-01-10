@@ -51,16 +51,15 @@ fn to_string_amount(amount: &Amount) -> String {
 
 #[cfg(test)]
 mod tests {
-    use chrono::NaiveDate;
 
-    use crate::{Account, Amount, Ledger, Posting, Transaction};
+    use crate::{Account, Amount, Date, Ledger, Posting, Transaction};
 
     #[test]
     fn test() {
         let ledger = Ledger {
             transactions: vec![
                 Transaction {
-                    date: NaiveDate::from_ymd_opt(2023, 1, 1).unwrap(),
+                    date: Date::new(2023, 1, 1),
                     description: "some food".to_string(),
                     postings: vec![
                         Posting {
@@ -74,7 +73,7 @@ mod tests {
                     ],
                 },
                 Transaction {
-                    date: NaiveDate::from_ymd_opt(2023, 1, 2).unwrap(),
+                    date: Date::new(2023, 1, 2),
                     description: "paying credit card".to_string(),
                     postings: vec![
                         Posting {

@@ -243,7 +243,6 @@ name = "bonk-ast"
 version = "0.1.0"
 dependencies = [
  "cc",
- "chrono",
  "tree-sitter",
  "tree-sitter-bonk",
 ]
@@ -253,7 +252,6 @@ name = "bonk-ast-errorless"
 version = "0.1.0"
 dependencies = [
  "bonk-ast",
- "chrono",
  "serde",
 ]
 
@@ -262,7 +260,6 @@ name = "bonk-csv"
 version = "0.1.0"
 dependencies = [
  "bonk-ast-errorless",
- "chrono",
  "clap 4.4.13",
  "csv",
  "serde",
@@ -273,7 +270,6 @@ name = "bonk-db"
 version = "0.1.0"
 dependencies = [
  "bonk-ast-errorless",
- "chrono",
  "clap 4.4.13",
  "sqlite 0.32.0",
  "sqlite3-sys",
@@ -294,7 +290,6 @@ name = "bonk-plaid"
 version = "0.1.0"
 dependencies = [
  "bonk-ast-errorless",
- "chrono",
  "clap 4.4.13",
  "plaid",
  "reqwest",

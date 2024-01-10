@@ -99,18 +99,16 @@ impl Db {
 
 #[cfg(test)]
 mod tests {
-    use bonk_ast_errorless::*;
-    use chrono::NaiveDate;
-    use sqlite::{Error, Row};
-
     use crate::Db;
+    use bonk_ast_errorless::*;
+    use sqlite::{Error, Row};
 
     #[test]
     fn test() {
         let ledger = Ledger {
             transactions: vec![
                 Transaction {
-                    date: NaiveDate::from_ymd_opt(2023, 1, 1).unwrap(),
+                    date: Date::new(2023, 1, 1),
                     description: "some food".to_string(),
                     postings: vec![
                         Posting {
@@ -124,7 +122,7 @@ mod tests {
                     ],
                 },
                 Transaction {
-                    date: NaiveDate::from_ymd_opt(2023, 1, 2).unwrap(),
+                    date: Date::new(2023, 1, 2),
                     description: "paying credit card".to_string(),
                     postings: vec![
                         Posting {
