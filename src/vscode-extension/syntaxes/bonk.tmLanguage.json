@@ -1,32 +1,23 @@
 {
-	"$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
-	"name": "Bonk",
-	"patterns": [
-		{
-			"include": "#keywords"
-		},
-		{
-			"include": "#strings"
-		}
-	],
-	"repository": {
-		"keywords": {
-			"patterns": [{
-				"name": "keyword.control.bonk",
-				"match": "\\b(if|while|for|return)\\b"
-			}]
-		},
-		"strings": {
-			"name": "string.quoted.double.bonk",
-			"begin": "\"",
-			"end": "\"",
-			"patterns": [
-				{
-					"name": "constant.character.escape.bonk",
-					"match": "\\\\."
-				}
-			]
-		}
-	},
-	"scopeName": "source.bonk"
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "Bonk",
+  "patterns": [
+    {
+      "include": "#strings"
+    }
+  ],
+  "repository": {
+    "strings": {
+      "name": "string.quoted.double.bonk",
+      "begin": "\"",
+      "end": "\"",
+      "patterns": [
+        {
+          "name": "constant.character.escape.bonk",
+          "match": "\\\\."
+        }
+      ]
+    }
+  },
+  "scopeName": "source.bonk"
 }

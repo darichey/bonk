@@ -10,16 +10,25 @@
     "Programming Languages"
   ],
   "contributes": {
-    "languages": [{
-      "id": "bonk",
-      "aliases": ["Bonk", "bonk"],
-      "extensions": [".bonk"],
-      "configuration": "./language-configuration.json"
-    }],
-    "grammars": [{
-      "language": "bonk",
-      "scopeName": "source.bonk",
-      "path": "./syntaxes/bonk.tmLanguage.json"
-    }]
+    "languages": [
+      {
+        "id": "bonk",
+        "aliases": [
+          "Bonk",
+          "bonk"
+        ],
+        "extensions": [
+          ".bonk"
+        ],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "bonk",
+        "scopeName": "source.bonk",
+        "path": "./syntaxes/bonk.tmLanguage.json"
+      }
+    ]
   }
 }
