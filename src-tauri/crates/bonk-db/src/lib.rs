@@ -114,15 +114,11 @@ mod tests {
                     description: "some food".to_string(),
                     postings: vec![
                         Posting {
-                            account: Account {
-                                path: vec!["expenses".to_string(), "food".to_string()],
-                            },
+                            account: Account::parse("expenses:food"),
                             amount: Amount { cents: 1234 },
                         },
                         Posting {
-                            account: Account {
-                                path: vec!["liabilities".to_string(), "my_credit_card".to_string()],
-                            },
+                            account: Account::parse("liabilities:my_credit_card"),
                             amount: Amount { cents: -1234 },
                         },
                     ],
@@ -132,15 +128,11 @@ mod tests {
                     description: "paying credit card".to_string(),
                     postings: vec![
                         Posting {
-                            account: Account {
-                                path: vec!["liabilities".to_string(), "my_credit_card".to_string()],
-                            },
+                            account: Account::parse("liabilities:my_credit_card"),
                             amount: Amount { cents: 1234 },
                         },
                         Posting {
-                            account: Account {
-                                path: vec!["assets".to_string(), "my_checking".to_string()],
-                            },
+                            account: Account::parse("assets:my_checking"),
                             amount: Amount { cents: -1234 },
                         },
                     ],

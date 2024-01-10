@@ -16,9 +16,7 @@ pub fn do_import<D: io::Read>(
     account: &str,
     reader: &mut Reader<D>,
 ) -> Result<Ledger, Box<dyn Error>> {
-    let account = Account {
-        path: account.split(':').map(|s| s.to_string()).collect(),
-    };
+    let account = Account::parse(account);
 
     let transactions = reader
         .deserialize()
@@ -67,9 +65,7 @@ mod tests {
                         date: NaiveDate::from_ymd_opt(2023, 1, 1).unwrap(),
                         description: "Salary Deposit".to_string(),
                         postings: vec![Posting {
-                            account: Account {
-                                path: vec!["assets".to_string(), "my_checking".to_string()]
-                            },
+                            account: Account::parse("assets:my_checking"),
                             amount: Amount { cents: 250000 }
                         }]
                     },
@@ -77,9 +73,7 @@ mod tests {
                         date: NaiveDate::from_ymd_opt(2023, 1, 2).unwrap(),
                         description: "Grocery Shopping".to_string(),
                         postings: vec![Posting {
-                            account: Account {
-                                path: vec!["assets".to_string(), "my_checking".to_string()]
-                            },
+                            account: Account::parse("assets:my_checking"),
                             amount: Amount { cents: -12050 }
                         }]
                     }

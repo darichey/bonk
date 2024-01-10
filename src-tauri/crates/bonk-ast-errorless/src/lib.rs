@@ -32,6 +32,15 @@ pub struct Account {
     pub path: Vec<String>,
 }
 
+impl Account {
+    /// Creates an Account from a string like "assets:foo:my_checking"
+    pub fn parse(account: &str) -> Self {
+        Self {
+            path: account.split(':').map(|s| s.to_string()).collect(),
+        }
+    }
+}
+
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Amount {
     pub cents: i32,

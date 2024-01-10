@@ -50,12 +50,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         output,
     } = Args::parse();
 
-    let account = Account {
-        path: account
-            .split(':')
-            .map(|s| s.to_string())
-            .collect::<Vec<_>>(),
-    };
+    let account = Account::parse(&account);
 
     let config = plaid_config()?;
     let access_token = plaid_get_access_token(&config)?;
