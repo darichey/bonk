@@ -37,8 +37,8 @@ struct Args {
     #[arg(short, long)]
     account: String,
 
-    #[arg(short, long)]
     /// The path to output the ledger to (e.g., "./foo.partial.bonk").
+    #[arg(short, long)]
     output: PathBuf,
 }
 

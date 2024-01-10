@@ -258,6 +258,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "bonk-csv"
+version = "0.1.0"
+dependencies = [
+ "bonk-ast-errorless",
+ "chrono",
+ "clap 4.4.13",
+ "csv",
+ "serde",
+]
+
+[[package]]
 name = "bonk-db"
 version = "0.1.0"
 dependencies = [
