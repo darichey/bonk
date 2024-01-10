@@ -1,6 +1,6 @@
-import { useGetAllTransactions } from "../commands";
+import { useGetAllTransactions } from "@/commands";
 
-export default function TransactionLog() {
+export default function LogPage() {
   const { data: transactions, error, isLoading } = useGetAllTransactions();
 
   return (

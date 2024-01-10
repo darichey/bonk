@@ -1,5 +1,5 @@
-import { Link } from "react-router-dom";
-import { useGetDashboardNames } from "../commands";
+import Link from "next/link";
+import { useGetDashboardNames } from "@/commands";
 
 export default function DashboardSidebar() {
   const { data: dashboardNames, isLoading, error } = useGetDashboardNames();
@@ -14,7 +14,7 @@ export default function DashboardSidebar() {
       ) : (
         <ul>
           {dashboardNames.map((name, i) => (
-            <Link to={`/dashboard/${name}`} key={i}>
+            <Link href={`/dashboard/${name}`} key={i}>
               {name}
             </Link>
           ))}

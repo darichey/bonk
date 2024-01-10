@@ -1,13 +1,10 @@
-// TODO: figure out tree-shaking
-import "chart.js/auto";
-
+import { Bar } from "react-chartjs-2";
+import { useQueryTransactionsForChart } from "@/commands";
 import { ChartData } from "chart.js";
-import { Line } from "react-chartjs-2";
-import { useQueryTransactionsForChart } from "../../commands";
-import { SqlValue } from "../../types";
+import { SqlValue } from "@/types";
 import { getLineOrBarOptions } from "./common";
 
-export default function QueryLineChart({
+export default function QueryBarChart({
   title,
   xAxis,
   query,
@@ -30,7 +27,7 @@ export default function QueryLineChart({
     return <div>Loading...</div>;
   }
 
-  const data: ChartData<"line", SqlValue[], unknown> = {
+  const data: ChartData<"bar", SqlValue[], unknown> = {
     labels: chartData[xAxis],
     datasets: Object.keys(chartData)
       .filter((key) => key != xAxis)
@@ -42,5 +39,5 @@ export default function QueryLineChart({
       }),
   };
 
-  return <Line options={getLineOrBarOptions(title)} data={data} />;
+  return <Bar options={getLineOrBarOptions(title)} data={data} />;
 }

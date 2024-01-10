@@ -1,8 +1,12 @@
-import { useGetDashboard } from "../commands";
-import DashboardText from "./DashboardText";
-import QueryChart from "./chart/QueryChart";
+import { useGetDashboard } from "@/commands";
+import DashboardText from "@/components/DashboardText";
+import QueryChart from "@/components/chart/QueryChart";
 
-export default function Dashboard({ name }: { name: string }) {
+export default function DashboardPage({
+  params: { name },
+}: {
+  params: { name: string };
+}) {
   const { data: dashboard, isLoading, error } = useGetDashboard(name);
 
   return error ? (

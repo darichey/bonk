@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router-dom";
+import { useRouter } from "next/navigation";
 
 export default function NavButton({
   dir,
@@ -7,16 +7,16 @@ export default function NavButton({
   dir: "forward" | "back";
   className?: string | undefined;
 }) {
-  const navigate = useNavigate();
+  const router = useRouter();
 
   return (
     <div
       className={className}
       onClick={() => {
         if (dir === "forward") {
-          navigate(1);
+          router.forward();
         } else if (dir === "back") {
-          navigate(-1);
+          router.back();
         }
       }}
     >

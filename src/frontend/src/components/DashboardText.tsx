@@ -1,4 +1,4 @@
-import { useRenderQueryTemplate } from "../commands";
+import { useRenderQueryTemplate } from "@/commands";
 import { Text } from "../types";
 
 export default function DashboardText({

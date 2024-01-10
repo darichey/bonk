@@ -1,9 +1,11 @@
+"use client";
+
+import { useQueryTransactions } from "@/commands";
 import { Editor } from "@monaco-editor/react";
 import { useState } from "react";
-import { useQueryTransactions } from "../commands";
 import { useDebounce } from "usehooks-ts";
 
-export default function Query() {
+export default function QueryPage() {
   const [query, setQuery] = useState("select * from transactions\nlimit 10");
   const debouncedQuery = useDebounce(query, 500);
   const { data, error, isLoading } = useQueryTransactions(debouncedQuery);
