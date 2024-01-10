@@ -1,0 +1,25 @@
+{
+  "name": "bonk",
+  "displayName": "bonk",
+  "description": "",
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Programming Languages"
+  ],
+  "contributes": {
+    "languages": [{
+      "id": "bonk",
+      "aliases": ["Bonk", "bonk"],
+      "extensions": [".bonk"],
+      "configuration": "./language-configuration.json"
+    }],
+    "grammars": [{
+      "language": "bonk",
+      "scopeName": "source.bonk",
+      "path": "./syntaxes/bonk.tmLanguage.json"
+    }]
+  }
+}
