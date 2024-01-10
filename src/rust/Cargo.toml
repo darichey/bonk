@@ -1,0 +1,12 @@
+[workspace]
+members = [
+    "bonk-ast",
+    "bonk-ast-errorless",
+    "bonk-csv",
+    "bonk-db",
+    "bonk-lsp",
+    "bonk-plaid",
+    "plaid",
+    "tree-sitter-bonk",
+]
+resolver = "2"
