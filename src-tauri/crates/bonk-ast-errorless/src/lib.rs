@@ -45,3 +45,11 @@ impl Account {
 pub struct Amount {
     pub cents: i32,
 }
+
+impl Amount {
+    pub fn from_dollars(dollar_amount: f64) -> Self {
+        Self {
+            cents: (dollar_amount * 100.0) as i32,
+        }
+    }
+}

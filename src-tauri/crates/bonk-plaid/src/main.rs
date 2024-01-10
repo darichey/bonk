@@ -70,9 +70,7 @@ fn main() -> Result<(), Box<dyn Error>> {
             description: name,
             postings: vec![Posting {
                 account: account.clone(),
-                amount: Amount {
-                    cents: (amount * 100.0) as i32,
-                },
+                amount: Amount::from_dollars(amount),
             }],
         })
         .collect();

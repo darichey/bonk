@@ -65,11 +65,11 @@ mod tests {
                     postings: vec![
                         Posting {
                             account: Account::parse("expenses:food"),
-                            amount: Amount { cents: 1234 },
+                            amount: Amount::from_dollars(12.34),
                         },
                         Posting {
                             account: Account::parse("liabilities:my_credit_card"),
-                            amount: Amount { cents: -1234 },
+                            amount: Amount::from_dollars(-12.34),
                         },
                     ],
                 },
@@ -79,11 +79,11 @@ mod tests {
                     postings: vec![
                         Posting {
                             account: Account::parse("liabilities:my_credit_card"),
-                            amount: Amount { cents: 1234 },
+                            amount: Amount::from_dollars(12.34),
                         },
                         Posting {
                             account: Account::parse("assets:my_checking"),
-                            amount: Amount { cents: -1234 },
+                            amount: Amount::from_dollars(-12.34),
                         },
                     ],
                 },

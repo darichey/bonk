@@ -32,9 +32,7 @@ pub fn do_import<D: io::Read>(
                 description,
                 postings: vec![Posting {
                     account: account.clone(),
-                    amount: Amount {
-                        cents: (amount * 100.0) as i32,
-                    },
+                    amount: Amount::from_dollars(amount),
                 }],
             })
         })
@@ -66,7 +64,7 @@ mod tests {
                         description: "Salary Deposit".to_string(),
                         postings: vec![Posting {
                             account: Account::parse("assets:my_checking"),
-                            amount: Amount { cents: 250000 }
+                            amount: Amount::from_dollars(2500.00),
                         }]
                     },
                     Transaction {
@@ -74,7 +72,7 @@ mod tests {
                         description: "Grocery Shopping".to_string(),
                         postings: vec![Posting {
                             account: Account::parse("assets:my_checking"),
-                            amount: Amount { cents: -12050 }
+                            amount: Amount::from_dollars(-120.50),
                         }]
                     }
                 ]
