@@ -32,12 +32,22 @@
         "path": "./syntaxes/bonk.tmLanguage.json"
       }
     ],
-    "commands": [
-      {
-        "command": "bonk.helloWorld",
-        "title": "Hello World"
+    "configuration": {
+      "title": "Bonk",
+      "properties": {
+        "bonk.trace.server": {
+          "type": "string",
+          "scope": "window",
+          "enum": [
+            "off",
+            "messages",
+            "verbose"
+          ],
+          "default": "verbose",
+          "description": "Trace requests to the Bonk LSP server."
+        }
       }
-    ]
+    }
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",
@@ -46,11 +56,14 @@
     "lint": "eslint src --ext ts"
   },
   "devDependencies": {
-    "@types/vscode": "^1.85.0",
     "@types/node": "18.x",
+    "@types/vscode": "^1.85.0",
     "@typescript-eslint/eslint-plugin": "^6.15.0",
     "@typescript-eslint/parser": "^6.15.0",
     "eslint": "^8.56.0",
     "typescript": "^5.3.3"
+  },
+  "dependencies": {
+    "vscode-languageclient": "^9.0.1"
   }
 }

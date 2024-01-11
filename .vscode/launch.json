@@ -11,6 +11,9 @@
       ],
       "outFiles": ["${workspaceFolder}/src/vscode-extension/out/**/*.js"],
       "preLaunchTask": "Build Extension",
+      "env": {
+        "__BONK_LSP_SERVER_DEBUG": "${workspaceFolder}/src/rust/target/debug/bonk-lsp"
+      }
     }
   ]
 }
