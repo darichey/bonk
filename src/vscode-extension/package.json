@@ -1,14 +1,16 @@
 {
   "name": "bonk",
   "displayName": "bonk",
-  "description": "",
+  "description": "Language support for Bonk",
   "version": "0.0.1",
   "engines": {
-    "vscode": "^1.85.0"
+    "vscode": "^1.84.0"
   },
   "categories": [
     "Programming Languages"
   ],
+  "activationEvents": [],
+  "main": "./out/extension.js",
   "contributes": {
     "languages": [
       {
@@ -29,6 +31,26 @@
         "scopeName": "source.bonk",
         "path": "./syntaxes/bonk.tmLanguage.json"
       }
+    ],
+    "commands": [
+      {
+        "command": "bonk.helloWorld",
+        "title": "Hello World"
+      }
     ]
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "lint": "eslint src --ext ts"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.85.0",
+    "@types/node": "18.x",
+    "@typescript-eslint/eslint-plugin": "^6.15.0",
+    "@typescript-eslint/parser": "^6.15.0",
+    "eslint": "^8.56.0",
+    "typescript": "^5.3.3"
   }
 }
