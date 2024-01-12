@@ -191,6 +191,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "bonk-check"
+version = "0.1.0"
+dependencies = [
+ "bonk-ast",
+ "bonk-ast-errorless",
+]
+
+[[package]]
 name = "bonk-csv"
 version = "0.1.0"
 dependencies = [
@@ -204,7 +212,9 @@ dependencies = [
 name = "bonk-db"
 version = "0.1.0"
 dependencies = [
+ "bonk-ast",
  "bonk-ast-errorless",
+ "bonk-check",
  "clap",
  "sqlite",
  "sqlite3-sys",

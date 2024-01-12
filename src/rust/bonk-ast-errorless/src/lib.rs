@@ -1,12 +1,4 @@
-mod convert;
 mod ser;
-
-use convert::AstHasErrors;
-
-pub fn parse(src: &str) -> Result<Ledger, AstHasErrors> {
-    let ledger = bonk_ast::parse(src);
-    ledger.try_into()
-}
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Ledger {
