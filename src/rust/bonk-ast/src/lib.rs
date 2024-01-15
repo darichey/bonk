@@ -1,4 +1,6 @@
-use tree_sitter::{Node, Tree};
+use core::fmt;
+
+use tree_sitter::{Node, Range, Tree};
 
 pub fn parse(src: &str) -> Ledger {
     let mut parser = tree_sitter::Parser::new();
@@ -7,6 +9,9 @@ pub fn parse(src: &str) -> Ledger {
     let ledger = Ledger::new(tree, src);
     ledger
 }
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord)]
+pub struct SourceSpan(pub Range);
 
 pub struct Ledger<'a>(Tree, &'a str);
 
@@ -23,21 +28,64 @@ impl<'a> Ledger<'a> {
             .map(|n| Transaction(n, self.1))
             .collect()
     }
+
+    pub fn errors(&self) -> Vec<SourceSpan> {
+        let mut cursor = self.0.walk();
+
+        let mut errors = vec![];
+        let mut reached_root = false;
+
+        while !reached_root {
+            if cursor.node().is_error() {
+                errors.push(SourceSpan(cursor.node().range()))
+            }
+
+            if cursor.goto_first_child() {
+                continue;
+            }
+
+            if cursor.goto_next_sibling() {
+                continue;
+            }
+
+            let mut retracting = true;
+            while retracting {
+                if !cursor.goto_parent() {
+                    retracting = false;
+                    reached_root = true;
+                }
+
+                if cursor.goto_next_sibling() {
+                    retracting = false;
+                }
+            }
+        }
+
+        errors
+    }
+}
+
+impl fmt::Debug for Ledger<'_> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.write_str(&self.0.root_node().to_sexp())
+    }
 }
 
 pub struct Transaction<'a>(Node<'a>, &'a str);
 
 impl Transaction<'_> {
     pub fn date(&self) -> Option<&str> {
-        self.0
-            .child_by_field_name("date")
-            .map(|n| n.utf8_text(self.1.as_bytes()).unwrap())
+        self.0.child_by_field_name("date").map(|n| {
+            n.utf8_text(self.1.as_bytes())
+                .expect("src is not valid utf-8")
+        })
     }
 
     pub fn description(&self) -> Option<&str> {
-        self.0
-            .child_by_field_name("description")
-            .map(|n| n.utf8_text(self.1.as_bytes()).unwrap())
+        self.0.child_by_field_name("description").map(|n| {
+            n.utf8_text(self.1.as_bytes())
+                .expect("src is not valid utf-8")
+        })
     }
 
     pub fn postings(&self) -> Vec<Posting<'_>> {
@@ -68,25 +116,20 @@ impl Posting<'_> {
 pub struct Account<'a>(Node<'a>, &'a str);
 
 impl Account<'_> {
-    pub fn path(&self) -> Vec<&str> {
+    pub fn value(&self) -> &str {
         self.0
             .utf8_text(self.1.as_bytes())
-            .unwrap()
-            .split(':')
-            .collect()
+            .expect("src is not valid utf-8")
     }
 }
 
 pub struct Amount<'a>(Node<'a>, &'a str);
 
 impl Amount<'_> {
-    pub fn cents(&self) -> i32 {
+    pub fn value(&self) -> &str {
         self.0
             .utf8_text(self.1.as_bytes())
-            .unwrap()
-            .replace('.', "")
-            .parse()
-            .unwrap()
+            .expect("src is not valid utf-8")
     }
 }
 
@@ -115,16 +158,13 @@ mod tests {
 
         let postings = transaction.postings();
         let posting = postings.get(0).unwrap();
-        assert_eq!(
-            posting.account().unwrap().path(),
-            vec!["expenses", "fast_food"]
-        );
-        assert_eq!(posting.amount().unwrap().cents(), 1091);
+        assert_eq!(posting.account().unwrap().value(), "expenses:fast_food");
+        assert_eq!(posting.amount().unwrap().value(), "10.91");
 
         let posting = postings.get(1).unwrap();
         assert_eq!(
-            posting.account().unwrap().path(),
-            vec!["liabilities", "my_credit_card"]
+            posting.account().unwrap().value(),
+            "liabilities:my_credit_card"
         );
         assert!(posting.amount().is_none());
 
@@ -135,16 +175,13 @@ mod tests {
         let postings = transaction.postings();
         let posting = postings.get(0).unwrap();
         assert_eq!(
-            posting.account().unwrap().path(),
-            vec!["liabilities", "my_credit_card"]
+            posting.account().unwrap().value(),
+            "liabilities:my_credit_card"
         );
-        assert_eq!(posting.amount().unwrap().cents(), 1091);
+        assert_eq!(posting.amount().unwrap().value(), "10.91");
 
         let posting = postings.get(1).unwrap();
-        assert_eq!(
-            posting.account().unwrap().path(),
-            vec!["assets", "my_checking"]
-        );
+        assert_eq!(posting.account().unwrap().value(), "assets:my_checking");
         assert!(posting.amount().is_none());
     }
 }

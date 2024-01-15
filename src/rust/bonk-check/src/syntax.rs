@@ -1,59 +1,117 @@
+use bonk_ast::SourceSpan;
 use bonk_ast_errorless::Date;
+use itertools::Itertools;
 
 #[derive(Debug)]
-pub struct AstHasErrors;
+pub struct SyntaxErrors(Vec<SourceSpan>);
 
-pub fn check_syntax(ledger: bonk_ast::Ledger) -> Result<bonk_ast_errorless::Ledger, AstHasErrors> {
-    Ok(bonk_ast_errorless::Ledger {
+pub fn check_syntax(ledger: bonk_ast::Ledger) -> Result<bonk_ast_errorless::Ledger, SyntaxErrors> {
+    let errors = ledger.errors();
+    if errors.is_empty() {
+        Ok(convert_ledger(ledger))
+    } else {
+        Err(SyntaxErrors(errors))
+    }
+}
+
+fn convert_ledger(ledger: bonk_ast::Ledger) -> bonk_ast_errorless::Ledger {
+    bonk_ast_errorless::Ledger {
         transactions: ledger
             .transactions()
             .into_iter()
-            .map(check_syntax_transaction)
-            .collect::<Result<Vec<_>, _>>()?,
-    })
+            .map(convert_transaction)
+            .collect_vec(),
+    }
 }
 
-fn check_syntax_transaction(
-    value: bonk_ast::Transaction<'_>,
-) -> Result<bonk_ast_errorless::Transaction, AstHasErrors> {
-    Ok(bonk_ast_errorless::Transaction {
-        date: value.date().and_then(Date::parse).ok_or(AstHasErrors)?,
-        description: value.description().ok_or(AstHasErrors)?.to_string(),
-        postings: value
+fn convert_transaction(transaction: bonk_ast::Transaction) -> bonk_ast_errorless::Transaction {
+    bonk_ast_errorless::Transaction {
+        date: transaction
+            .date()
+            .and_then(Date::parse)
+            .expect("Couldn't parse date (but tree had no errors?)"),
+        description: transaction
+            .description()
+            .expect("Couldn't get description (but tree had no errors?)")
+            .to_string(),
+        postings: transaction
             .postings()
             .into_iter()
-            .map(check_syntax_posting)
-            .collect::<Result<Vec<_>, _>>()?,
-    })
+            .map(convert_posting)
+            .collect_vec(),
+    }
 }
 
-fn check_syntax_posting(
-    value: bonk_ast::Posting<'_>,
-) -> Result<bonk_ast_errorless::Posting, AstHasErrors> {
-    Ok(bonk_ast_errorless::Posting {
-        account: value
+fn convert_posting(posting: bonk_ast::Posting) -> bonk_ast_errorless::Posting {
+    bonk_ast_errorless::Posting {
+        account: posting
             .account()
-            .ok_or(AstHasErrors)
-            .and_then(check_syntax_account)?,
-        amount: value
+            .map(convert_account)
+            .expect("Couldn't get account (but tree had no errors?)"),
+        amount: posting
             .amount()
-            .ok_or(AstHasErrors)
-            .and_then(check_syntax_amount)?,
-    })
+            .map(convert_amount)
+            .expect("Couldn't get amount (but tree had no errors?)"),
+    }
 }
 
-fn check_syntax_account(
-    value: bonk_ast::Account<'_>,
-) -> Result<bonk_ast_errorless::Account, AstHasErrors> {
-    Ok(bonk_ast_errorless::Account {
-        path: value.path().iter().map(|s| s.to_string()).collect(),
-    })
+fn convert_account(account: bonk_ast::Account) -> bonk_ast_errorless::Account {
+    bonk_ast_errorless::Account {
+        path: account
+            .value()
+            .split(':')
+            .map(|s| s.to_string())
+            .collect_vec(),
+    }
 }
 
-fn check_syntax_amount(
-    value: bonk_ast::Amount<'_>,
-) -> Result<bonk_ast_errorless::Amount, AstHasErrors> {
-    Ok(bonk_ast_errorless::Amount {
-        cents: value.cents(),
-    })
+fn convert_amount(amount: bonk_ast::Amount) -> bonk_ast_errorless::Amount {
+    bonk_ast_errorless::Amount {
+        cents: amount
+            .value()
+            .replace('.', "")
+            .parse()
+            .expect("Couldn't parse amount (but tree had no errors?)"),
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use bonk_ast::SourceSpan;
+    use tree_sitter::{Point, Range};
+
+    use crate::check_syntax;
+
+    #[test]
+    fn test_no_errors() {
+        let src = r#"2023-01-01 "Mcdonald's"
+    expenses:fast_food         10.91
+    liabilities:my_credit_card -10.91"#;
+
+        let ledger = bonk_ast::parse(src);
+        let ledger = check_syntax(ledger);
+
+        assert!(ledger.is_ok());
+    }
+
+    #[test]
+    fn test_error() {
+        let src = r#"2023-01-01abc "Mcdonald's"
+expenses:fast_food         10.91
+liabilities:my_credit_card -10.91"#;
+
+        let ledger = bonk_ast::parse(src);
+        let ledger = check_syntax(ledger);
+
+        let errors = ledger.err().unwrap().0;
+        assert_eq!(
+            errors,
+            vec![SourceSpan(Range {
+                start_byte: 10,
+                end_byte: 13,
+                start_point: Point { row: 0, column: 10 },
+                end_point: Point { row: 0, column: 13 }
+            })]
+        )
+    }
 }
