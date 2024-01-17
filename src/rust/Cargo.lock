@@ -226,6 +226,7 @@ dependencies = [
 name = "bonk-lsp"
 version = "0.1.0"
 dependencies = [
+ "bonk-check",
  "lsp-server",
  "lsp-types",
  "serde",
