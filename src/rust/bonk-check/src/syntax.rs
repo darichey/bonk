@@ -88,7 +88,7 @@ mod tests {
     expenses:fast_food         10.91
     liabilities:my_credit_card -10.91"#;
 
-        let ledger = bonk_ast::parse(src);
+        let ledger = bonk_ast::Parser::new().parse(src, None);
         let ledger = check_syntax(ledger);
 
         assert!(ledger.is_ok());
@@ -100,7 +100,7 @@ mod tests {
 expenses:fast_food         10.91
 liabilities:my_credit_card -10.91"#;
 
-        let ledger = bonk_ast::parse(src);
+        let ledger = bonk_ast::Parser::new().parse(src, None);
         let ledger = check_syntax(ledger);
 
         let errors = ledger.err().unwrap().0;

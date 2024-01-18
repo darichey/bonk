@@ -2,12 +2,32 @@ use core::fmt;
 
 use tree_sitter::{Node, Range, Tree};
 
-pub fn parse(src: &str) -> Ledger {
-    let mut parser = tree_sitter::Parser::new();
-    parser.set_language(tree_sitter_bonk::language()).unwrap();
-    let tree = parser.parse(src, None).unwrap();
-    let ledger = Ledger::new(tree, src);
-    ledger
+pub struct Parser {
+    ts_parser: tree_sitter::Parser,
+}
+
+impl Parser {
+    pub fn new() -> Self {
+        let mut ts_parser = tree_sitter::Parser::new();
+        ts_parser
+            .set_language(tree_sitter_bonk::language())
+            .unwrap();
+        Self { ts_parser }
+    }
+
+    pub fn parse<'a>(&mut self, src: &'a str, old_ledger: Option<&Ledger>) -> Ledger<'a> {
+        let tree = self
+            .ts_parser
+            .parse(src, old_ledger.map(|old_ledger| &old_ledger.0))
+            .unwrap();
+        Ledger::new(tree, src)
+    }
+}
+
+impl Default for Parser {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord)]
@@ -135,7 +155,7 @@ impl Amount<'_> {
 
 #[cfg(test)]
 mod tests {
-    use crate::parse;
+    use crate::Parser;
 
     #[test]
     fn test() {
@@ -147,7 +167,7 @@ mod tests {
   liabilities:my_credit_card    10.91
   assets:my_checking"#;
 
-        let ledger = parse(src);
+        let ledger = Parser::new().parse(src, None);
 
         let transactions = ledger.transactions();
         assert_eq!(transactions.len(), 2);
