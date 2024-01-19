@@ -14,6 +14,7 @@ use lsp_types::{InitializeParams, ServerCapabilities};
 
 use lsp_server::{Connection, ExtractError, Message, Notification, Request, RequestId, Response};
 
+use crate::diagnostic::get_diagnostics;
 use crate::state::State;
 
 fn main() -> Result<(), Box<dyn Error + Sync + Send>> {
@@ -84,32 +85,17 @@ fn main_loop(
                     Ok((id, params)) => {
                         if let Some("bonk") = params.identifier.as_deref() {
                             eprintln!("got textDocument/diagnostic request #{id}: {params:?}");
+
+                            let doc = state
+                                .get_doc(params.text_document.uri.as_str())
+                                .expect("we don't know about this file");
+
                             let result = DocumentDiagnosticReport::Full(
                                 RelatedFullDocumentDiagnosticReport {
                                     related_documents: None,
                                     full_document_diagnostic_report: FullDocumentDiagnosticReport {
                                         result_id: None,
-                                        items: vec![],
-                                        // items: vec![Diagnostic {
-                                        //     range: Range {
-                                        //         start: Position {
-                                        //             line: 0,
-                                        //             character: 0,
-                                        //         },
-                                        //         end: Position {
-                                        //             line: 0,
-                                        //             character: 10,
-                                        //         },
-                                        //     },
-                                        //     severity: Some(DiagnosticSeverity::ERROR),
-                                        //     code: None,
-                                        //     code_description: None,
-                                        //     source: Some("bonk".to_string()),
-                                        //     message: "this is an error".to_string(),
-                                        //     related_information: None,
-                                        //     tags: None,
-                                        //     data: None,
-                                        // }],
+                                        items: get_diagnostics(&doc.ledger, &doc.src),
                                     },
                                 },
                             );

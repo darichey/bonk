@@ -3,9 +3,9 @@ use std::collections::HashMap;
 use bonk_ast::{Ledger, Parser};
 use lsp_types::{Position, Range, TextDocumentContentChangeEvent};
 
-struct Document {
-    src: String,
-    ledger: Ledger,
+pub struct Document {
+    pub src: String,
+    pub ledger: Ledger,
     parser: Parser,
 }
 
@@ -18,6 +18,10 @@ impl State {
         Self {
             files: HashMap::new(),
         }
+    }
+
+    pub fn get_doc(&self, file: &str) -> Option<&Document> {
+        self.files.get(file)
     }
 
     pub fn on_open(&mut self, file: String, src: String) {

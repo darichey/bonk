@@ -3,7 +3,7 @@ use bonk_ast_errorless::Date;
 use itertools::Itertools;
 
 #[derive(Debug)]
-pub struct SyntaxErrors(Vec<SourceSpan>);
+pub struct SyntaxErrors(pub Vec<SourceSpan>);
 
 pub fn check_syntax(
     ledger: &bonk_ast::Ledger,
