@@ -5,70 +5,76 @@ use itertools::Itertools;
 #[derive(Debug)]
 pub struct SyntaxErrors(Vec<SourceSpan>);
 
-pub fn check_syntax(ledger: bonk_ast::Ledger) -> Result<bonk_ast_errorless::Ledger, SyntaxErrors> {
+pub fn check_syntax(
+    ledger: bonk_ast::Ledger,
+    src: &str,
+) -> Result<bonk_ast_errorless::Ledger, SyntaxErrors> {
     let errors = ledger.errors();
     if errors.is_empty() {
-        Ok(convert_ledger(ledger))
+        Ok(convert_ledger(ledger, src))
     } else {
         Err(SyntaxErrors(errors))
     }
 }
 
-fn convert_ledger(ledger: bonk_ast::Ledger) -> bonk_ast_errorless::Ledger {
+fn convert_ledger(ledger: bonk_ast::Ledger, src: &str) -> bonk_ast_errorless::Ledger {
     bonk_ast_errorless::Ledger {
         transactions: ledger
             .transactions()
             .into_iter()
-            .map(convert_transaction)
+            .map(|t| convert_transaction(t, src))
             .collect_vec(),
     }
 }
 
-fn convert_transaction(transaction: bonk_ast::Transaction) -> bonk_ast_errorless::Transaction {
+fn convert_transaction(
+    transaction: bonk_ast::Transaction,
+    src: &str,
+) -> bonk_ast_errorless::Transaction {
     bonk_ast_errorless::Transaction {
         date: transaction
-            .date()
+            .date(src)
             .and_then(Date::parse)
             .expect("Couldn't parse date (but tree had no errors?)"),
         description: transaction
-            .description()
+            .description(src)
             .expect("Couldn't get description (but tree had no errors?)")
             .to_string(),
         postings: transaction
             .postings()
             .into_iter()
-            .map(convert_posting)
+            .map(|p| convert_posting(p, src))
             .collect_vec(),
     }
 }
 
-fn convert_posting(posting: bonk_ast::Posting) -> bonk_ast_errorless::Posting {
+fn convert_posting(posting: bonk_ast::Posting, src: &str) -> bonk_ast_errorless::Posting {
     bonk_ast_errorless::Posting {
         account: posting
             .account()
-            .map(convert_account)
+            .map(|acc| convert_account(acc, src))
             .expect("Couldn't get account (but tree had no errors?)"),
         amount: posting
             .amount()
-            .map(convert_amount)
+            .map(|amt| convert_amount(amt, src))
             .expect("Couldn't get amount (but tree had no errors?)"),
     }
 }
 
-fn convert_account(account: bonk_ast::Account) -> bonk_ast_errorless::Account {
+fn convert_account(account: bonk_ast::Account, src: &str) -> bonk_ast_errorless::Account {
     bonk_ast_errorless::Account {
         path: account
-            .value()
+            .value(src)
             .split(':')
             .map(|s| s.to_string())
             .collect_vec(),
     }
 }
 
-fn convert_amount(amount: bonk_ast::Amount) -> bonk_ast_errorless::Amount {
+fn convert_amount(amount: bonk_ast::Amount, src: &str) -> bonk_ast_errorless::Amount {
     bonk_ast_errorless::Amount {
         cents: amount
-            .value()
+            .value(src)
             .replace('.', "")
             .parse()
             .expect("Couldn't parse amount (but tree had no errors?)"),
@@ -89,7 +95,7 @@ mod tests {
     liabilities:my_credit_card -10.91"#;
 
         let ledger = bonk_ast::Parser::new().parse(src, None);
-        let ledger = check_syntax(ledger);
+        let ledger = check_syntax(ledger, src);
 
         assert!(ledger.is_ok());
     }
@@ -101,7 +107,7 @@ expenses:fast_food         10.91
 liabilities:my_credit_card -10.91"#;
 
         let ledger = bonk_ast::Parser::new().parse(src, None);
-        let ledger = check_syntax(ledger);
+        let ledger = check_syntax(ledger, src);
 
         let errors = ledger.err().unwrap().0;
         assert_eq!(

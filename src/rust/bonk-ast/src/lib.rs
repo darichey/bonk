@@ -15,12 +15,12 @@ impl Parser {
         Self { ts_parser }
     }
 
-    pub fn parse<'a>(&mut self, src: &'a str, old_ledger: Option<&Ledger>) -> Ledger<'a> {
+    pub fn parse(&mut self, src: &str, old_ledger: Option<&Ledger>) -> Ledger {
         let tree = self
             .ts_parser
             .parse(src, old_ledger.map(|old_ledger| &old_ledger.0))
             .unwrap();
-        Ledger::new(tree, src)
+        Ledger::new(tree)
     }
 }
 
@@ -33,11 +33,11 @@ impl Default for Parser {
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub struct SourceSpan(pub Range);
 
-pub struct Ledger<'a>(Tree, &'a str);
+pub struct Ledger(Tree);
 
-impl<'a> Ledger<'a> {
-    pub fn new(tree: Tree, src: &'a str) -> Self {
-        Self(tree, src)
+impl Ledger {
+    pub fn new(tree: Tree) -> Self {
+        Self(tree)
     }
 
     pub fn transactions(&self) -> Vec<Transaction<'_>> {
@@ -45,7 +45,7 @@ impl<'a> Ledger<'a> {
         self.0
             .root_node()
             .children_by_field_name("transaction", &mut cursor)
-            .map(|n| Transaction(n, self.1))
+            .map(Transaction)
             .collect()
     }
 
@@ -85,70 +85,64 @@ impl<'a> Ledger<'a> {
     }
 }
 
-impl fmt::Debug for Ledger<'_> {
+impl fmt::Debug for Ledger {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.write_str(&self.0.root_node().to_sexp())
     }
 }
 
-pub struct Transaction<'a>(Node<'a>, &'a str);
+pub struct Transaction<'a>(Node<'a>);
 
 impl Transaction<'_> {
-    pub fn date(&self) -> Option<&str> {
-        self.0.child_by_field_name("date").map(|n| {
-            n.utf8_text(self.1.as_bytes())
-                .expect("src is not valid utf-8")
-        })
+    pub fn date<'s>(&self, src: &'s str) -> Option<&'s str> {
+        self.0
+            .child_by_field_name("date")
+            .map(|n| n.utf8_text(src.as_bytes()).expect("src is not valid utf-8"))
     }
 
-    pub fn description(&self) -> Option<&str> {
-        self.0.child_by_field_name("description").map(|n| {
-            n.utf8_text(self.1.as_bytes())
-                .expect("src is not valid utf-8")
-        })
+    pub fn description<'s>(&self, src: &'s str) -> Option<&'s str> {
+        self.0
+            .child_by_field_name("description")
+            .map(|n| n.utf8_text(src.as_bytes()).expect("src is not valid utf-8"))
     }
 
     pub fn postings(&self) -> Vec<Posting<'_>> {
         let mut cursor = self.0.walk();
         self.0
             .children_by_field_name("posting", &mut cursor)
-            .map(|n| Posting(n, self.1))
+            .map(Posting)
             .collect()
     }
 }
 
-pub struct Posting<'a>(Node<'a>, &'a str);
+pub struct Posting<'a>(Node<'a>);
 
 impl Posting<'_> {
     pub fn account(&self) -> Option<Account> {
-        self.0
-            .child_by_field_name("account")
-            .map(|n| Account(n, self.1))
+        self.0.child_by_field_name("account").map(Account)
     }
 
     pub fn amount(&self) -> Option<Amount> {
-        self.0
-            .child_by_field_name("amount")
-            .map(|n| Amount(n, self.1))
+        self.0.child_by_field_name("amount").map(Amount)
     }
 }
 
-pub struct Account<'a>(Node<'a>, &'a str);
+pub struct Account<'a>(Node<'a>);
 
 impl Account<'_> {
-    pub fn value(&self) -> &str {
+    pub fn value<'s>(&self, src: &'s str) -> &'s str {
         self.0
-            .utf8_text(self.1.as_bytes())
+            .utf8_text(src.as_bytes())
             .expect("src is not valid utf-8")
     }
 }
 
-pub struct Amount<'a>(Node<'a>, &'a str);
+pub struct Amount<'a>(Node<'a>);
 
 impl Amount<'_> {
-    pub fn value(&self) -> &str {
+    pub fn value<'s>(&self, src: &'s str) -> &'s str {
         self.0
-            .utf8_text(self.1.as_bytes())
+            .utf8_text(src.as_bytes())
             .expect("src is not valid utf-8")
     }
 }
@@ -173,35 +167,35 @@ mod tests {
         assert_eq!(transactions.len(), 2);
 
         let transaction = transactions.get(0).unwrap();
-        assert_eq!(transaction.date(), Some("2023-01-01"));
-        assert_eq!(transaction.description(), Some("\"Mcdonald's\""));
+        assert_eq!(transaction.date(src), Some("2023-01-01"));
+        assert_eq!(transaction.description(src), Some("\"Mcdonald's\""));
 
         let postings = transaction.postings();
         let posting = postings.get(0).unwrap();
-        assert_eq!(posting.account().unwrap().value(), "expenses:fast_food");
-        assert_eq!(posting.amount().unwrap().value(), "10.91");
+        assert_eq!(posting.account().unwrap().value(src), "expenses:fast_food");
+        assert_eq!(posting.amount().unwrap().value(src), "10.91");
 
         let posting = postings.get(1).unwrap();
         assert_eq!(
-            posting.account().unwrap().value(),
+            posting.account().unwrap().value(src),
             "liabilities:my_credit_card"
         );
         assert!(posting.amount().is_none());
 
         let transaction = transactions.get(1).unwrap();
-        assert_eq!(transaction.date(), Some("2023-01-02"));
-        assert_eq!(transaction.description(), Some("\"Paying credit card\""));
+        assert_eq!(transaction.date(src), Some("2023-01-02"));
+        assert_eq!(transaction.description(src), Some("\"Paying credit card\""));
 
         let postings = transaction.postings();
         let posting = postings.get(0).unwrap();
         assert_eq!(
-            posting.account().unwrap().value(),
+            posting.account().unwrap().value(src),
             "liabilities:my_credit_card"
         );
-        assert_eq!(posting.amount().unwrap().value(), "10.91");
+        assert_eq!(posting.amount().unwrap().value(src), "10.91");
 
         let posting = postings.get(1).unwrap();
-        assert_eq!(posting.account().unwrap().value(), "assets:my_checking");
+        assert_eq!(posting.account().unwrap().value(src), "assets:my_checking");
         assert!(posting.amount().is_none());
     }
 }
