@@ -1,9 +1,16 @@
 use std::collections::HashMap;
 
+use bonk_ast::{Ledger, Parser};
 use lsp_types::{Position, Range, TextDocumentContentChangeEvent};
 
+struct Document {
+    src: String,
+    ledger: Ledger,
+    parser: Parser,
+}
+
 pub struct State {
-    files: HashMap<String, String>,
+    files: HashMap<String, Document>,
 }
 
 impl State {
@@ -13,30 +20,59 @@ impl State {
         }
     }
 
-    pub fn on_open(&mut self, file: String, contents: String) {
-        self.files.insert(file, contents);
+    pub fn on_open(&mut self, file: String, src: String) {
+        let mut parser = Parser::new();
+        let ledger = parser.parse(&src, None);
+
+        self.files.insert(
+            file,
+            Document {
+                src,
+                ledger,
+                parser,
+            },
+        );
     }
 
-    pub fn on_change(&mut self, file: String, changes: Vec<TextDocumentContentChangeEvent>) {
-        let contents = self
+    pub fn on_change(&mut self, file: &str, changes: Vec<TextDocumentContentChangeEvent>) {
+        let Document {
+            src,
+            ledger,
+            parser,
+        } = self
             .files
-            .get_mut(&file)
+            .get_mut(file)
             .expect("we don't know about the file");
 
         for change in changes {
-            if let Some(Range { start, end }) = change.range {
-                let start = position_to_byte_offset(contents, start);
-                let end = position_to_byte_offset(contents, end);
+            let old_src = src.clone();
 
-                contents.replace_range(start..end, &change.text);
+            if let Some(Range { start, end }) = change.range {
+                let start_byte = position_to_byte_offset(src, start);
+                let end_byte = position_to_byte_offset(src, end);
+
+                src.replace_range(start_byte..end_byte, &change.text);
+                ledger.edit(
+                    &old_src,
+                    src,
+                    start.line as usize,
+                    start.character as usize,
+                    end.line as usize,
+                    end.character as usize,
+                    change.text.len(),
+                );
             } else {
-                *contents = change.text;
+                *src = change.text;
+                // TODO
+                ledger.edit(&old_src, src, 0, 0, todo!(), todo!(), change.text.len());
             }
         }
+
+        *ledger = parser.parse(src, Some(ledger));
     }
 
-    pub fn on_close(&mut self, file: String) {
-        self.files.remove(&file);
+    pub fn on_close(&mut self, file: &str) {
+        self.files.remove(file);
     }
 }
 
@@ -77,7 +113,7 @@ mod tests {
         );
 
         state.on_change(
-            "test".to_string(),
+            "test",
             vec![TextDocumentContentChangeEvent {
                 range: Some(Range {
                     start: Position {
@@ -95,12 +131,12 @@ mod tests {
         );
 
         assert_eq!(
-            state.files.get("test").unwrap(),
+            state.files.get("test").unwrap().src,
             "asome\ntext\nin\nthe\ndocument"
         );
 
         state.on_change(
-            "test".to_string(),
+            "test",
             vec![TextDocumentContentChangeEvent {
                 range: Some(Range {
                     start: Position {
@@ -118,12 +154,12 @@ mod tests {
         );
 
         assert_eq!(
-            state.files.get("test").unwrap(),
+            state.files.get("test").unwrap().src,
             "asome\ntextb\nin\nthe\ndocument"
         );
 
         state.on_change(
-            "test".to_string(),
+            "test",
             vec![TextDocumentContentChangeEvent {
                 range: Some(Range {
                     start: Position {
@@ -141,12 +177,12 @@ mod tests {
         );
 
         assert_eq!(
-            state.files.get("test").unwrap(),
+            state.files.get("test").unwrap().src,
             "asome\ntextb\nicn\nthe\ndocument"
         );
 
         state.on_change(
-            "test".to_string(),
+            "test",
             vec![TextDocumentContentChangeEvent {
                 range: Some(Range {
                     start: Position {
@@ -164,12 +200,12 @@ mod tests {
         );
 
         assert_eq!(
-            state.files.get("test").unwrap(),
+            state.files.get("test").unwrap().src,
             "asome\ntextb\nicn\nd\ndocument"
         );
 
         state.on_change(
-            "test".to_string(),
+            "test",
             vec![TextDocumentContentChangeEvent {
                 range: Some(Range {
                     start: Position {
@@ -186,10 +222,10 @@ mod tests {
             }],
         );
 
-        assert_eq!(state.files.get("test").unwrap(), "asome\n\ndocument");
+        assert_eq!(state.files.get("test").unwrap().src, "asome\n\ndocument");
 
         state.on_change(
-            "test".to_string(),
+            "test",
             vec![
                 TextDocumentContentChangeEvent {
                     range: Some(Range {
@@ -222,10 +258,10 @@ mod tests {
             ],
         );
 
-        assert_eq!(state.files.get("test").unwrap(), "aspme\n\ndpcument");
+        assert_eq!(state.files.get("test").unwrap().src, "aspme\n\ndpcument");
 
         state.on_change(
-            "test".to_string(),
+            "test",
             vec![TextDocumentContentChangeEvent {
                 range: Some(Range {
                     start: Position {
@@ -242,10 +278,10 @@ mod tests {
             }],
         );
 
-        assert_eq!(state.files.get("test").unwrap(), "aspme\n\ndpcument\n");
+        assert_eq!(state.files.get("test").unwrap().src, "aspme\n\ndpcument\n");
 
         state.on_change(
-            "test".to_string(),
+            "test",
             vec![TextDocumentContentChangeEvent {
                 range: Some(Range {
                     start: Position {
@@ -262,10 +298,10 @@ mod tests {
             }],
         );
 
-        assert_eq!(state.files.get("test").unwrap(), "foo");
+        assert_eq!(state.files.get("test").unwrap().src, "foo");
 
         state.on_change(
-            "test".to_string(),
+            "test",
             vec![TextDocumentContentChangeEvent {
                 range: Some(Range {
                     start: Position {
@@ -282,7 +318,7 @@ mod tests {
             }],
         );
 
-        assert_eq!(state.files.get("test").unwrap(), "fo");
+        assert_eq!(state.files.get("test").unwrap().src, "fo");
     }
 
     #[test]

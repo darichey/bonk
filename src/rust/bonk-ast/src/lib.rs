@@ -1,6 +1,6 @@
 use core::fmt;
 
-use tree_sitter::{Node, Range, Tree};
+use tree_sitter::{InputEdit, Node, Point, Range, Tree};
 
 pub struct Parser {
     ts_parser: tree_sitter::Parser,
@@ -83,6 +83,79 @@ impl Ledger {
 
         errors
     }
+
+    pub fn edit(
+        &mut self,
+        old_src: &str,
+        new_src: &str,
+        start_line: usize,
+        start_col: usize,
+        end_line: usize,
+        end_col: usize,
+        change_length: usize,
+    ) {
+        let start_byte = position_to_byte_offset(old_src, start_line, start_col);
+        let new_end_byte = start_byte + change_length;
+        let new_end_position = byte_offset_to_position(new_src, new_end_byte);
+
+        self.0.edit(&InputEdit {
+            start_byte,
+            old_end_byte: position_to_byte_offset(old_src, end_line, end_col),
+            new_end_byte,
+            start_position: Point {
+                row: start_line,
+                column: start_col,
+            },
+            old_end_position: Point {
+                row: end_line,
+                column: end_col,
+            },
+            new_end_position: Point {
+                row: new_end_position.0,
+                column: new_end_position.1,
+            },
+        });
+    }
+}
+
+fn position_to_byte_offset(text: &str, line: usize, col: usize) -> usize {
+    let mut cur_line = 0;
+    let mut cur_col = 0;
+
+    for (offset, c) in text.char_indices() {
+        if cur_line == line && cur_col == col {
+            return offset;
+        }
+
+        if c == '\n' {
+            cur_line += 1;
+            cur_col = 0;
+        } else {
+            cur_col += 1;
+        }
+    }
+
+    text.len()
+}
+
+fn byte_offset_to_position(text: &str, offset: usize) -> (usize, usize) {
+    let mut cur_line = 0;
+    let mut cur_col = 0;
+
+    for (o, c) in text.char_indices() {
+        if o == offset {
+            break;
+        }
+
+        if c == '\n' {
+            cur_line += 1;
+            cur_col = 0;
+        } else {
+            cur_col += 1;
+        }
+    }
+
+    (cur_line, cur_col)
 }
 
 impl fmt::Debug for Ledger {

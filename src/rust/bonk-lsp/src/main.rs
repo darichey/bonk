@@ -6,10 +6,9 @@ use std::error::Error;
 use lsp_types::notification::{DidChangeTextDocument, DidCloseTextDocument, DidOpenTextDocument};
 use lsp_types::request::DocumentDiagnosticRequest;
 use lsp_types::{
-    Diagnostic, DiagnosticOptions, DiagnosticServerCapabilities, DiagnosticSeverity,
-    DocumentDiagnosticReport, FullDocumentDiagnosticReport, Position, Range,
-    RelatedFullDocumentDiagnosticReport, TextDocumentSyncCapability, TextDocumentSyncKind,
-    TextDocumentSyncOptions, WorkDoneProgressOptions,
+    DiagnosticOptions, DiagnosticServerCapabilities, DocumentDiagnosticReport,
+    FullDocumentDiagnosticReport, RelatedFullDocumentDiagnosticReport, TextDocumentSyncCapability,
+    TextDocumentSyncKind, TextDocumentSyncOptions, WorkDoneProgressOptions,
 };
 use lsp_types::{InitializeParams, ServerCapabilities};
 
@@ -148,10 +147,7 @@ fn main_loop(
 
                 let not = match cast_not::<DidChangeTextDocument>(not) {
                     Ok(params) => {
-                        state.on_change(
-                            params.text_document.uri.to_string(),
-                            params.content_changes,
-                        );
+                        state.on_change(params.text_document.uri.as_str(), params.content_changes);
                         continue;
                     }
                     Err(err @ ExtractError::JsonError { .. }) => panic!("{err:?}"),
@@ -160,7 +156,7 @@ fn main_loop(
 
                 let _not = match cast_not::<DidCloseTextDocument>(not) {
                     Ok(params) => {
-                        state.on_close(params.text_document.uri.to_string());
+                        state.on_close(params.text_document.uri.as_str());
                         continue;
                     }
                     Err(err @ ExtractError::JsonError { .. }) => panic!("{err:?}"),
