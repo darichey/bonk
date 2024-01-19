@@ -6,7 +6,7 @@ use itertools::Itertools;
 pub struct SyntaxErrors(Vec<SourceSpan>);
 
 pub fn check_syntax(
-    ledger: bonk_ast::Ledger,
+    ledger: &bonk_ast::Ledger,
     src: &str,
 ) -> Result<bonk_ast_errorless::Ledger, SyntaxErrors> {
     let errors = ledger.errors();
@@ -17,7 +17,7 @@ pub fn check_syntax(
     }
 }
 
-fn convert_ledger(ledger: bonk_ast::Ledger, src: &str) -> bonk_ast_errorless::Ledger {
+fn convert_ledger(ledger: &bonk_ast::Ledger, src: &str) -> bonk_ast_errorless::Ledger {
     bonk_ast_errorless::Ledger {
         transactions: ledger
             .transactions()
@@ -95,7 +95,7 @@ mod tests {
     liabilities:my_credit_card -10.91"#;
 
         let ledger = bonk_ast::Parser::new().parse(src, None);
-        let ledger = check_syntax(ledger, src);
+        let ledger = check_syntax(&ledger, src);
 
         assert!(ledger.is_ok());
     }
@@ -107,7 +107,7 @@ expenses:fast_food         10.91
 liabilities:my_credit_card -10.91"#;
 
         let ledger = bonk_ast::Parser::new().parse(src, None);
-        let ledger = check_syntax(ledger, src);
+        let ledger = check_syntax(&ledger, src);
 
         let errors = ledger.err().unwrap().0;
         assert_eq!(
