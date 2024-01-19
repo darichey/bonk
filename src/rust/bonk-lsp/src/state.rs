@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use bonk_ast::{position_to_byte_offset, Ledger, Parser};
+use bonk_ast::{byte_offset_to_position, position_to_byte_offset, Ledger, Parser};
 use lsp_types::{Position, Range, TextDocumentContentChangeEvent};
 
 pub struct Document {
@@ -72,8 +72,8 @@ impl State {
                 );
             } else {
                 *src = change.text;
-                // TODO
-                ledger.edit(&old_src, src, 0, 0, todo!(), todo!(), change.text.len());
+                let (end_line, end_col) = byte_offset_to_position(src, src.len());
+                ledger.edit(&old_src, src, 0, 0, end_line, end_col, src.len());
             }
         }
 
