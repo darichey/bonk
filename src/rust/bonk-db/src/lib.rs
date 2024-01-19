@@ -101,7 +101,6 @@ impl Db {
 mod tests {
     use crate::Db;
     use bonk_ast_errorless::*;
-    use sqlite::{Error, Row};
 
     #[test]
     fn test() {

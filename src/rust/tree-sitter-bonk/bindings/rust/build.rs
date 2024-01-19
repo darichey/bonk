@@ -1,3 +1,5 @@
+#![allow(clippy::all)] // generated
+
 fn main() {
     let src_dir = std::path::Path::new("src");
 

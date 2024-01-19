@@ -84,6 +84,7 @@ impl Ledger {
         errors
     }
 
+    #[allow(clippy::too_many_arguments)] // I'm fine with this for now
     pub fn edit(
         &mut self,
         old_src: &str,

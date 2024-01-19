@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
 use bonk_ast::{byte_offset_to_position, position_to_byte_offset, Ledger, Parser};
-use lsp_types::{Position, Range, TextDocumentContentChangeEvent};
+use lsp_types::{Range, TextDocumentContentChangeEvent};
 
 pub struct Document {
     pub src: String,

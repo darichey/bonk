@@ -1,3 +1,5 @@
+#![allow(clippy::all)] // generated
+
 //! This crate provides bonk language support for the [tree-sitter][] parsing library.
 //!
 //! Typically, you will use the [language][language func] function to add this language to a
