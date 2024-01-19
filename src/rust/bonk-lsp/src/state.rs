@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use bonk_ast::{Ledger, Parser};
+use bonk_ast::{position_to_byte_offset, Ledger, Parser};
 use lsp_types::{Position, Range, TextDocumentContentChangeEvent};
 
 pub struct Document {
@@ -52,17 +52,22 @@ impl State {
             let old_src = src.clone();
 
             if let Some(Range { start, end }) = change.range {
-                let start_byte = position_to_byte_offset(src, start);
-                let end_byte = position_to_byte_offset(src, end);
+                let start_line = start.line as usize;
+                let start_col = start.character as usize;
+                let end_line = end.line as usize;
+                let end_col = end.character as usize;
+
+                let start_byte = position_to_byte_offset(src, start_line, start_col);
+                let end_byte = position_to_byte_offset(src, end_line, end_col);
 
                 src.replace_range(start_byte..end_byte, &change.text);
                 ledger.edit(
                     &old_src,
                     src,
-                    start.line as usize,
-                    start.character as usize,
-                    end.line as usize,
-                    end.character as usize,
+                    start_line,
+                    start_col,
+                    end_line,
+                    end_col,
                     change.text.len(),
                 );
             } else {
@@ -80,31 +85,10 @@ impl State {
     }
 }
 
-fn position_to_byte_offset(text: &str, position: Position) -> usize {
-    let mut line = 0;
-    let mut char = 0;
-
-    for (offset, c) in text.char_indices() {
-        if line == position.line && char == position.character {
-            return offset;
-        }
-
-        if c == '\n' {
-            line += 1;
-            char = 0;
-        } else {
-            char += 1;
-        }
-    }
-
-    text.len()
-}
-
 #[cfg(test)]
 mod tests {
+    use bonk_ast::position_to_byte_offset;
     use lsp_types::{Position, Range, TextDocumentContentChangeEvent};
-
-    use crate::state::position_to_byte_offset;
 
     use super::State;
 
@@ -329,59 +313,14 @@ mod tests {
     fn test_position_to_bye_offset() {
         let s = "foo\nbars\nbazzz";
 
-        assert_eq!(
-            position_to_byte_offset(
-                s,
-                Position {
-                    line: 0,
-                    character: 0
-                }
-            ),
-            0
-        );
+        assert_eq!(position_to_byte_offset(s, 0, 0), 0);
 
-        assert_eq!(
-            position_to_byte_offset(
-                s,
-                Position {
-                    line: 0,
-                    character: 2
-                }
-            ),
-            2
-        );
+        assert_eq!(position_to_byte_offset(s, 0, 2), 2);
 
-        assert_eq!(
-            position_to_byte_offset(
-                s,
-                Position {
-                    line: 1,
-                    character: 0
-                }
-            ),
-            4
-        );
+        assert_eq!(position_to_byte_offset(s, 1, 0), 4);
 
-        assert_eq!(
-            position_to_byte_offset(
-                s,
-                Position {
-                    line: 2,
-                    character: 3
-                }
-            ),
-            12
-        );
+        assert_eq!(position_to_byte_offset(s, 2, 3), 12);
 
-        assert_eq!(
-            position_to_byte_offset(
-                s,
-                Position {
-                    line: 2,
-                    character: 5
-                },
-            ),
-            14
-        )
+        assert_eq!(position_to_byte_offset(s, 2, 5), 14)
     }
 }

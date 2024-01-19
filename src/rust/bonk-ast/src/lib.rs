@@ -118,7 +118,7 @@ impl Ledger {
     }
 }
 
-fn position_to_byte_offset(text: &str, line: usize, col: usize) -> usize {
+pub fn position_to_byte_offset(text: &str, line: usize, col: usize) -> usize {
     let mut cur_line = 0;
     let mut cur_col = 0;
 
@@ -138,7 +138,7 @@ fn position_to_byte_offset(text: &str, line: usize, col: usize) -> usize {
     text.len()
 }
 
-fn byte_offset_to_position(text: &str, offset: usize) -> (usize, usize) {
+pub fn byte_offset_to_position(text: &str, offset: usize) -> (usize, usize) {
     let mut cur_line = 0;
     let mut cur_col = 0;
 
