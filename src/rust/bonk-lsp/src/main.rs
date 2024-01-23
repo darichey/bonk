@@ -18,8 +18,7 @@ use crate::diagnostic::get_diagnostics;
 use crate::state::State;
 
 fn main() -> Result<(), Box<dyn Error + Sync + Send>> {
-    // Note that  we must have our logging only write out to stderr.
-    eprintln!("starting generic LSP server");
+    eprintln!("Starting...");
 
     // Create the transport. Includes the stdio (stdin and stdout) versions but this could
     // also be implemented to use sockets or HTTP.
@@ -60,7 +59,7 @@ fn main() -> Result<(), Box<dyn Error + Sync + Send>> {
     io_threads.join()?;
 
     // Shut down gracefully.
-    eprintln!("shutting down server");
+    eprintln!("Shutting down...");
     Ok(())
 }
 
@@ -72,20 +71,17 @@ fn main_loop(
 
     let mut state = State::new();
 
-    eprintln!("starting example main loop");
+    eprintln!("Starting main loop...");
     for msg in &connection.receiver {
-        eprintln!("got msg: {msg:?}");
         match msg {
             Message::Request(req) => {
+                eprintln!("Received request {} ({})", req.method, req.id);
                 if connection.handle_shutdown(&req)? {
                     return Ok(());
                 }
-                eprintln!("got request: {req:?}");
                 let _req = match cast_req::<DocumentDiagnosticRequest>(req) {
                     Ok((id, params)) => {
                         if let Some("bonk") = params.identifier.as_deref() {
-                            eprintln!("got textDocument/diagnostic request #{id}: {params:?}");
-
                             let doc = state
                                 .get_doc(params.text_document.uri.as_str())
                                 .expect("we don't know about this file");
@@ -114,10 +110,10 @@ fn main_loop(
                 };
             }
             Message::Response(resp) => {
-                eprintln!("got response: {resp:?}");
+                eprintln!("Received response {}", resp.id);
             }
             Message::Notification(not) => {
-                eprintln!("got notification: {not:?}");
+                eprintln!("Received notification {}", not.method);
 
                 let not = match cast_not::<DidOpenTextDocument>(not) {
                     Ok(params) => {
