@@ -92,6 +92,17 @@ mod tests {
 
     use super::State;
 
+    fn assert_state_change(
+        state: &mut State,
+        file: &str,
+        changes: Vec<TextDocumentContentChangeEvent>,
+        new_src: &str,
+    ) {
+        state.on_change(file, changes);
+
+        assert_eq!(state.files.get(file).unwrap().src, new_src);
+    }
+
     #[test]
     fn test_on_change() {
         let mut state = State::new();
@@ -100,7 +111,8 @@ mod tests {
             "some\ntext\nin\nthe\ndocument".to_string(),
         );
 
-        state.on_change(
+        assert_state_change(
+            &mut state,
             "test",
             vec![TextDocumentContentChangeEvent {
                 range: Some(Range {
@@ -116,14 +128,11 @@ mod tests {
                 range_length: Some(0),
                 text: "a".to_string(),
             }],
+            "asome\ntext\nin\nthe\ndocument",
         );
 
-        assert_eq!(
-            state.files.get("test").unwrap().src,
-            "asome\ntext\nin\nthe\ndocument"
-        );
-
-        state.on_change(
+        assert_state_change(
+            &mut state,
             "test",
             vec![TextDocumentContentChangeEvent {
                 range: Some(Range {
@@ -139,14 +148,11 @@ mod tests {
                 range_length: Some(0),
                 text: "b".to_string(),
             }],
+            "asome\ntextb\nin\nthe\ndocument",
         );
 
-        assert_eq!(
-            state.files.get("test").unwrap().src,
-            "asome\ntextb\nin\nthe\ndocument"
-        );
-
-        state.on_change(
+        assert_state_change(
+            &mut state,
             "test",
             vec![TextDocumentContentChangeEvent {
                 range: Some(Range {
@@ -162,14 +168,11 @@ mod tests {
                 range_length: Some(0),
                 text: "c".to_string(),
             }],
+            "asome\ntextb\nicn\nthe\ndocument",
         );
 
-        assert_eq!(
-            state.files.get("test").unwrap().src,
-            "asome\ntextb\nicn\nthe\ndocument"
-        );
-
-        state.on_change(
+        assert_state_change(
+            &mut state,
             "test",
             vec![TextDocumentContentChangeEvent {
                 range: Some(Range {
@@ -185,14 +188,11 @@ mod tests {
                 range_length: Some(0),
                 text: "d".to_string(),
             }],
+            "asome\ntextb\nicn\nd\ndocument",
         );
 
-        assert_eq!(
-            state.files.get("test").unwrap().src,
-            "asome\ntextb\nicn\nd\ndocument"
-        );
-
-        state.on_change(
+        assert_state_change(
+            &mut state,
             "test",
             vec![TextDocumentContentChangeEvent {
                 range: Some(Range {
@@ -208,11 +208,11 @@ mod tests {
                 range_length: Some(11),
                 text: "".to_string(),
             }],
+            "asome\n\ndocument",
         );
 
-        assert_eq!(state.files.get("test").unwrap().src, "asome\n\ndocument");
-
-        state.on_change(
+        assert_state_change(
+            &mut state,
             "test",
             vec![
                 TextDocumentContentChangeEvent {
@@ -244,11 +244,11 @@ mod tests {
                     text: "p".to_string(),
                 },
             ],
+            "aspme\n\ndpcument",
         );
 
-        assert_eq!(state.files.get("test").unwrap().src, "aspme\n\ndpcument");
-
-        state.on_change(
+        assert_state_change(
+            &mut state,
             "test",
             vec![TextDocumentContentChangeEvent {
                 range: Some(Range {
@@ -264,11 +264,11 @@ mod tests {
                 range_length: Some(0),
                 text: "\n".to_string(),
             }],
+            "aspme\n\ndpcument\n",
         );
 
-        assert_eq!(state.files.get("test").unwrap().src, "aspme\n\ndpcument\n");
-
-        state.on_change(
+        assert_state_change(
+            &mut state,
             "test",
             vec![TextDocumentContentChangeEvent {
                 range: Some(Range {
@@ -284,11 +284,11 @@ mod tests {
                 range_length: Some(16),
                 text: "foo".to_string(),
             }],
+            "foo",
         );
 
-        assert_eq!(state.files.get("test").unwrap().src, "foo");
-
-        state.on_change(
+        assert_state_change(
+            &mut state,
             "test",
             vec![TextDocumentContentChangeEvent {
                 range: Some(Range {
@@ -304,9 +304,8 @@ mod tests {
                 range_length: Some(1),
                 text: "".to_string(),
             }],
+            "fo",
         );
-
-        assert_eq!(state.files.get("test").unwrap().src, "fo");
     }
 
     #[test]
