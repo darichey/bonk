@@ -9,8 +9,7 @@ module.exports = grammar({
         field("description", $.description),
         field("posting", repeat1($.posting))
       ),
-    posting: ($) =>
-      seq(field("account", $.account), field("amount", optional($.amount))),
+    posting: ($) => seq(field("account", $.account), field("amount", $.amount)),
 
     date: ($) => /\d{4}-\d{2}-\d{2}/,
     description: ($) => /"([^"\\]|\\["\\bnfrt])*"/,

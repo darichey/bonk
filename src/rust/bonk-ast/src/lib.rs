@@ -283,33 +283,37 @@ mod tests {
     fn test_debug_fmt() {
         let src = r#"2023-01-01 "Mcdonald's"
   expenses:fast_food         10.91
-  liabilities:my_credit_card
+  liabilities:my_credit_card -10.91
       
 2023-01-02 "Paying credit card"
   liabilities:my_credit_card    10.91
-  assets:my_checking"#;
+  assets:my_checking           -10.91"#;
 
         let ledger = Parser::new().parse(src, None);
 
+        println!("{:?}", ledger);
+
         assert_eq!(
             format!("{:?}", ledger),
-            r#"(ledger [0, 0] - [6, 20]
-  transaction: (transaction [0, 0] - [2, 28]
+            r#"(ledger [0, 0] - [6, 37]
+  transaction: (transaction [0, 0] - [2, 35]
     date: (date [0, 0] - [0, 10])
     description: (description [0, 11] - [0, 23])
     posting: (posting [1, 2] - [1, 34]
       account: (account [1, 2] - [1, 20])
       amount: (amount [1, 29] - [1, 34]))
-    posting: (posting [2, 2] - [2, 28]
-      account: (account [2, 2] - [2, 28])))
-  transaction: (transaction [4, 0] - [6, 20]
+    posting: (posting [2, 2] - [2, 35]
+      account: (account [2, 2] - [2, 28])
+      amount: (amount [2, 29] - [2, 35])))
+  transaction: (transaction [4, 0] - [6, 37]
     date: (date [4, 0] - [4, 10])
     description: (description [4, 11] - [4, 31])
     posting: (posting [5, 2] - [5, 37]
       account: (account [5, 2] - [5, 28])
       amount: (amount [5, 32] - [5, 37]))
-    posting: (posting [6, 2] - [6, 20]
-      account: (account [6, 2] - [6, 20]))))
+    posting: (posting [6, 2] - [6, 37]
+      account: (account [6, 2] - [6, 20])
+      amount: (amount [6, 31] - [6, 37]))))
 "#
         );
     }
@@ -318,11 +322,11 @@ mod tests {
     fn test_parse() {
         let src = r#"2023-01-01 "Mcdonald's"
   expenses:fast_food         10.91
-  liabilities:my_credit_card
+  liabilities:my_credit_card -10.91
       
 2023-01-02 "Paying credit card"
   liabilities:my_credit_card    10.91
-  assets:my_checking"#;
+  assets:my_checking           -10.91"#;
 
         let ledger = Parser::new().parse(src, None);
 
@@ -343,7 +347,7 @@ mod tests {
             posting.account().unwrap().value(src),
             "liabilities:my_credit_card"
         );
-        assert!(posting.amount().is_none());
+        assert_eq!(posting.amount().unwrap().value(src), "-10.91");
 
         let transaction = transactions.get(1).unwrap();
         assert_eq!(transaction.date(src), Some("2023-01-02"));
@@ -359,35 +363,36 @@ mod tests {
 
         let posting = postings.get(1).unwrap();
         assert_eq!(posting.account().unwrap().value(src), "assets:my_checking");
-        assert!(posting.amount().is_none());
+        assert_eq!(posting.amount().unwrap().value(src), "-10.91");
     }
 
     #[test]
     fn test_edit() {
         let src = r#"2023-01-01 "Mcdonald's"
-  expenses:fast_food         10.91
-  liabilities:my_credit_card"#;
+  expenses:fast_food          10.91
+  liabilities:my_credit_card -10.91"#;
 
         let mut ledger = Parser::new().parse(src, None);
 
         let old_src = src;
         let new_src = r#"foo "Mcdonald's"
-  expenses:fast_food         10.91
-  liabilities:my_credit_card"#;
+  expenses:fast_food          10.91
+  liabilities:my_credit_card -10.91"#;
 
         ledger.edit(old_src, new_src, 0, 0, 0, 10, 3);
 
         assert_eq!(
             format!("{:?}", ledger),
-            r#"(ledger [0, 0] - [2, 28]
-  transaction: (transaction [0, 0] - [2, 28]
+            r#"(ledger [0, 0] - [2, 35]
+  transaction: (transaction [0, 0] - [2, 35]
     date: (date [0, 0] - [0, 3])
     description: (description [0, 4] - [0, 16])
-    posting: (posting [1, 2] - [1, 34]
+    posting: (posting [1, 2] - [1, 35]
       account: (account [1, 2] - [1, 20])
-      amount: (amount [1, 29] - [1, 34]))
-    posting: (posting [2, 2] - [2, 28]
-      account: (account [2, 2] - [2, 28]))))
+      amount: (amount [1, 30] - [1, 35]))
+    posting: (posting [2, 2] - [2, 35]
+      account: (account [2, 2] - [2, 28])
+      amount: (amount [2, 29] - [2, 35]))))
 "#
         );
     }

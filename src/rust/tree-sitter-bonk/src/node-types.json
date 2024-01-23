@@ -31,7 +31,7 @@
       },
       "amount": {
         "multiple": false,
-        "required": false,
+        "required": true,
         "types": [
           {
             "type": "amount",

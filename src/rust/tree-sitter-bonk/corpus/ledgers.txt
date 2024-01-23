@@ -3,12 +3,12 @@ Ledger
 ================================================================================
 
 2023-01-01 "Mcdonald's"
-  expenses:fast_food         10.91
-  liabilities:my_credit_card
+  expenses:fast_food          10.91
+  liabilities:my_credit_card -10.91
 
 2023-01-02 "Paying credit card"
   liabilities:my_credit_card    10.91
-  assets:my_checking
+  assets:my_checking           -10.91
 
 --------------------------------------------------------------------------------
 
@@ -20,7 +20,8 @@ Ledger
       (account)
       (amount))
     (posting
-      (account)))
+      (account)
+      (amount)))
   (transaction
     (date)
     (description)
@@ -28,4 +29,5 @@ Ledger
       (account)
       (amount))
     (posting
-      (account))))
+      (account)
+      (amount))))
