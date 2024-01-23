@@ -223,7 +223,7 @@ impl Amount<'_> {
 
 #[cfg(test)]
 mod tests {
-    use crate::Parser;
+    use crate::{position_to_byte_offset, Parser};
 
     #[test]
     fn test() {
@@ -271,5 +271,20 @@ mod tests {
         let posting = postings.get(1).unwrap();
         assert_eq!(posting.account().unwrap().value(src), "assets:my_checking");
         assert!(posting.amount().is_none());
+    }
+
+    #[test]
+    fn test_position_to_byte_offset() {
+        let s = "foo\nbars\nbazzz";
+
+        assert_eq!(position_to_byte_offset(s, 0, 0), 0);
+
+        assert_eq!(position_to_byte_offset(s, 0, 2), 2);
+
+        assert_eq!(position_to_byte_offset(s, 1, 0), 4);
+
+        assert_eq!(position_to_byte_offset(s, 2, 3), 12);
+
+        assert_eq!(position_to_byte_offset(s, 2, 5), 14)
     }
 }

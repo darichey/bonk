@@ -87,7 +87,6 @@ impl State {
 
 #[cfg(test)]
 mod tests {
-    use bonk_ast::position_to_byte_offset;
     use lsp_types::{Position, Range, TextDocumentContentChangeEvent};
 
     use super::State;
@@ -306,20 +305,5 @@ mod tests {
             }],
             "fo",
         );
-    }
-
-    #[test]
-    fn test_position_to_bye_offset() {
-        let s = "foo\nbars\nbazzz";
-
-        assert_eq!(position_to_byte_offset(s, 0, 0), 0);
-
-        assert_eq!(position_to_byte_offset(s, 0, 2), 2);
-
-        assert_eq!(position_to_byte_offset(s, 1, 0), 4);
-
-        assert_eq!(position_to_byte_offset(s, 2, 3), 12);
-
-        assert_eq!(position_to_byte_offset(s, 2, 5), 14)
     }
 }
