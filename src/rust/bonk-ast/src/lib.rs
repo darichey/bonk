@@ -160,8 +160,62 @@ pub fn byte_offset_to_position(text: &str, offset: usize) -> (usize, usize) {
 }
 
 impl fmt::Debug for Ledger {
+    // adapted from tree-sitter-cli: https://github.com/tree-sitter/tree-sitter/blob/660481dbf71413eba5a928b0b0ab8da50c1109e0/cli/src/parse.rs#L132-L185
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.write_str(&self.0.root_node().to_sexp())
+        let mut cursor = self.0.walk();
+        let mut needs_newline = false;
+        let mut indent_level = 0;
+        let mut did_visit_children = false;
+        loop {
+            let node = cursor.node();
+            let is_named = node.is_named();
+            if did_visit_children {
+                if is_named {
+                    f.write_str(")")?;
+                    needs_newline = true;
+                }
+                if cursor.goto_next_sibling() {
+                    did_visit_children = false;
+                } else if cursor.goto_parent() {
+                    did_visit_children = true;
+                    indent_level -= 1;
+                } else {
+                    break;
+                }
+            } else {
+                if is_named {
+                    if needs_newline {
+                        f.write_str("\n")?;
+                    }
+                    for _ in 0..indent_level {
+                        f.write_str("  ")?;
+                    }
+                    let start = node.start_position();
+                    let end = node.end_position();
+                    if let Some(field_name) = cursor.field_name() {
+                        write!(f, "{}: ", field_name)?;
+                    }
+                    write!(
+                        f,
+                        "({} [{}, {}] - [{}, {}]",
+                        node.kind(),
+                        start.row,
+                        start.column,
+                        end.row,
+                        end.column
+                    )?;
+                    needs_newline = true;
+                }
+                if cursor.goto_first_child() {
+                    did_visit_children = false;
+                    indent_level += 1;
+                } else {
+                    did_visit_children = true;
+                }
+            }
+        }
+        f.write_str("\n")?;
+        Ok(())
     }
 }
 
@@ -224,6 +278,41 @@ impl Amount<'_> {
 #[cfg(test)]
 mod tests {
     use crate::{position_to_byte_offset, Parser};
+
+    #[test]
+    fn test_debug_fmt() {
+        let src = r#"2023-01-01 "Mcdonald's"
+  expenses:fast_food         10.91
+  liabilities:my_credit_card
+      
+2023-01-02 "Paying credit card"
+  liabilities:my_credit_card    10.91
+  assets:my_checking"#;
+
+        let ledger = Parser::new().parse(src, None);
+
+        assert_eq!(
+            format!("{:?}", ledger),
+            r#"(ledger [0, 0] - [6, 20]
+  transaction: (transaction [0, 0] - [2, 28]
+    date: (date [0, 0] - [0, 10])
+    description: (description [0, 11] - [0, 23])
+    posting: (posting [1, 2] - [1, 34]
+      account: (account [1, 2] - [1, 20])
+      amount: (amount [1, 29] - [1, 34]))
+    posting: (posting [2, 2] - [2, 28]
+      account: (account [2, 2] - [2, 28])))
+  transaction: (transaction [4, 0] - [6, 20]
+    date: (date [4, 0] - [4, 10])
+    description: (description [4, 11] - [4, 31])
+    posting: (posting [5, 2] - [5, 37]
+      account: (account [5, 2] - [5, 28])
+      amount: (amount [5, 32] - [5, 37]))
+    posting: (posting [6, 2] - [6, 20]
+      account: (account [6, 2] - [6, 20]))))
+"#
+        );
+    }
 
     #[test]
     fn test() {
