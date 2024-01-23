@@ -315,7 +315,7 @@ mod tests {
     }
 
     #[test]
-    fn test() {
+    fn test_parse() {
         let src = r#"2023-01-01 "Mcdonald's"
   expenses:fast_food         10.91
   liabilities:my_credit_card
@@ -360,6 +360,36 @@ mod tests {
         let posting = postings.get(1).unwrap();
         assert_eq!(posting.account().unwrap().value(src), "assets:my_checking");
         assert!(posting.amount().is_none());
+    }
+
+    #[test]
+    fn test_edit() {
+        let src = r#"2023-01-01 "Mcdonald's"
+  expenses:fast_food         10.91
+  liabilities:my_credit_card"#;
+
+        let mut ledger = Parser::new().parse(src, None);
+
+        let old_src = src;
+        let new_src = r#"foo "Mcdonald's"
+  expenses:fast_food         10.91
+  liabilities:my_credit_card"#;
+
+        ledger.edit(old_src, new_src, 0, 0, 0, 10, 3);
+
+        assert_eq!(
+            format!("{:?}", ledger),
+            r#"(ledger [0, 0] - [2, 28]
+  transaction: (transaction [0, 0] - [2, 28]
+    date: (date [0, 0] - [0, 3])
+    description: (description [0, 4] - [0, 16])
+    posting: (posting [1, 2] - [1, 34]
+      account: (account [1, 2] - [1, 20])
+      amount: (amount [1, 29] - [1, 34]))
+    posting: (posting [2, 2] - [2, 28]
+      account: (account [2, 2] - [2, 28]))))
+"#
+        );
     }
 
     #[test]
