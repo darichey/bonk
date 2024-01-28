@@ -11,54 +11,102 @@ pub fn check_syntax(
 ) -> Result<bonk_ast_errorless::Ledger, SyntaxErrors> {
     let errors = ledger.errors();
     if errors.is_empty() {
-        Ok(convert_ledger(ledger, src))
+        convert_ledger(ledger, src)
     } else {
         Err(SyntaxErrors(errors))
     }
 }
 
-fn convert_ledger(ledger: &bonk_ast::Ledger, src: &str) -> bonk_ast_errorless::Ledger {
-    bonk_ast_errorless::Ledger {
-        transactions: ledger
-            .transactions()
-            .into_iter()
-            .map(|t| convert_transaction(t, src))
-            .collect_vec(),
+fn convert_ledger(
+    ledger: &bonk_ast::Ledger,
+    src: &str,
+) -> Result<bonk_ast_errorless::Ledger, SyntaxErrors> {
+    let (transactions, errors): (Vec<_>, Vec<_>) = ledger
+        .transactions()
+        .into_iter()
+        .map(|t| convert_transaction(t, src))
+        .partition_result();
+
+    if errors.is_empty() {
+        Ok(bonk_ast_errorless::Ledger { transactions })
+    } else {
+        Err(SyntaxErrors(
+            errors.into_iter().flat_map(|e| e.0).collect_vec(),
+        ))
     }
 }
 
 fn convert_transaction(
     transaction: bonk_ast::Transaction,
     src: &str,
-) -> bonk_ast_errorless::Transaction {
-    bonk_ast_errorless::Transaction {
-        date: transaction
-            .date(src)
-            .and_then(Date::parse)
-            .expect("Couldn't parse date (but tree had no errors?)"),
-        description: transaction
-            .description(src)
-            .expect("Couldn't get description (but tree had no errors?)")
-            .to_string(),
-        postings: transaction
-            .postings()
-            .into_iter()
-            .map(|p| convert_posting(p, src))
-            .collect_vec(),
-    }
+) -> Result<bonk_ast_errorless::Transaction, SyntaxErrors> {
+    let date = transaction
+        .date(src)
+        .and_then(Date::parse)
+        .ok_or(SyntaxErrors(vec![transaction.span()]));
+
+    let description = transaction
+        .description(src)
+        .ok_or(SyntaxErrors(vec![transaction.span()]));
+
+    let (postings, errors): (Vec<_>, Vec<_>) = transaction
+        .postings()
+        .into_iter()
+        .map(|p| convert_posting(p, src))
+        .partition_result();
+
+    let mut errors = errors.into_iter().flat_map(|e| e.0).collect_vec();
+
+    match (date, description) {
+        (Ok(date), Ok(description)) => {
+            return if errors.is_empty() {
+                Ok(bonk_ast_errorless::Transaction {
+                    date,
+                    description: description.to_string(),
+                    postings,
+                })
+            } else {
+                Err(SyntaxErrors(errors))
+            }
+        }
+        (Ok(_), Err(err)) => errors.extend(err.0),
+        (Err(err), Ok(_)) => errors.extend(err.0),
+        (Err(err_a), Err(err_b)) => {
+            errors.extend(err_a.0);
+            errors.extend(err_b.0);
+        }
+    };
+
+    Err(SyntaxErrors(errors))
 }
 
-fn convert_posting(posting: bonk_ast::Posting, src: &str) -> bonk_ast_errorless::Posting {
-    bonk_ast_errorless::Posting {
-        account: posting
-            .account()
-            .map(|acc| convert_account(acc, src))
-            .expect("Couldn't get account (but tree had no errors?)"),
-        amount: posting
-            .amount()
-            .map(|amt| convert_amount(amt, src))
-            .expect("Couldn't get amount (but tree had no errors?)"),
-    }
+fn convert_posting(
+    posting: bonk_ast::Posting,
+    src: &str,
+) -> Result<bonk_ast_errorless::Posting, SyntaxErrors> {
+    let account = posting
+        .account()
+        .ok_or(SyntaxErrors(vec![posting.span()]))
+        .map(|acc| convert_account(acc, src));
+
+    let amount = posting
+        .amount()
+        .ok_or(SyntaxErrors(vec![posting.span()]))
+        .and_then(|amt| convert_amount(amt, src));
+
+    let mut errors = Vec::new();
+
+    match (account, amount) {
+        (Ok(account), Ok(amount)) => return Ok(bonk_ast_errorless::Posting { account, amount }),
+        (Ok(_), Err(err)) => errors.extend(err.0),
+        (Err(err), Ok(_)) => errors.extend(err.0),
+        (Err(err_a), Err(err_b)) => {
+            errors.extend(err_a.0);
+            errors.extend(err_b.0);
+        }
+    };
+
+    Err(SyntaxErrors(errors))
 }
 
 fn convert_account(account: bonk_ast::Account, src: &str) -> bonk_ast_errorless::Account {
@@ -71,14 +119,17 @@ fn convert_account(account: bonk_ast::Account, src: &str) -> bonk_ast_errorless:
     }
 }
 
-fn convert_amount(amount: bonk_ast::Amount, src: &str) -> bonk_ast_errorless::Amount {
-    bonk_ast_errorless::Amount {
+fn convert_amount(
+    amount: bonk_ast::Amount,
+    src: &str,
+) -> Result<bonk_ast_errorless::Amount, SyntaxErrors> {
+    Ok(bonk_ast_errorless::Amount {
         cents: amount
             .value(src)
             .replace('.', "")
             .parse()
-            .expect("Couldn't parse amount (but tree had no errors?)"),
-    }
+            .map_err(|_| SyntaxErrors(vec![amount.span()]))?,
+    })
 }
 
 #[cfg(test)]

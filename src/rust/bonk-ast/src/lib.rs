@@ -241,6 +241,10 @@ impl Transaction<'_> {
             .map(Posting)
             .collect()
     }
+
+    pub fn span(&self) -> SourceSpan {
+        SourceSpan(self.0.range())
+    }
 }
 
 pub struct Posting<'a>(Node<'a>);
@@ -252,6 +256,10 @@ impl Posting<'_> {
 
     pub fn amount(&self) -> Option<Amount> {
         self.0.child_by_field_name("amount").map(Amount)
+    }
+
+    pub fn span(&self) -> SourceSpan {
+        SourceSpan(self.0.range())
     }
 }
 
@@ -272,6 +280,10 @@ impl Amount<'_> {
         self.0
             .utf8_text(src.as_bytes())
             .expect("src is not valid utf-8")
+    }
+
+    pub fn span(&self) -> SourceSpan {
+        SourceSpan(self.0.range())
     }
 }
 

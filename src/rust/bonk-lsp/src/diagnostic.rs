@@ -3,6 +3,8 @@ use bonk_check::{check_syntax, SyntaxErrors};
 use lsp_types::{Diagnostic, DiagnosticSeverity, Position, Range};
 
 pub fn get_diagnostics(ledger: &Ledger, src: &str) -> Vec<Diagnostic> {
+    eprintln!("{}", src);
+    eprintln!("{:?}", ledger);
     match check_syntax(ledger, src) {
         Ok(_) => vec![],
         Err(SyntaxErrors(errs)) => errs
