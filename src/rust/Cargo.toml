@@ -6,6 +6,7 @@ members = [
     "bonk-csv",
     "bonk-dashboard",
     "bonk-db",
+    "bonk-http",
     "bonk-lsp",
     "bonk-plaid",
     "plaid",
