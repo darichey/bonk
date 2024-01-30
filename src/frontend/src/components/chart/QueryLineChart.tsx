@@ -1,3 +1,5 @@
+"use client";
+
 // TODO: figure out tree-shaking
 import "chart.js/auto";
 

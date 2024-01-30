@@ -1,3 +1,5 @@
+"use client";
+
 import { useGetDashboard } from "@/commands";
 import DashboardText from "@/components/DashboardText";
 import QueryChart from "@/components/chart/QueryChart";

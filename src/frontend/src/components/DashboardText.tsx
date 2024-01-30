@@ -1,3 +1,5 @@
+"use client";
+
 import { useRenderQueryTemplate } from "@/commands";
 import { Text } from "../types";
 

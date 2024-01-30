@@ -4,6 +4,7 @@ import Link from "next/link";
 import DashboardSidebar from "@/components/DashboardSidebar";
 import NavButton from "@/components/NavButton";
 import Image from "next/image";
+import financeAppSvg from "../../public/finance-app.svg";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -18,7 +19,7 @@ export default function RootLayout({
         <div className="flex flex-row h-full w-full px-2">
           <div className="flex flex-col border-r-2 w-1/12 px-2">
             <Image
-              src="/finance-app.svg"
+              src={financeAppSvg}
               alt="finance-app logo"
               className="py-4"
             />

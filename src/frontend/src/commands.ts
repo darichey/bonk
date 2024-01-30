@@ -1,3 +1,5 @@
+"use client";
+
 import useSWR, { SWRResponse } from "swr";
 import { ChartData, Dashboard, TableData, Transaction } from "./types";
 

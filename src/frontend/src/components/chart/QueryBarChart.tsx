@@ -1,3 +1,5 @@
+"use client";
+
 import { Bar } from "react-chartjs-2";
 import { useQueryTransactionsForChart } from "@/commands";
 import { ChartData } from "chart.js";

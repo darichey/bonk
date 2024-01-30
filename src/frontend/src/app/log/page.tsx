@@ -1,3 +1,5 @@
+"use client";
+
 import { useGetAllTransactions } from "@/commands";
 
 export default function LogPage() {
