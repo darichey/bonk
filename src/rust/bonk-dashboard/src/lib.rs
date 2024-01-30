@@ -43,3 +43,7 @@ pub struct Dashboard {
     pub name: String,
     pub components: Vec<Component>,
 }
+
+pub fn from_toml(src: &str) -> Result<Dashboard, toml::de::Error> {
+    toml::from_str(src)
+}

@@ -4,6 +4,7 @@ members = [
     "bonk-ast-errorless",
     "bonk-check",
     "bonk-csv",
+    "bonk-dashboard",
     "bonk-db",
     "bonk-lsp",
     "bonk-plaid",
