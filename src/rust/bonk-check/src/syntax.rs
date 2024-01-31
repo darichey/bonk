@@ -2,7 +2,7 @@ use bonk_ast::SourceSpan;
 use bonk_ast_errorless::Date;
 use itertools::Itertools;
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq)]
 pub struct SyntaxErrors(pub Vec<SourceSpan>);
 
 pub fn check_syntax(
@@ -147,6 +147,7 @@ fn convert_amount(
 #[cfg(test)]
 mod tests {
     use bonk_ast::SourceSpan;
+    use bonk_ast_errorless::{Account, Amount, Date, Ledger, Posting, Transaction};
 
     use crate::check_syntax;
 
@@ -159,7 +160,97 @@ mod tests {
         let ledger = bonk_ast::Parser::new().parse(src, None);
         let ledger = check_syntax(&ledger, src);
 
-        assert!(ledger.is_ok());
+        assert_eq!(
+            ledger,
+            Ok(Ledger {
+                transactions: vec![Transaction {
+                    date: Date::parse("2023-01-01", None,).unwrap(),
+                    description: "\"Mcdonald's\"".to_string(),
+                    postings: vec![
+                        Posting {
+                            account: Account::parse(
+                                "expenses:fast_food",
+                                Some(SourceSpan {
+                                    start_byte: 28,
+                                    end_byte: 46,
+                                    start_row: 1,
+                                    start_col: 4,
+                                    end_row: 1,
+                                    end_col: 22,
+                                })
+                            ),
+                            amount: Amount::from_dollars(
+                                10.91,
+                                Some(SourceSpan {
+                                    start_byte: 55,
+                                    end_byte: 60,
+                                    start_row: 1,
+                                    start_col: 31,
+                                    end_row: 1,
+                                    end_col: 36,
+                                })
+                            ),
+                            source_span: Some(SourceSpan {
+                                start_byte: 28,
+                                end_byte: 60,
+                                start_row: 1,
+                                start_col: 4,
+                                end_row: 1,
+                                end_col: 36,
+                            })
+                        },
+                        Posting {
+                            account: Account::parse(
+                                "liabilities:my_credit_card",
+                                Some(SourceSpan {
+                                    start_byte: 65,
+                                    end_byte: 91,
+                                    start_row: 2,
+                                    start_col: 4,
+                                    end_row: 2,
+                                    end_col: 30,
+                                })
+                            ),
+                            amount: Amount::from_dollars(
+                                -10.91,
+                                Some(SourceSpan {
+                                    start_byte: 92,
+                                    end_byte: 98,
+                                    start_row: 2,
+                                    start_col: 31,
+                                    end_row: 2,
+                                    end_col: 37,
+                                })
+                            ),
+                            source_span: Some(SourceSpan {
+                                start_byte: 65,
+                                end_byte: 98,
+                                start_row: 2,
+                                start_col: 4,
+                                end_row: 2,
+                                end_col: 37,
+                            })
+                        }
+                    ],
+                    source_span: Some(SourceSpan {
+                        start_byte: 0,
+                        end_byte: 98,
+                        start_row: 0,
+                        start_col: 0,
+                        end_row: 2,
+                        end_col: 37,
+                    })
+                }],
+                source_span: Some(SourceSpan {
+                    start_byte: 0,
+                    end_byte: 98,
+                    start_row: 0,
+                    start_col: 0,
+                    end_row: 2,
+                    end_col: 37,
+                })
+            })
+        )
     }
 
     #[test]
