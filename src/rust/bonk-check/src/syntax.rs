@@ -44,8 +44,8 @@ fn convert_transaction(
     src: &str,
 ) -> Result<bonk_ast_errorless::Transaction, SyntaxErrors> {
     let date = transaction
-        .date(src)
-        .and_then(|date| Date::parse(date, None))
+        .date()
+        .and_then(|date| Date::parse(date.value(src), None))
         .ok_or(SyntaxErrors(vec![transaction.span()]));
 
     let description = transaction

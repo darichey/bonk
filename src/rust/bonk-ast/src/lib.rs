@@ -246,10 +246,8 @@ impl fmt::Debug for Ledger {
 pub struct Transaction<'a>(Node<'a>);
 
 impl Transaction<'_> {
-    pub fn date<'s>(&self, src: &'s str) -> Option<&'s str> {
-        self.0
-            .child_by_field_name("date")
-            .map(|n| n.utf8_text(src.as_bytes()).expect("src is not valid utf-8"))
+    pub fn date(&self) -> Option<Date> {
+        self.0.child_by_field_name("date").map(Date)
     }
 
     pub fn description<'s>(&self, src: &'s str) -> Option<&'s str> {
@@ -264,6 +262,20 @@ impl Transaction<'_> {
             .children_by_field_name("posting", &mut cursor)
             .map(Posting)
             .collect()
+    }
+
+    pub fn span(&self) -> SourceSpan {
+        self.0.range().into()
+    }
+}
+
+pub struct Date<'a>(Node<'a>);
+
+impl Date<'_> {
+    pub fn value<'s>(&self, src: &'s str) -> &'s str {
+        self.0
+            .utf8_text(src.as_bytes())
+            .expect("src is not valid utf-8")
     }
 
     pub fn span(&self) -> SourceSpan {
@@ -374,7 +386,7 @@ mod tests {
         assert_eq!(transactions.len(), 2);
 
         let transaction = transactions.get(0).unwrap();
-        assert_eq!(transaction.date(src), Some("2023-01-01"));
+        assert_eq!(transaction.date().map(|d| d.value(src)), Some("2023-01-01"));
         assert_eq!(transaction.description(src), Some("\"Mcdonald's\""));
 
         let postings = transaction.postings();
@@ -390,7 +402,7 @@ mod tests {
         assert_eq!(posting.amount().unwrap().value(src), "-10.91");
 
         let transaction = transactions.get(1).unwrap();
-        assert_eq!(transaction.date(src), Some("2023-01-02"));
+        assert_eq!(transaction.date().map(|d| d.value(src)), Some("2023-01-02"));
         assert_eq!(transaction.description(src), Some("\"Paying credit card\""));
 
         let postings = transaction.postings();
