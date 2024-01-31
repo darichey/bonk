@@ -31,7 +31,27 @@ impl Default for Parser {
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord)]
-pub struct SourceSpan(pub Range);
+pub struct SourceSpan {
+    pub start_byte: usize,
+    pub end_byte: usize,
+    pub start_row: usize,
+    pub start_col: usize,
+    pub end_row: usize,
+    pub end_col: usize,
+}
+
+impl From<Range> for SourceSpan {
+    fn from(value: Range) -> Self {
+        Self {
+            start_byte: value.start_byte,
+            end_byte: value.end_byte,
+            start_row: value.start_point.row,
+            start_col: value.start_point.column,
+            end_row: value.end_point.row,
+            end_col: value.end_point.column,
+        }
+    }
+}
 
 pub struct Ledger(Tree);
 
@@ -57,7 +77,7 @@ impl Ledger {
 
         while !reached_root {
             if cursor.node().is_error() {
-                errors.push(SourceSpan(cursor.node().range()))
+                errors.push(cursor.node().range().into())
             }
 
             if cursor.goto_first_child() {
@@ -119,7 +139,7 @@ impl Ledger {
     }
 
     pub fn span(&self) -> SourceSpan {
-        SourceSpan(self.0.root_node().range())
+        self.0.root_node().range().into()
     }
 }
 
@@ -247,7 +267,7 @@ impl Transaction<'_> {
     }
 
     pub fn span(&self) -> SourceSpan {
-        SourceSpan(self.0.range())
+        self.0.range().into()
     }
 }
 
@@ -263,7 +283,7 @@ impl Posting<'_> {
     }
 
     pub fn span(&self) -> SourceSpan {
-        SourceSpan(self.0.range())
+        self.0.range().into()
     }
 }
 
@@ -277,7 +297,7 @@ impl Account<'_> {
     }
 
     pub fn span(&self) -> SourceSpan {
-        SourceSpan(self.0.range())
+        self.0.range().into()
     }
 }
 
@@ -291,7 +311,7 @@ impl Amount<'_> {
     }
 
     pub fn span(&self) -> SourceSpan {
-        SourceSpan(self.0.range())
+        self.0.range().into()
     }
 }
 

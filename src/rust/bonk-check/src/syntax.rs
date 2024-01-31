@@ -147,7 +147,6 @@ fn convert_amount(
 #[cfg(test)]
 mod tests {
     use bonk_ast::SourceSpan;
-    use tree_sitter::{Point, Range};
 
     use crate::check_syntax;
 
@@ -175,12 +174,14 @@ liabilities:my_credit_card -10.91"#;
         let errors = ledger.err().unwrap().0;
         assert_eq!(
             errors,
-            vec![SourceSpan(Range {
+            vec![SourceSpan {
                 start_byte: 10,
                 end_byte: 13,
-                start_point: Point { row: 0, column: 10 },
-                end_point: Point { row: 0, column: 13 }
-            })]
+                start_row: 0,
+                start_col: 10,
+                end_row: 0,
+                end_col: 13,
+            }],
         )
     }
 }

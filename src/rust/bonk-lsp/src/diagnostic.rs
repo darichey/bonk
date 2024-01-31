@@ -1,4 +1,4 @@
-use bonk_ast::{Ledger, SourceSpan};
+use bonk_ast::Ledger;
 use bonk_check::{check_syntax, SyntaxErrors};
 use lsp_types::{Diagnostic, DiagnosticSeverity, Position, Range};
 
@@ -9,15 +9,15 @@ pub fn get_diagnostics(ledger: &Ledger, src: &str) -> Vec<Diagnostic> {
         Ok(_) => vec![],
         Err(SyntaxErrors(errs)) => errs
             .into_iter()
-            .map(|SourceSpan(range)| Diagnostic {
+            .map(|span| Diagnostic {
                 range: Range {
                     start: Position {
-                        line: range.start_point.row as u32,
-                        character: range.start_point.column as u32,
+                        line: span.start_row as u32,
+                        character: span.start_col as u32,
                     },
                     end: Position {
-                        line: range.end_point.row as u32,
-                        character: range.end_point.column as u32,
+                        line: span.end_row as u32,
+                        character: span.end_col as u32,
                     },
                 },
                 severity: Some(DiagnosticSeverity::ERROR),
