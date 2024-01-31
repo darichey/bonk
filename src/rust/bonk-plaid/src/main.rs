@@ -49,7 +49,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         output,
     } = Args::parse();
 
-    let account = Account::parse(&account);
+    let account = Account::parse(&account, None);
 
     let config = plaid_config()?;
     let access_token = plaid_get_access_token(&config)?;
@@ -65,16 +65,21 @@ fn main() -> Result<(), Box<dyn Error>> {
     let transactions = transactions
         .into_iter()
         .map(|PlaidTransaction { amount, date, name }| Transaction {
-            date: Date::parse(&date).unwrap(),
+            date: Date::parse(&date, None).unwrap(),
             description: name,
             postings: vec![Posting {
                 account: account.clone(),
-                amount: Amount::from_dollars(amount),
+                amount: Amount::from_dollars(amount, None),
+                source_span: None,
             }],
+            source_span: None,
         })
         .collect();
 
-    let ledger = Ledger { transactions };
+    let ledger = Ledger {
+        transactions,
+        source_span: None,
+    };
 
     fs::write(&output, ledger.to_string())?;
 

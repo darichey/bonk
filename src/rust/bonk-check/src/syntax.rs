@@ -28,7 +28,10 @@ fn convert_ledger(
         .partition_result();
 
     if errors.is_empty() {
-        Ok(bonk_ast_errorless::Ledger { transactions })
+        Ok(bonk_ast_errorless::Ledger {
+            transactions,
+            source_span: Some(ledger.span()),
+        })
     } else {
         Err(SyntaxErrors(
             errors.into_iter().flat_map(|e| e.0).collect_vec(),
@@ -42,7 +45,7 @@ fn convert_transaction(
 ) -> Result<bonk_ast_errorless::Transaction, SyntaxErrors> {
     let date = transaction
         .date(src)
-        .and_then(Date::parse)
+        .and_then(|date| Date::parse(date, None))
         .ok_or(SyntaxErrors(vec![transaction.span()]));
 
     let description = transaction
@@ -64,6 +67,7 @@ fn convert_transaction(
                     date,
                     description: description.to_string(),
                     postings,
+                    source_span: Some(transaction.span()),
                 })
             } else {
                 Err(SyntaxErrors(errors))
@@ -97,7 +101,13 @@ fn convert_posting(
     let mut errors = Vec::new();
 
     match (account, amount) {
-        (Ok(account), Ok(amount)) => return Ok(bonk_ast_errorless::Posting { account, amount }),
+        (Ok(account), Ok(amount)) => {
+            return Ok(bonk_ast_errorless::Posting {
+                account,
+                amount,
+                source_span: Some(posting.span()),
+            })
+        }
         (Ok(_), Err(err)) => errors.extend(err.0),
         (Err(err), Ok(_)) => errors.extend(err.0),
         (Err(err_a), Err(err_b)) => {
@@ -116,6 +126,7 @@ fn convert_account(account: bonk_ast::Account, src: &str) -> bonk_ast_errorless:
             .split(':')
             .map(|s| s.to_string())
             .collect_vec(),
+        source_span: Some(account.span()),
     }
 }
 
@@ -129,6 +140,7 @@ fn convert_amount(
             .replace('.', "")
             .parse()
             .map_err(|_| SyntaxErrors(vec![amount.span()]))?,
+        source_span: Some(amount.span()),
     })
 }
 

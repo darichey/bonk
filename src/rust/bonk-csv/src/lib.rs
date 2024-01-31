@@ -15,7 +15,7 @@ pub fn do_import<D: io::Read>(
     account: &str,
     reader: &mut Reader<D>,
 ) -> Result<Ledger, Box<dyn Error>> {
-    let account = Account::parse(account);
+    let account = Account::parse(account, None);
 
     let transactions = reader
         .deserialize()
@@ -27,17 +27,22 @@ pub fn do_import<D: io::Read>(
             } = result?;
 
             Ok(Transaction {
-                date: Date::parse(&date).ok_or("Couldn't parse date")?,
+                date: Date::parse(&date, None).ok_or("Couldn't parse date")?,
                 description,
                 postings: vec![Posting {
                     account: account.clone(),
-                    amount: Amount::from_dollars(amount),
+                    amount: Amount::from_dollars(amount, None),
+                    source_span: None,
                 }],
+                source_span: None,
             })
         })
         .collect::<Result<Vec<_>, Box<dyn Error>>>()?;
 
-    Ok(Ledger { transactions })
+    Ok(Ledger {
+        transactions,
+        source_span: None,
+    })
 }
 
 #[cfg(test)]
@@ -61,19 +66,24 @@ mod tests {
                         date: Date::new(2023, 1, 1),
                         description: "Salary Deposit".to_string(),
                         postings: vec![Posting {
-                            account: Account::parse("assets:my_checking"),
-                            amount: Amount::from_dollars(2500.00),
-                        }]
+                            account: Account::parse("assets:my_checking", None),
+                            amount: Amount::from_dollars(2500.00, None),
+                            source_span: None,
+                        }],
+                        source_span: None,
                     },
                     Transaction {
                         date: Date::new(2023, 1, 2),
                         description: "Grocery Shopping".to_string(),
                         postings: vec![Posting {
-                            account: Account::parse("assets:my_checking"),
-                            amount: Amount::from_dollars(-120.50),
-                        }]
+                            account: Account::parse("assets:my_checking", None),
+                            amount: Amount::from_dollars(-120.50, None),
+                            source_span: None,
+                        }],
+                        source_span: None,
                     }
-                ]
+                ],
+                source_span: None,
             }
         )
     }

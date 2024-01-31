@@ -117,6 +117,10 @@ impl Ledger {
             },
         });
     }
+
+    pub fn span(&self) -> SourceSpan {
+        SourceSpan(self.0.root_node().range())
+    }
 }
 
 pub fn position_to_byte_offset(text: &str, line: usize, col: usize) -> usize {
@@ -270,6 +274,10 @@ impl Account<'_> {
         self.0
             .utf8_text(src.as_bytes())
             .expect("src is not valid utf-8")
+    }
+
+    pub fn span(&self) -> SourceSpan {
+        SourceSpan(self.0.range())
     }
 }
 

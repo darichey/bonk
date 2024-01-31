@@ -43,6 +43,7 @@ impl Db {
                 date,
                 description,
                 postings,
+                ..
             } in ledger.transactions.iter()
             {
                 insert_transaction
@@ -66,7 +67,10 @@ impl Db {
                 let transaction_id =
                     unsafe { sqlite3_sys::sqlite3_last_insert_rowid(con.as_raw()) };
 
-                for Posting { account, amount } in postings {
+                for Posting {
+                    account, amount, ..
+                } in postings
+                {
                     let account = account.path.join(":");
                     let amount = amount.cents.to_string();
 
@@ -111,30 +115,37 @@ mod tests {
                     description: "some food".to_string(),
                     postings: vec![
                         Posting {
-                            account: Account::parse("expenses:food"),
-                            amount: Amount::from_dollars(12.34),
+                            account: Account::parse("expenses:food", None),
+                            amount: Amount::from_dollars(12.34, None),
+                            source_span: None,
                         },
                         Posting {
-                            account: Account::parse("liabilities:my_credit_card"),
-                            amount: Amount::from_dollars(-12.34),
+                            account: Account::parse("liabilities:my_credit_card", None),
+                            amount: Amount::from_dollars(-12.34, None),
+                            source_span: None,
                         },
                     ],
+                    source_span: None,
                 },
                 Transaction {
                     date: Date::new(2023, 1, 2),
                     description: "paying credit card".to_string(),
                     postings: vec![
                         Posting {
-                            account: Account::parse("liabilities:my_credit_card"),
-                            amount: Amount::from_dollars(12.34),
+                            account: Account::parse("liabilities:my_credit_card", None),
+                            amount: Amount::from_dollars(12.34, None),
+                            source_span: None,
                         },
                         Posting {
-                            account: Account::parse("assets:my_checking"),
-                            amount: Amount::from_dollars(-12.34),
+                            account: Account::parse("assets:my_checking", None),
+                            amount: Amount::from_dollars(-12.34, None),
+                            source_span: None,
                         },
                     ],
+                    source_span: None,
                 },
             ],
+            source_span: None,
         };
 
         let expected_transactions = [
