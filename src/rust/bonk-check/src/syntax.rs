@@ -45,7 +45,7 @@ fn convert_transaction(
 ) -> Result<bonk_ast_errorless::Transaction, SyntaxErrors> {
     let date = transaction
         .date()
-        .and_then(|date| Date::parse(date.value(src), None))
+        .and_then(|date| Date::parse(date.value(src), Some(date.span())))
         .ok_or(SyntaxErrors(vec![transaction.span()]));
 
     let description = transaction
@@ -164,7 +164,18 @@ mod tests {
             ledger,
             Ok(Ledger {
                 transactions: vec![Transaction {
-                    date: Date::parse("2023-01-01", None,).unwrap(),
+                    date: Date::parse(
+                        "2023-01-01",
+                        Some(SourceSpan {
+                            start_byte: 0,
+                            end_byte: 10,
+                            start_row: 0,
+                            start_col: 0,
+                            end_row: 0,
+                            end_col: 10
+                        }),
+                    )
+                    .unwrap(),
                     description: "\"Mcdonald's\"".to_string(),
                     postings: vec![
                         Posting {
