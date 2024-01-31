@@ -1,0 +1,50 @@
+2023-09-01 "Salary Deposit"
+  assets:my_checking 2500.0
+
+2023-09-03 "Grocery Shopping"
+  assets:my_checking -115.75
+
+2023-09-05 "Gas Station Purchase"
+  assets:my_checking -29.50
+
+2023-09-06 "Online Subscription Payment"
+  assets:my_checking -9.99
+
+2023-09-08 "Utilities Bill Payment"
+  assets:my_checking -70.0
+
+2023-09-10 "Medical Co-pay"
+  assets:my_checking -20.0
+
+2023-09-12 "Restaurant Dinner"
+  assets:my_checking -55.30
+
+2023-09-14 "Coffee Shop"
+  assets:my_checking -7.25
+
+2023-09-15 "Movie Night"
+  assets:my_checking -24.50
+
+2023-09-17 "Car Service"
+  assets:my_checking -90.0
+
+2023-09-18 "Salary Deposit"
+  assets:my_checking 2500.0
+
+2023-09-20 "Bookstore Purchase"
+  assets:my_checking -18.80
+
+2023-09-22 "Gas Station Purchase"
+  assets:my_checking -35.75
+
+2023-09-24 "Dentist Appointment"
+  assets:my_checking -50.0
+
+2023-09-26 "Grocery Shopping"
+  assets:my_checking -97.60
+
+2023-09-28 "Concert Tickets"
+  assets:my_checking -65.0
+
+2023-09-30 "Phone Bill Payment"
+  assets:my_checking -50.0
