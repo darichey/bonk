@@ -22,6 +22,7 @@ fn main() {
     let src = fs::read_to_string(ledger).expect("Couldn't read ledger");
     let ledger = bonk_ast::Parser::new().parse(&src, None);
     let ledger = bonk_check::check_syntax(&ledger, &src).unwrap();
+    let ledger = bonk_check::check_balance(ledger).unwrap();
 
     Db::new(&ledger, database).expect("Couldn't create database");
 }
