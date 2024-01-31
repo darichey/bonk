@@ -4,7 +4,11 @@ import useSWR, { SWRResponse } from "swr";
 import { ChartData, Dashboard, TableData, Transaction } from "./types";
 
 export function useGetAllTransactions(): SWRResponse<Transaction[]> {
-  return useSWR("useGetAllTransactions", () => [] as Transaction[]); // TODO
+  return useSWR("/transactions", async () => {
+    const res = await fetch(`http://localhost:8080/transactions`);
+    const json = await res.json();
+    return json as Transaction[];
+  });
 }
 
 export function useQueryTransactionsForChart(

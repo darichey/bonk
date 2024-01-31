@@ -37,6 +37,8 @@ struct Posting {
     amount: i32,
 }
 
+// TODO: order by date
+// TODO: paginate by date
 fn get_transactions(_request: &Request, state: Arc<Mutex<State>>) -> Response {
     let state = state.lock().expect("Couldn't acquire state");
     let con = &state.db.con;
@@ -69,6 +71,7 @@ fn get_transactions(_request: &Request, state: Arc<Mutex<State>>) -> Response {
     }
 
     Response::json(&transactions.values().collect::<Vec<_>>())
+        .with_additional_header("Access-Control-Allow-Origin", "*") // TODO real cors
 }
 
 fn main() {

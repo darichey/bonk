@@ -1,10 +1,12 @@
 export interface Transaction {
   date: string;
   description: string;
-  amount: {
-    cents: number;
-  };
+  postings: Posting[];
+}
+
+interface Posting {
   account: string;
+  amount: number;
 }
 
 export type SqlValue = string | number | null;
@@ -41,11 +43,4 @@ export type Component = Chart | Text;
 export interface Dashboard {
   name: string;
   components: Component[];
-}
-
-export interface PlaidTransaction {
-  account: string;
-  amount: number;
-  date: string;
-  name: string;
 }
