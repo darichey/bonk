@@ -4,6 +4,15 @@
   "patterns": [
     {
       "include": "#strings"
+    },
+    {
+      "include": "#dates"
+    },
+    {
+      "include": "#numbers"
+    },
+    {
+      "include": "#accounts"
     }
   ],
   "repository": {
@@ -17,6 +26,18 @@
           "match": "\\\\."
         }
       ]
+    },
+    "dates": {
+      "name": "constant.date.bonk",
+      "match": "\\d{4}-\\d{2}-\\d{2}"
+    },
+    "numbers": {
+      "name": "constant.numeric.bonk",
+      "match": "\\b-?\\d+(\\.\\d+)?\\b"
+    },
+    "accounts": {
+      "name": "variable.account.bonk",
+      "match": "[A-Za-z_][A-Za-z0-9_]*(:[A-Za-z_][A-Za-z0-9_]*)*"
     }
   },
   "scopeName": "source.bonk"
