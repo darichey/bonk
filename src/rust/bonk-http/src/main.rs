@@ -86,7 +86,7 @@ fn main() {
         Arc::new(Mutex::new(state))
     };
 
-    let server = Server::new("localhost:0", move |request| {
+    let server = Server::new("localhost:8080", move |request| {
         let state = state.clone();
         router!(request,
             (GET) (/transactions) => { get_transactions(request, state) },
