@@ -8,6 +8,14 @@
         "members": [
           {
             "type": "FIELD",
+            "name": "import",
+            "content": {
+              "type": "SYMBOL",
+              "name": "import"
+            }
+          },
+          {
+            "type": "FIELD",
             "name": "declare_account",
             "content": {
               "type": "SYMBOL",
@@ -24,6 +32,40 @@
           }
         ]
       }
+    },
+    "import": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "STRING",
+          "value": "import"
+        },
+        {
+          "type": "FIELD",
+          "name": "path",
+          "content": {
+            "type": "SYMBOL",
+            "name": "path"
+          }
+        }
+      ]
+    },
+    "declare_account": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "STRING",
+          "value": "account"
+        },
+        {
+          "type": "FIELD",
+          "name": "account",
+          "content": {
+            "type": "SYMBOL",
+            "name": "account"
+          }
+        }
+      ]
     },
     "transaction": {
       "type": "SEQ",
@@ -78,23 +120,6 @@
         }
       ]
     },
-    "declare_account": {
-      "type": "SEQ",
-      "members": [
-        {
-          "type": "STRING",
-          "value": "account"
-        },
-        {
-          "type": "FIELD",
-          "name": "account",
-          "content": {
-            "type": "SYMBOL",
-            "name": "account"
-          }
-        }
-      ]
-    },
     "date": {
       "type": "PATTERN",
       "value": "\\d{4}-\\d{2}-\\d{2}"
@@ -110,6 +135,10 @@
     "amount": {
       "type": "PATTERN",
       "value": "-?\\d+(\\.\\d+)?"
+    },
+    "path": {
+      "type": "PATTERN",
+      "value": "(.+)\\/([^\\/\\s]+)"
     }
   },
   "extras": [

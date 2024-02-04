@@ -16,6 +16,22 @@
     }
   },
   {
+    "type": "import",
+    "named": true,
+    "fields": {
+      "path": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "path",
+            "named": true
+          }
+        ]
+      }
+    }
+  },
+  {
     "type": "ledger",
     "named": true,
     "fields": {
@@ -25,6 +41,16 @@
         "types": [
           {
             "type": "declare_account",
+            "named": true
+          }
+        ]
+      },
+      "import": {
+        "multiple": true,
+        "required": false,
+        "types": [
+          {
+            "type": "import",
             "named": true
           }
         ]
@@ -121,6 +147,14 @@
   },
   {
     "type": "description",
+    "named": true
+  },
+  {
+    "type": "import",
+    "named": false
+  },
+  {
+    "type": "path",
     "named": true
   }
 ]
