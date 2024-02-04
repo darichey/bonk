@@ -8,6 +8,7 @@ pub use syntax::SyntaxError;
 
 #[derive(Debug, PartialEq, Eq)]
 pub enum CheckError {
+    AccountRefError(AccountRefError),
     BalanceError(BalanceError),
     SyntaxError(SyntaxError),
 }
@@ -19,6 +20,12 @@ pub fn check(
     let ledger = syntax::check_syntax(ledger, src).map_err(|errs| {
         errs.into_iter()
             .map(CheckError::SyntaxError)
+            .collect::<Vec<_>>()
+    })?;
+
+    let ledger = account_ref::check_account_refs(ledger).map_err(|errs| {
+        errs.into_iter()
+            .map(CheckError::AccountRefError)
             .collect::<Vec<_>>()
     })?;
 

@@ -1,3 +1,7 @@
+account expenses:fast_food
+account liabilities:my_credit_card
+account assets:my_checking
+
 2023-01-01 "Mcdonald's"
   expenses:fast_food          10.91
   liabilities:my_credit_card -10.91
