@@ -82,6 +82,10 @@ impl Account {
             source_span,
         }
     }
+
+    pub fn path_string(&self) -> String {
+        self.path.join(":")
+    }
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
