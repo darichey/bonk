@@ -69,6 +69,15 @@ impl Ledger {
             .collect()
     }
 
+    pub fn declare_accounts(&self) -> Vec<DeclareAccount<'_>> {
+        let mut cursor = self.0.walk();
+        self.0
+            .root_node()
+            .children_by_field_name("declare_account", &mut cursor)
+            .map(DeclareAccount)
+            .collect()
+    }
+
     pub fn errors(&self) -> Vec<SourceSpan> {
         let mut cursor = self.0.walk();
 
@@ -327,6 +336,18 @@ impl Amount<'_> {
     }
 }
 
+pub struct DeclareAccount<'a>(Node<'a>);
+
+impl DeclareAccount<'_> {
+    pub fn account(&self) -> Option<Account> {
+        self.0.child_by_field_name("account").map(Account)
+    }
+
+    pub fn span(&self) -> SourceSpan {
+        self.0.range().into()
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use crate::{position_to_byte_offset, Parser};
@@ -372,7 +393,11 @@ mod tests {
 
     #[test]
     fn test_parse() {
-        let src = r#"2023-01-01 "Mcdonald's"
+        let src = r#"account expenses:fast_food
+account liabilities:my_credit_card
+account assets:my_checking
+
+2023-01-01 "Mcdonald's"
   expenses:fast_food         10.91
   liabilities:my_credit_card -10.91
       
@@ -381,6 +406,13 @@ mod tests {
   assets:my_checking           -10.91"#;
 
         let ledger = Parser::new().parse(src, None);
+
+        let declared_accounts = ledger.declare_accounts();
+        assert_eq!(declared_accounts.len(), 3);
+        assert_eq!(
+            declared_accounts[0].account().map(|a| a.value(src)),
+            Some("expenses:fast_food")
+        );
 
         let transactions = ledger.transactions();
         assert_eq!(transactions.len(), 2);
