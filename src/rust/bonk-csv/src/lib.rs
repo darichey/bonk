@@ -11,7 +11,7 @@ struct CsvTransaction {
     amount: f64,
 }
 
-pub fn do_import<D: io::Read>(
+pub fn do_convert<D: io::Read>(
     account: &str,
     reader: &mut Reader<D>,
 ) -> Result<Ledger, Box<dyn Error>> {
@@ -48,7 +48,7 @@ pub fn do_import<D: io::Read>(
 
 #[cfg(test)]
 mod tests {
-    use crate::do_import;
+    use crate::do_convert;
 
     #[test]
     fn test() {
@@ -56,7 +56,7 @@ mod tests {
 2023-01-01,Salary Deposit,2500.00
 2023-01-02,Grocery Shopping,-120.50"#;
         let mut reader = csv::Reader::from_reader(&input[..]);
-        let ledger = do_import("assets:my_checking", &mut reader).unwrap();
+        let ledger = do_convert("assets:my_checking", &mut reader).unwrap();
 
         insta::assert_debug_snapshot!(ledger, @r###"
         Ledger {

@@ -4,14 +4,14 @@ use std::{
     path::PathBuf,
 };
 
-use bonk_csv::do_import;
+use bonk_csv::do_convert;
 use clap::Parser;
 
-/// Produces a partial Bonk ledger by importing transactions from a csv file with the header `date,description,amount`.
+/// Produces a partial Bonk ledger by converting transactions from a csv file with the header `date,description,amount`.
 #[derive(Parser, Debug)]
 #[command()]
 struct Args {
-    /// The Bonk account to associate the imported transactions to (e.g., "assets:my_checking").
+    /// The Bonk account to associate the converted transactions to (e.g., "assets:my_checking").
     #[arg(short, long)]
     account: String,
 
@@ -32,7 +32,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     } = Args::parse();
 
     let mut reader = csv::Reader::from_path(input)?;
-    let ledger = do_import(&account, &mut reader)?;
+    let ledger = do_convert(&account, &mut reader)?;
     fs::write(output, ledger.to_string())?;
 
     Ok(())

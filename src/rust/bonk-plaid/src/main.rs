@@ -20,7 +20,7 @@ use std::{
     time::Duration,
 };
 
-/// Produces a partial Bonk ledger by importing transactions from Plaid.
+/// Produces a partial Bonk ledger by converting transactions fetched via Plaid.
 #[derive(Parser, Debug)]
 #[command()]
 struct Args {
@@ -32,7 +32,7 @@ struct Args {
     #[arg(short, long)]
     end_date: String,
 
-    /// The Bonk account to associate the imported transactions to (e.g., "assets:my_checking").
+    /// The Bonk account to associate the converted transactions to (e.g., "assets:my_checking").
     #[arg(short, long)]
     account: String,
 
