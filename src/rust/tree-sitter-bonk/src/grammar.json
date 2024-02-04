@@ -2,14 +2,27 @@
   "name": "bonk",
   "rules": {
     "ledger": {
-      "type": "FIELD",
-      "name": "transaction",
+      "type": "REPEAT",
       "content": {
-        "type": "REPEAT",
-        "content": {
-          "type": "SYMBOL",
-          "name": "transaction"
-        }
+        "type": "CHOICE",
+        "members": [
+          {
+            "type": "FIELD",
+            "name": "declare_account",
+            "content": {
+              "type": "SYMBOL",
+              "name": "declare_account"
+            }
+          },
+          {
+            "type": "FIELD",
+            "name": "transaction",
+            "content": {
+              "type": "SYMBOL",
+              "name": "transaction"
+            }
+          }
+        ]
       }
     },
     "transaction": {
@@ -61,6 +74,23 @@
           "content": {
             "type": "SYMBOL",
             "name": "amount"
+          }
+        }
+      ]
+    },
+    "declare_account": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "STRING",
+          "value": "account"
+        },
+        {
+          "type": "FIELD",
+          "name": "account",
+          "content": {
+            "type": "SYMBOL",
+            "name": "account"
           }
         }
       ]

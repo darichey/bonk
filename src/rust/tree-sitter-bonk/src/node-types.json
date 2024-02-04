@@ -1,8 +1,34 @@
 [
   {
+    "type": "declare_account",
+    "named": true,
+    "fields": {
+      "account": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "account",
+            "named": true
+          }
+        ]
+      }
+    }
+  },
+  {
     "type": "ledger",
     "named": true,
     "fields": {
+      "declare_account": {
+        "multiple": true,
+        "required": false,
+        "types": [
+          {
+            "type": "declare_account",
+            "named": true
+          }
+        ]
+      },
       "transaction": {
         "multiple": true,
         "required": false,
@@ -80,6 +106,10 @@
   {
     "type": "account",
     "named": true
+  },
+  {
+    "type": "account",
+    "named": false
   },
   {
     "type": "amount",
