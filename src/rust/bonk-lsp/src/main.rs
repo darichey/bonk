@@ -1,20 +1,23 @@
 mod diagnostic;
+mod go_to_def;
 mod state;
 
 use std::error::Error;
 
 use lsp_types::notification::{DidChangeTextDocument, DidCloseTextDocument, DidOpenTextDocument};
-use lsp_types::request::DocumentDiagnosticRequest;
+use lsp_types::request::{DocumentDiagnosticRequest, GotoDefinition};
 use lsp_types::{
     DiagnosticOptions, DiagnosticServerCapabilities, DocumentDiagnosticReport,
-    FullDocumentDiagnosticReport, RelatedFullDocumentDiagnosticReport, TextDocumentSyncCapability,
-    TextDocumentSyncKind, TextDocumentSyncOptions, WorkDoneProgressOptions,
+    FullDocumentDiagnosticReport, GotoDefinitionResponse, OneOf,
+    RelatedFullDocumentDiagnosticReport, TextDocumentSyncCapability, TextDocumentSyncKind,
+    TextDocumentSyncOptions, WorkDoneProgressOptions,
 };
 use lsp_types::{InitializeParams, ServerCapabilities};
 
 use lsp_server::{Connection, ExtractError, Message, Notification, Request, RequestId, Response};
 
 use crate::diagnostic::get_diagnostics;
+use crate::go_to_def::get_go_to_def_result;
 use crate::state::State;
 
 fn main() -> Result<(), Box<dyn Error + Sync + Send>> {
@@ -43,6 +46,7 @@ fn main() -> Result<(), Box<dyn Error + Sync + Send>> {
                 work_done_progress: Some(false),
             },
         })),
+        definition_provider: Some(OneOf::Left(true)),
         ..Default::default()
     })
     .unwrap();
@@ -79,7 +83,7 @@ fn main_loop(
                 if connection.handle_shutdown(&req)? {
                     return Ok(());
                 }
-                let _req = match cast_req::<DocumentDiagnosticRequest>(req) {
+                let req = match cast_req::<DocumentDiagnosticRequest>(req) {
                     Ok((id, params)) => {
                         if let Some("bonk") = params.identifier.as_deref() {
                             let doc = state
@@ -103,6 +107,33 @@ fn main_loop(
                             };
                             connection.sender.send(Message::Response(resp))?;
                         }
+                        continue;
+                    }
+                    Err(err @ ExtractError::JsonError { .. }) => panic!("{err:?}"),
+                    Err(ExtractError::MethodMismatch(req)) => req,
+                };
+
+                let _req = match cast_req::<GotoDefinition>(req) {
+                    Ok((id, params)) => {
+                        let params = params.text_document_position_params;
+                        let doc = state
+                            .get_doc(params.text_document.uri.as_str())
+                            .expect("we don't know about this file");
+
+                        let result = get_go_to_def_result(
+                            &doc.ledger,
+                            &doc.src,
+                            params.text_document.uri,
+                            params.position,
+                        )
+                        .map(GotoDefinitionResponse::Scalar);
+                        let result = serde_json::to_value(&result).unwrap();
+                        let resp = Response {
+                            id,
+                            result: Some(result),
+                            error: None,
+                        };
+                        connection.sender.send(Message::Response(resp))?;
                         continue;
                     }
                     Err(err @ ExtractError::JsonError { .. }) => panic!("{err:?}"),
