@@ -32,8 +32,6 @@ mod tests {
     use bonk_ast::SourceSpan;
     use bonk_ast_errorless::*;
 
-    use crate::balance::BalanceErrors;
-
     use super::check_balance;
 
     #[test]
@@ -213,16 +211,21 @@ mod tests {
 
         let checked_ledger = check_balance(ledger.clone());
 
-        assert_eq!(
-            checked_ledger,
-            Err(BalanceErrors(vec![SourceSpan {
-                start_byte: 0,
-                end_byte: 98,
-                start_row: 0,
-                start_col: 0,
-                end_row: 2,
-                end_col: 37,
-            }]))
-        );
+        insta::assert_debug_snapshot!(checked_ledger, @r###"
+        Err(
+            BalanceErrors(
+                [
+                    SourceSpan {
+                        start_byte: 0,
+                        end_byte: 98,
+                        start_row: 0,
+                        start_col: 0,
+                        end_row: 2,
+                        end_col: 37,
+                    },
+                ],
+            ),
+        )
+        "###);
     }
 }

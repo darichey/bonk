@@ -364,11 +364,9 @@ mod tests {
 
         let ledger = Parser::new().parse(src, None);
 
-        println!("{:?}", ledger);
-
-        assert_eq!(
-            format!("{:?}", ledger),
-            r#"(ledger [0, 0] - [6, 37]
+        insta::assert_debug_snapshot!(
+            ledger,
+            @r#"(ledger [0, 0] - [6, 37]
   transaction: (transaction [0, 0] - [2, 35]
     date: (date [0, 0] - [0, 10])
     description: (description [0, 11] - [0, 23])
@@ -465,9 +463,9 @@ account assets:my_checking
 
         ledger.edit(old_src, new_src, 0, 0, 0, 10, 3);
 
-        assert_eq!(
-            format!("{:?}", ledger),
-            r#"(ledger [0, 0] - [2, 35]
+        insta::assert_debug_snapshot!(
+            ledger,
+            @r#"(ledger [0, 0] - [2, 35]
   transaction: (transaction [0, 0] - [2, 35]
     date: (date [0, 0] - [0, 3])
     description: (description [0, 4] - [0, 16])

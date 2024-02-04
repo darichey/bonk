@@ -10,3 +10,6 @@ bonk-ast-errorless = { path = "../bonk-ast-errorless" }
 clap = { version = "4.4.13", features = ["derive"] }
 csv = "1.2.2"
 serde = { version = "1.0.195", features = ["derive"] }
+
+[dev-dependencies]
+insta = "1.34.0"

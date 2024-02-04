@@ -96,9 +96,9 @@ mod tests {
             source_span: None,
         };
 
-        assert_eq!(
-            ledger.to_string(),
-            r#"2023-01-01 "some food"
+        insta::assert_display_snapshot!(
+            ledger,
+            @r#"2023-01-01 "some food"
   expenses:food 12.34
   liabilities:my_credit_card -12.34
 
