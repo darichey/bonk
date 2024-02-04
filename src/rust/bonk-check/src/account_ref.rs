@@ -3,11 +3,11 @@ use std::collections::HashSet;
 use bonk_ast::SourceSpan;
 
 #[derive(Debug, PartialEq, Eq)]
-pub struct AccountRefErrors(pub Vec<SourceSpan>);
+pub struct AccountRefError(pub SourceSpan);
 
 pub fn check_account_refs(
     ledger: bonk_ast_errorless::Ledger,
-) -> Result<bonk_ast_errorless::Ledger, AccountRefErrors> {
+) -> Result<bonk_ast_errorless::Ledger, Vec<AccountRefError>> {
     let mut errors = vec![];
 
     let declared_accounts = ledger
@@ -19,15 +19,15 @@ pub fn check_account_refs(
     for transaction in &ledger.transactions {
         for posting in &transaction.postings {
             if !declared_accounts.contains(&posting.account.path_string()) {
-                errors.push(posting.account.source_span.expect(
+                errors.push(AccountRefError(posting.account.source_span.expect(
                     "ast passed to check_account_refs isn't annotated with source spans", // TODO: I really want to encode this in the types
-                ))
+                )))
             }
         }
     }
 
     if !errors.is_empty() {
-        Err(AccountRefErrors(errors))
+        Err(errors)
     } else {
         Ok(ledger)
     }
@@ -38,7 +38,7 @@ mod tests {
     use bonk_ast::SourceSpan;
     use bonk_ast_errorless::*;
 
-    use crate::check_account_refs;
+    use crate::account_ref::check_account_refs;
 
     #[test]
     fn test_no_errors() {
@@ -127,8 +127,8 @@ mod tests {
 
         insta::assert_debug_snapshot!(checked_ledger, @r###"
         Err(
-            AccountRefErrors(
-                [
+            [
+                AccountRefError(
                     SourceSpan {
                         start_byte: 0,
                         end_byte: 1,
@@ -137,8 +137,8 @@ mod tests {
                         end_row: 4,
                         end_col: 5,
                     },
-                ],
-            ),
+                ),
+            ],
         )
         "###);
     }

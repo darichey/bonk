@@ -3,24 +3,24 @@ use bonk_ast_errorless::Date;
 use itertools::Itertools;
 
 #[derive(Debug, PartialEq, Eq)]
-pub struct SyntaxErrors(pub Vec<SourceSpan>);
+pub struct SyntaxError(pub SourceSpan);
 
 pub fn check_syntax(
     ledger: &bonk_ast::Ledger,
     src: &str,
-) -> Result<bonk_ast_errorless::Ledger, SyntaxErrors> {
+) -> Result<bonk_ast_errorless::Ledger, Vec<SyntaxError>> {
     let errors = ledger.errors();
     if errors.is_empty() {
         convert_ledger(ledger, src)
     } else {
-        Err(SyntaxErrors(errors))
+        Err(errors.into_iter().map(SyntaxError).collect())
     }
 }
 
 fn convert_ledger(
     ledger: &bonk_ast::Ledger,
     src: &str,
-) -> Result<bonk_ast_errorless::Ledger, SyntaxErrors> {
+) -> Result<bonk_ast_errorless::Ledger, Vec<SyntaxError>> {
     let (declared_accounts, errors_declared_accounts): (Vec<_>, Vec<_>) = ledger
         .declare_accounts()
         .into_iter()
@@ -45,24 +45,22 @@ fn convert_ledger(
             source_span: Some(ledger.span()),
         })
     } else {
-        Err(SyntaxErrors(
-            errors.into_iter().flat_map(|e| e.0).collect_vec(),
-        ))
+        Err(errors.into_iter().flatten().collect())
     }
 }
 
 fn convert_transaction(
     transaction: bonk_ast::Transaction,
     src: &str,
-) -> Result<bonk_ast_errorless::Transaction, SyntaxErrors> {
+) -> Result<bonk_ast_errorless::Transaction, Vec<SyntaxError>> {
     let date = transaction
         .date()
         .and_then(|date| Date::parse(date.value(src), Some(date.span())))
-        .ok_or(SyntaxErrors(vec![transaction.span()]));
+        .ok_or(vec![SyntaxError(transaction.span())]);
 
     let description = transaction
         .description(src)
-        .ok_or(SyntaxErrors(vec![transaction.span()]));
+        .ok_or(vec![SyntaxError(transaction.span())]);
 
     let (postings, errors): (Vec<_>, Vec<_>) = transaction
         .postings()
@@ -70,7 +68,7 @@ fn convert_transaction(
         .map(|p| convert_posting(p, src))
         .partition_result();
 
-    let mut errors = errors.into_iter().flat_map(|e| e.0).collect_vec();
+    let mut errors = errors.into_iter().flatten().collect_vec();
 
     match (date, description) {
         (Ok(date), Ok(description)) => {
@@ -82,32 +80,32 @@ fn convert_transaction(
                     source_span: Some(transaction.span()),
                 })
             } else {
-                Err(SyntaxErrors(errors))
+                Err(errors)
             }
         }
-        (Ok(_), Err(err)) => errors.extend(err.0),
-        (Err(err), Ok(_)) => errors.extend(err.0),
+        (Ok(_), Err(err)) => errors.extend(err),
+        (Err(err), Ok(_)) => errors.extend(err),
         (Err(err_a), Err(err_b)) => {
-            errors.extend(err_a.0);
-            errors.extend(err_b.0);
+            errors.extend(err_a);
+            errors.extend(err_b);
         }
     };
 
-    Err(SyntaxErrors(errors))
+    Err(errors)
 }
 
 fn convert_posting(
     posting: bonk_ast::Posting,
     src: &str,
-) -> Result<bonk_ast_errorless::Posting, SyntaxErrors> {
+) -> Result<bonk_ast_errorless::Posting, Vec<SyntaxError>> {
     let account = posting
         .account()
-        .ok_or(SyntaxErrors(vec![posting.span()]))
+        .ok_or(vec![SyntaxError(posting.span())])
         .map(|acc| convert_account(acc, src));
 
     let amount = posting
         .amount()
-        .ok_or(SyntaxErrors(vec![posting.span()]))
+        .ok_or(vec![SyntaxError(posting.span())])
         .and_then(|amt| convert_amount(amt, src));
 
     let mut errors = Vec::new();
@@ -120,15 +118,15 @@ fn convert_posting(
                 source_span: Some(posting.span()),
             })
         }
-        (Ok(_), Err(err)) => errors.extend(err.0),
-        (Err(err), Ok(_)) => errors.extend(err.0),
+        (Ok(_), Err(err)) => errors.extend(err),
+        (Err(err), Ok(_)) => errors.extend(err),
         (Err(err_a), Err(err_b)) => {
-            errors.extend(err_a.0);
-            errors.extend(err_b.0);
+            errors.extend(err_a);
+            errors.extend(err_b);
         }
     };
 
-    Err(SyntaxErrors(errors))
+    Err(errors)
 }
 
 fn convert_account(account: bonk_ast::Account, src: &str) -> bonk_ast_errorless::Account {
@@ -145,13 +143,13 @@ fn convert_account(account: bonk_ast::Account, src: &str) -> bonk_ast_errorless:
 fn convert_amount(
     amount: bonk_ast::Amount,
     src: &str,
-) -> Result<bonk_ast_errorless::Amount, SyntaxErrors> {
+) -> Result<bonk_ast_errorless::Amount, Vec<SyntaxError>> {
     Ok(bonk_ast_errorless::Amount {
         cents: amount
             .value(src)
             .replace('.', "")
             .parse()
-            .map_err(|_| SyntaxErrors(vec![amount.span()]))?,
+            .map_err(|_| vec![SyntaxError(amount.span())])?,
         source_span: Some(amount.span()),
     })
 }
@@ -159,18 +157,18 @@ fn convert_amount(
 fn convert_declared_account(
     account: bonk_ast::DeclareAccount,
     src: &str,
-) -> Result<bonk_ast_errorless::DeclareAccount, SyntaxErrors> {
+) -> Result<bonk_ast_errorless::DeclareAccount, Vec<SyntaxError>> {
     Ok(bonk_ast_errorless::DeclareAccount {
         account: account
             .account()
-            .ok_or(SyntaxErrors(vec![account.span()]))
+            .ok_or(vec![SyntaxError(account.span())])
             .map(|a| convert_account(a, src))?,
         source_span: Some(account.span()),
     })
 }
 #[cfg(test)]
 mod tests {
-    use crate::check_syntax;
+    use crate::syntax::check_syntax;
 
     #[test]
     fn test_no_errors() {
@@ -355,8 +353,8 @@ liabilities:my_credit_card -10.91"#;
 
         insta::assert_debug_snapshot!(ledger, @r###"
         Err(
-            SyntaxErrors(
-                [
+            [
+                SyntaxError(
                     SourceSpan {
                         start_byte: 10,
                         end_byte: 13,
@@ -365,8 +363,8 @@ liabilities:my_credit_card -10.91"#;
                         end_row: 0,
                         end_col: 13,
                     },
-                ],
-            ),
+                ),
+            ],
         )
         "###);
     }

@@ -1,27 +1,27 @@
 use bonk_ast::SourceSpan;
 
 #[derive(Debug, PartialEq, Eq)]
-pub struct BalanceErrors(pub Vec<SourceSpan>);
+pub struct BalanceError(pub SourceSpan);
 
 // TODO: if/when we add inference for posting amounts (i.e., allowing one posting to have an implicit amount), there should be another ast type to represent that and this should go from bonk_ast_errorless::Ledger to that one instead
 pub fn check_balance(
     ledger: bonk_ast_errorless::Ledger,
-) -> Result<bonk_ast_errorless::Ledger, BalanceErrors> {
+) -> Result<bonk_ast_errorless::Ledger, Vec<BalanceError>> {
     let mut errors = vec![];
 
     for transaction in &ledger.transactions {
         let sum: i32 = transaction.postings.iter().map(|p| p.amount.cents).sum();
         if sum != 0 {
-            errors.push(
+            errors.push(BalanceError(
                 transaction
                     .source_span
                     .expect("ast passed to check_balance isn't annotated with source spans"), // TODO: I really want to encode this in the types
-            )
+            ))
         }
     }
 
     if !errors.is_empty() {
-        Err(BalanceErrors(errors))
+        Err(errors)
     } else {
         Ok(ledger)
     }
@@ -215,8 +215,8 @@ mod tests {
 
         insta::assert_debug_snapshot!(checked_ledger, @r###"
         Err(
-            BalanceErrors(
-                [
+            [
+                BalanceError(
                     SourceSpan {
                         start_byte: 0,
                         end_byte: 98,
@@ -225,8 +225,8 @@ mod tests {
                         end_row: 2,
                         end_col: 37,
                     },
-                ],
-            ),
+                ),
+            ],
         )
         "###);
     }

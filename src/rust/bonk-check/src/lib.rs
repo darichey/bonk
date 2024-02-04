@@ -2,11 +2,31 @@ mod account_ref;
 mod balance;
 mod syntax;
 
-pub use account_ref::check_account_refs;
-pub use account_ref::AccountRefErrors;
+pub use account_ref::AccountRefError;
+pub use balance::BalanceError;
+pub use syntax::SyntaxError;
 
-pub use balance::check_balance;
-pub use balance::BalanceErrors;
+#[derive(Debug, PartialEq, Eq)]
+pub enum CheckError {
+    BalanceError(BalanceError),
+    SyntaxError(SyntaxError),
+}
 
-pub use syntax::check_syntax;
-pub use syntax::SyntaxErrors;
+pub fn check(
+    ledger: &bonk_ast::Ledger,
+    src: &str,
+) -> Result<bonk_ast_errorless::Ledger, Vec<CheckError>> {
+    let ledger = syntax::check_syntax(ledger, src).map_err(|errs| {
+        errs.into_iter()
+            .map(CheckError::SyntaxError)
+            .collect::<Vec<_>>()
+    })?;
+
+    let ledger = balance::check_balance(ledger).map_err(|errs| {
+        errs.into_iter()
+            .map(CheckError::BalanceError)
+            .collect::<Vec<_>>()
+    })?;
+
+    Ok(ledger)
+}
