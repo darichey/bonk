@@ -85,6 +85,15 @@ impl Ledger {
             .collect()
     }
 
+    pub fn imports(&self) -> Vec<Import<'_>> {
+        let mut cursor = self.0.walk();
+        self.0
+            .root_node()
+            .children_by_field_name("import", &mut cursor)
+            .map(Import)
+            .collect()
+    }
+
     pub fn errors(&self) -> Vec<SourceSpan> {
         let mut cursor = self.0.walk();
 
@@ -348,6 +357,32 @@ pub struct DeclareAccount<'a>(Node<'a>);
 impl DeclareAccount<'_> {
     pub fn account(&self) -> Option<Account> {
         self.0.child_by_field_name("account").map(Account)
+    }
+
+    pub fn span(&self) -> SourceSpan {
+        self.0.range().into()
+    }
+}
+
+pub struct Import<'a>(Node<'a>);
+
+impl Import<'_> {
+    pub fn path(&self) -> Option<Path> {
+        self.0.child_by_field_name("path").map(Path)
+    }
+
+    pub fn span(&self) -> SourceSpan {
+        self.0.range().into()
+    }
+}
+
+pub struct Path<'a>(Node<'a>);
+
+impl Path<'_> {
+    pub fn value<'s>(&self, src: &'s str) -> &'s str {
+        self.0
+            .utf8_text(src.as_bytes())
+            .expect("src is not valid utf-8")
     }
 
     pub fn span(&self) -> SourceSpan {
