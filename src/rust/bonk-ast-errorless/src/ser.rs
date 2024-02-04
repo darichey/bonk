@@ -60,15 +60,15 @@ mod tests {
             declare_accounts: vec![
                 DeclareAccount {
                     account: Account::parse("expenses:fast_food", None),
-                    source_span: None,
+                    source: None,
                 },
                 DeclareAccount {
                     account: Account::parse("liabilities:my_credit_card", None),
-                    source_span: None,
+                    source: None,
                 },
                 DeclareAccount {
                     account: Account::parse("assets:my_checking", None),
-                    source_span: None,
+                    source: None,
                 },
             ],
             transactions: vec![
@@ -79,15 +79,15 @@ mod tests {
                         Posting {
                             account: Account::parse("expenses:food", None),
                             amount: Amount::from_dollars(12.34, None),
-                            source_span: None,
+                            source: None,
                         },
                         Posting {
                             account: Account::parse("liabilities:my_credit_card", None),
                             amount: Amount::from_dollars(-12.34, None),
-                            source_span: None,
+                            source: None,
                         },
                     ],
-                    source_span: None,
+                    source: None,
                 },
                 Transaction {
                     date: Date::new(2023, 1, 2),
@@ -96,18 +96,18 @@ mod tests {
                         Posting {
                             account: Account::parse("liabilities:my_credit_card", None),
                             amount: Amount::from_dollars(12.34, None),
-                            source_span: None,
+                            source: None,
                         },
                         Posting {
                             account: Account::parse("assets:my_checking", None),
                             amount: Amount::from_dollars(-12.34, None),
-                            source_span: None,
+                            source: None,
                         },
                     ],
-                    source_span: None,
+                    source: None,
                 },
             ],
-            source_span: None,
+            source: None,
         };
 
         insta::assert_display_snapshot!(

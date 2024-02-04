@@ -32,9 +32,9 @@ pub fn do_import<D: io::Read>(
                 postings: vec![Posting {
                     account: account.clone(),
                     amount: Amount::from_dollars(amount, None),
-                    source_span: None,
+                    source: None,
                 }],
-                source_span: None,
+                source: None,
             })
         })
         .collect::<Result<Vec<_>, Box<dyn Error>>>()?;
@@ -42,7 +42,7 @@ pub fn do_import<D: io::Read>(
     Ok(Ledger {
         declare_accounts: vec![],
         transactions,
-        source_span: None,
+        source: None,
     })
 }
 
@@ -67,7 +67,7 @@ mod tests {
                         year: 2023,
                         month: 1,
                         day: 1,
-                        source_span: None,
+                        source: None,
                     },
                     description: "Salary Deposit",
                     postings: [
@@ -77,23 +77,23 @@ mod tests {
                                     "assets",
                                     "my_checking",
                                 ],
-                                source_span: None,
+                                source: None,
                             },
                             amount: Amount {
                                 cents: 250000,
-                                source_span: None,
+                                source: None,
                             },
-                            source_span: None,
+                            source: None,
                         },
                     ],
-                    source_span: None,
+                    source: None,
                 },
                 Transaction {
                     date: Date {
                         year: 2023,
                         month: 1,
                         day: 2,
-                        source_span: None,
+                        source: None,
                     },
                     description: "Grocery Shopping",
                     postings: [
@@ -103,19 +103,19 @@ mod tests {
                                     "assets",
                                     "my_checking",
                                 ],
-                                source_span: None,
+                                source: None,
                             },
                             amount: Amount {
                                 cents: -12050,
-                                source_span: None,
+                                source: None,
                             },
-                            source_span: None,
+                            source: None,
                         },
                     ],
-                    source_span: None,
+                    source: None,
                 },
             ],
-            source_span: None,
+            source: None,
         }
         "###);
     }

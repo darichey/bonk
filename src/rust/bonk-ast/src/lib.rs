@@ -1,4 +1,5 @@
 use core::fmt;
+use std::path::PathBuf;
 
 use tree_sitter::{InputEdit, Node, Point, Range, Tree};
 
@@ -51,6 +52,12 @@ impl From<Range> for SourceSpan {
             end_col: value.end_point.column,
         }
     }
+}
+
+#[derive(Clone, Debug, PartialEq, Eq, Hash, PartialOrd, Ord)]
+pub struct Source {
+    pub path: Option<PathBuf>,
+    pub span: SourceSpan,
 }
 
 pub struct Ledger(Tree);

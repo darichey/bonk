@@ -70,16 +70,16 @@ fn main() -> Result<(), Box<dyn Error>> {
             postings: vec![Posting {
                 account: account.clone(),
                 amount: Amount::from_dollars(amount, None),
-                source_span: None,
+                source: None,
             }],
-            source_span: None,
+            source: None,
         })
         .collect();
 
     let ledger = Ledger {
         declare_accounts: vec![],
         transactions,
-        source_span: None,
+        source: None,
     };
 
     fs::write(&output, ledger.to_string())?;

@@ -76,11 +76,13 @@ fn get_transactions(_request: &Request, state: Arc<Mutex<State>>) -> Response {
 
 fn main() {
     let state = {
-        let Args { ledger } = Args::parse();
+        let Args {
+            ledger: ledger_path,
+        } = Args::parse();
 
-        let src = fs::read_to_string(ledger).expect("Couldn't read ledger");
+        let src = fs::read_to_string(&ledger_path).expect("Couldn't read ledger");
         let ledger = bonk_ast::Parser::new().parse(&src, None);
-        let ledger = bonk_check::check(&ledger, &src).unwrap();
+        let ledger = bonk_check::check(&ledger, &src, Some(&ledger_path)).unwrap();
 
         let state = State {
             db: Db::new(&ledger, ":memory:").expect("Couldn't create database"),

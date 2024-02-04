@@ -96,7 +96,11 @@ fn main_loop(
                                     related_documents: None,
                                     full_document_diagnostic_report: FullDocumentDiagnosticReport {
                                         result_id: None,
-                                        items: get_diagnostics(&doc.ledger, &doc.src),
+                                        items: get_diagnostics(
+                                            &doc.ledger,
+                                            &doc.src,
+                                            params.text_document.uri.to_file_path().ok().as_deref(),
+                                        ),
                                     },
                                 },
                             );

@@ -1,7 +1,7 @@
-use bonk_ast::SourceSpan;
+use bonk_ast::Source;
 
 #[derive(Debug, PartialEq, Eq)]
-pub struct BalanceError(pub SourceSpan);
+pub struct BalanceError(pub Source);
 
 // TODO: if/when we add inference for posting amounts (i.e., allowing one posting to have an implicit amount), there should be another ast type to represent that and this should go from bonk_ast_errorless::Ledger to that one instead
 pub fn check_balance(
@@ -14,7 +14,8 @@ pub fn check_balance(
         if sum != 0 {
             errors.push(BalanceError(
                 transaction
-                    .source_span
+                    .source
+                    .clone()
                     .expect("ast passed to check_balance isn't annotated with source spans"), // TODO: I really want to encode this in the types
             ))
         }
@@ -29,14 +30,16 @@ pub fn check_balance(
 
 #[cfg(test)]
 mod tests {
-    use bonk_ast::SourceSpan;
+    use std::path::PathBuf;
+
+    use bonk_ast::{Source, SourceSpan};
     use bonk_ast_errorless::*;
 
     use super::check_balance;
 
     #[test]
     fn test_no_errors() {
-        // Note that we can get away with passing source_span: None because we expect that there are no errors
+        // Note that we can get away with passing source: None because we expect that there are no errors
         let ledger = Ledger {
             declare_accounts: vec![],
             transactions: vec![Transaction {
@@ -46,17 +49,17 @@ mod tests {
                     Posting {
                         account: Account::parse("expenses:fast_food", None),
                         amount: Amount::from_dollars(10.91, None),
-                        source_span: None,
+                        source: None,
                     },
                     Posting {
                         account: Account::parse("liabilities:my_credit_card", None),
                         amount: Amount::from_dollars(-10.91, None),
-                        source_span: None,
+                        source: None,
                     },
                 ],
-                source_span: None,
+                source: None,
             }],
-            source_span: None,
+            source: None,
         };
 
         let checked_ledger = check_balance(ledger.clone());
@@ -74,19 +77,22 @@ mod tests {
                 postings: vec![Posting {
                     account: Account::parse("expenses:fast_food", None),
                     amount: Amount::from_dollars(10.91, None),
-                    source_span: None,
+                    source: None,
                 }],
-                // only supply a (fake) span here since it's the only error loc
-                source_span: Some(SourceSpan {
-                    start_byte: 0,
-                    end_byte: 1,
-                    start_row: 2,
-                    start_col: 3,
-                    end_row: 4,
-                    end_col: 5,
+                // only supply a (fake) source here since it's the only error loc
+                source: Some(Source {
+                    path: Some(PathBuf::from("ledger.bonk")),
+                    span: SourceSpan {
+                        start_byte: 0,
+                        end_byte: 1,
+                        start_row: 2,
+                        start_col: 3,
+                        end_row: 4,
+                        end_col: 5,
+                    },
                 }),
             }],
-            source_span: None,
+            source: None,
         };
 
         let checked_ledger = check_balance(ledger.clone());
@@ -95,13 +101,18 @@ mod tests {
         Err(
             [
                 BalanceError(
-                    SourceSpan {
-                        start_byte: 0,
-                        end_byte: 1,
-                        start_row: 2,
-                        start_col: 3,
-                        end_row: 4,
-                        end_col: 5,
+                    Source {
+                        path: Some(
+                            "ledger.bonk",
+                        ),
+                        span: SourceSpan {
+                            start_byte: 0,
+                            end_byte: 1,
+                            start_row: 2,
+                            start_col: 3,
+                            end_row: 4,
+                            end_col: 5,
+                        },
                     },
                 ),
             ],

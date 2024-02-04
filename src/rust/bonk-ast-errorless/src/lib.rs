@@ -1,4 +1,4 @@
-use bonk_ast::SourceSpan;
+use bonk_ast::Source;
 
 mod ser;
 
@@ -6,13 +6,13 @@ mod ser;
 pub struct Ledger {
     pub declare_accounts: Vec<DeclareAccount>,
     pub transactions: Vec<Transaction>,
-    pub source_span: Option<SourceSpan>,
+    pub source: Option<Source>,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct DeclareAccount {
     pub account: Account,
-    pub source_span: Option<SourceSpan>,
+    pub source: Option<Source>,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -20,7 +20,7 @@ pub struct Transaction {
     pub date: Date,
     pub description: String,
     pub postings: Vec<Posting>,
-    pub source_span: Option<SourceSpan>,
+    pub source: Option<Source>,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -28,7 +28,7 @@ pub struct Date {
     pub year: u32,
     pub month: u32,
     pub day: u32,
-    pub source_span: Option<SourceSpan>,
+    pub source: Option<Source>,
 }
 
 impl Date {
@@ -37,17 +37,17 @@ impl Date {
             year,
             month,
             day,
-            source_span: None,
+            source: None,
         }
     }
 
-    pub fn parse(date: &str, source_span: Option<SourceSpan>) -> Option<Self> {
+    pub fn parse(date: &str, source: Option<Source>) -> Option<Self> {
         if let &[year, month, day] = &date.split('-').collect::<Vec<_>>()[..] {
             Some(Self {
                 year: year.parse().ok()?,
                 month: month.parse().ok()?,
                 day: day.parse().ok()?,
-                source_span,
+                source,
             })
         } else {
             None
@@ -65,21 +65,21 @@ impl ToString for Date {
 pub struct Posting {
     pub account: Account,
     pub amount: Amount,
-    pub source_span: Option<SourceSpan>,
+    pub source: Option<Source>,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Account {
     pub path: Vec<String>,
-    pub source_span: Option<SourceSpan>,
+    pub source: Option<Source>,
 }
 
 impl Account {
     /// Creates an Account from a string like "assets:foo:my_checking"
-    pub fn parse(account: &str, source_span: Option<SourceSpan>) -> Self {
+    pub fn parse(account: &str, source: Option<Source>) -> Self {
         Self {
             path: account.split(':').map(|s| s.to_string()).collect(),
-            source_span,
+            source,
         }
     }
 
@@ -91,14 +91,14 @@ impl Account {
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Amount {
     pub cents: i32,
-    pub source_span: Option<SourceSpan>,
+    pub source: Option<Source>,
 }
 
 impl Amount {
-    pub fn from_dollars(dollar_amount: f64, source_span: Option<SourceSpan>) -> Self {
+    pub fn from_dollars(dollar_amount: f64, source: Option<Source>) -> Self {
         Self {
             cents: (dollar_amount * 100.0) as i32,
-            source_span,
+            source,
         }
     }
 }

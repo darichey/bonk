@@ -2,6 +2,8 @@ mod account_ref;
 mod balance;
 mod syntax;
 
+use std::path::Path;
+
 pub use account_ref::AccountRefError;
 pub use balance::BalanceError;
 pub use syntax::SyntaxError;
@@ -16,8 +18,9 @@ pub enum CheckError {
 pub fn check(
     ledger: &bonk_ast::Ledger,
     src: &str,
+    path: Option<&Path>,
 ) -> Result<bonk_ast_errorless::Ledger, Vec<CheckError>> {
-    let ledger = syntax::check_syntax(ledger, src).map_err(|errs| {
+    let ledger = syntax::check_syntax(ledger, src, path).map_err(|errs| {
         errs.into_iter()
             .map(CheckError::SyntaxError)
             .collect::<Vec<_>>()
