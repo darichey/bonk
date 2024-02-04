@@ -36,105 +36,27 @@ mod tests {
 
     #[test]
     fn test_no_errors() {
+        // Note that we can get away with passing source_span: None because we expect that there are no errors
         let ledger = Ledger {
             declare_accounts: vec![],
             transactions: vec![Transaction {
-                date: Date::parse(
-                    "2023-01-01",
-                    Some(SourceSpan {
-                        start_byte: 0,
-                        end_byte: 10,
-                        start_row: 0,
-                        start_col: 0,
-                        end_row: 0,
-                        end_col: 10,
-                    }),
-                )
-                .unwrap(),
+                date: Date::parse("2023-01-01", None).unwrap(),
                 description: "\"Mcdonald's\"".to_string(),
                 postings: vec![
                     Posting {
-                        account: Account::parse(
-                            "expenses:fast_food",
-                            Some(SourceSpan {
-                                start_byte: 28,
-                                end_byte: 46,
-                                start_row: 1,
-                                start_col: 4,
-                                end_row: 1,
-                                end_col: 22,
-                            }),
-                        ),
-                        amount: Amount::from_dollars(
-                            10.91,
-                            Some(SourceSpan {
-                                start_byte: 55,
-                                end_byte: 60,
-                                start_row: 1,
-                                start_col: 31,
-                                end_row: 1,
-                                end_col: 36,
-                            }),
-                        ),
-                        source_span: Some(SourceSpan {
-                            start_byte: 28,
-                            end_byte: 60,
-                            start_row: 1,
-                            start_col: 4,
-                            end_row: 1,
-                            end_col: 36,
-                        }),
+                        account: Account::parse("expenses:fast_food", None),
+                        amount: Amount::from_dollars(10.91, None),
+                        source_span: None,
                     },
                     Posting {
-                        account: Account::parse(
-                            "liabilities:my_credit_card",
-                            Some(SourceSpan {
-                                start_byte: 65,
-                                end_byte: 91,
-                                start_row: 2,
-                                start_col: 4,
-                                end_row: 2,
-                                end_col: 30,
-                            }),
-                        ),
-                        amount: Amount::from_dollars(
-                            -10.91,
-                            Some(SourceSpan {
-                                start_byte: 92,
-                                end_byte: 98,
-                                start_row: 2,
-                                start_col: 31,
-                                end_row: 2,
-                                end_col: 37,
-                            }),
-                        ),
-                        source_span: Some(SourceSpan {
-                            start_byte: 65,
-                            end_byte: 98,
-                            start_row: 2,
-                            start_col: 4,
-                            end_row: 2,
-                            end_col: 37,
-                        }),
+                        account: Account::parse("liabilities:my_credit_card", None),
+                        amount: Amount::from_dollars(-10.91, None),
+                        source_span: None,
                     },
                 ],
-                source_span: Some(SourceSpan {
-                    start_byte: 0,
-                    end_byte: 98,
-                    start_row: 0,
-                    start_col: 0,
-                    end_row: 2,
-                    end_col: 37,
-                }),
+                source_span: None,
             }],
-            source_span: Some(SourceSpan {
-                start_byte: 0,
-                end_byte: 98,
-                start_row: 0,
-                start_col: 0,
-                end_row: 2,
-                end_col: 37,
-            }),
+            source_span: None,
         };
 
         let checked_ledger = check_balance(ledger.clone());
@@ -147,68 +69,24 @@ mod tests {
         let ledger = Ledger {
             declare_accounts: vec![],
             transactions: vec![Transaction {
-                date: Date::parse(
-                    "2023-01-01",
-                    Some(SourceSpan {
-                        start_byte: 0,
-                        end_byte: 10,
-                        start_row: 0,
-                        start_col: 0,
-                        end_row: 0,
-                        end_col: 10,
-                    }),
-                )
-                .unwrap(),
+                date: Date::parse("2023-01-01", None).unwrap(),
                 description: "\"Mcdonald's\"".to_string(),
                 postings: vec![Posting {
-                    account: Account::parse(
-                        "expenses:fast_food",
-                        Some(SourceSpan {
-                            start_byte: 28,
-                            end_byte: 46,
-                            start_row: 1,
-                            start_col: 4,
-                            end_row: 1,
-                            end_col: 22,
-                        }),
-                    ),
-                    amount: Amount::from_dollars(
-                        10.91,
-                        Some(SourceSpan {
-                            start_byte: 55,
-                            end_byte: 60,
-                            start_row: 1,
-                            start_col: 31,
-                            end_row: 1,
-                            end_col: 36,
-                        }),
-                    ),
-                    source_span: Some(SourceSpan {
-                        start_byte: 28,
-                        end_byte: 60,
-                        start_row: 1,
-                        start_col: 4,
-                        end_row: 1,
-                        end_col: 36,
-                    }),
+                    account: Account::parse("expenses:fast_food", None),
+                    amount: Amount::from_dollars(10.91, None),
+                    source_span: None,
                 }],
+                // only supply a (fake) span here since it's the only error loc
                 source_span: Some(SourceSpan {
                     start_byte: 0,
-                    end_byte: 98,
-                    start_row: 0,
-                    start_col: 0,
-                    end_row: 2,
-                    end_col: 37,
+                    end_byte: 1,
+                    start_row: 2,
+                    start_col: 3,
+                    end_row: 4,
+                    end_col: 5,
                 }),
             }],
-            source_span: Some(SourceSpan {
-                start_byte: 0,
-                end_byte: 98,
-                start_row: 0,
-                start_col: 0,
-                end_row: 2,
-                end_col: 37,
-            }),
+            source_span: None,
         };
 
         let checked_ledger = check_balance(ledger.clone());
@@ -219,11 +97,11 @@ mod tests {
                 BalanceError(
                     SourceSpan {
                         start_byte: 0,
-                        end_byte: 98,
-                        start_row: 0,
-                        start_col: 0,
-                        end_row: 2,
-                        end_col: 37,
+                        end_byte: 1,
+                        start_row: 2,
+                        start_col: 3,
+                        end_row: 4,
+                        end_col: 5,
                     },
                 ),
             ],
