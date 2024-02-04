@@ -37,6 +37,7 @@ mod tests {
     #[test]
     fn test_no_errors() {
         let ledger = Ledger {
+            declare_accounts: vec![],
             transactions: vec![Transaction {
                 date: Date::parse(
                     "2023-01-01",
@@ -144,6 +145,7 @@ mod tests {
     #[test]
     fn test_error() {
         let ledger = Ledger {
+            declare_accounts: vec![],
             transactions: vec![Transaction {
                 date: Date::parse(
                     "2023-01-01",

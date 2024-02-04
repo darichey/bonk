@@ -4,7 +4,14 @@ mod ser;
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Ledger {
+    pub declare_accounts: Vec<DeclareAccount>,
     pub transactions: Vec<Transaction>,
+    pub source_span: Option<SourceSpan>,
+}
+
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct DeclareAccount {
+    pub account: Account,
     pub source_span: Option<SourceSpan>,
 }
 

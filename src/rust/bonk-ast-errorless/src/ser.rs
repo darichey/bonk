@@ -52,11 +52,25 @@ fn to_string_amount(amount: &Amount) -> String {
 #[cfg(test)]
 mod tests {
 
-    use crate::{Account, Amount, Date, Ledger, Posting, Transaction};
+    use crate::{Account, Amount, Date, DeclareAccount, Ledger, Posting, Transaction};
 
     #[test]
     fn test() {
         let ledger = Ledger {
+            declare_accounts: vec![
+                DeclareAccount {
+                    account: Account::parse("expenses:fast_food", None),
+                    source_span: None,
+                },
+                DeclareAccount {
+                    account: Account::parse("liabilities:my_credit_card", None),
+                    source_span: None,
+                },
+                DeclareAccount {
+                    account: Account::parse("assets:my_checking", None),
+                    source_span: None,
+                },
+            ],
             transactions: vec![
                 Transaction {
                     date: Date::new(2023, 1, 1),

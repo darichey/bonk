@@ -21,14 +21,26 @@ fn convert_ledger(
     ledger: &bonk_ast::Ledger,
     src: &str,
 ) -> Result<bonk_ast_errorless::Ledger, SyntaxErrors> {
-    let (transactions, errors): (Vec<_>, Vec<_>) = ledger
+    let (declared_accounts, errors_declared_accounts): (Vec<_>, Vec<_>) = ledger
+        .declare_accounts()
+        .into_iter()
+        .map(|d| convert_declared_account(d, src))
+        .partition_result();
+
+    let (transactions, errors_transactions): (Vec<_>, Vec<_>) = ledger
         .transactions()
         .into_iter()
         .map(|t| convert_transaction(t, src))
         .partition_result();
 
+    let errors: Vec<_> = errors_declared_accounts
+        .into_iter()
+        .chain(errors_transactions)
+        .collect();
+
     if errors.is_empty() {
         Ok(bonk_ast_errorless::Ledger {
+            declare_accounts: declared_accounts,
             transactions,
             source_span: Some(ledger.span()),
         })
@@ -144,15 +156,27 @@ fn convert_amount(
     })
 }
 
+fn convert_declared_account(
+    account: bonk_ast::DeclareAccount,
+    src: &str,
+) -> Result<bonk_ast_errorless::DeclareAccount, SyntaxErrors> {
+    Ok(bonk_ast_errorless::DeclareAccount {
+        account: account
+            .account()
+            .ok_or(SyntaxErrors(vec![account.span()]))
+            .map(|a| convert_account(a, src))?,
+        source_span: Some(account.span()),
+    })
+}
 #[cfg(test)]
 mod tests {
-    use bonk_ast::SourceSpan;
-
     use crate::check_syntax;
 
     #[test]
     fn test_no_errors() {
-        let src = r#"2023-01-01 "Mcdonald's"
+        let src = r#"account foo
+
+2023-01-01 "Mcdonald's"
     expenses:fast_food         10.91
     liabilities:my_credit_card -10.91"#;
 
@@ -162,6 +186,35 @@ mod tests {
         insta::assert_debug_snapshot!(ledger, @r###"
         Ok(
             Ledger {
+                declare_accounts: [
+                    DeclareAccount {
+                        account: Account {
+                            path: [
+                                "foo",
+                            ],
+                            source_span: Some(
+                                SourceSpan {
+                                    start_byte: 8,
+                                    end_byte: 11,
+                                    start_row: 0,
+                                    start_col: 8,
+                                    end_row: 0,
+                                    end_col: 11,
+                                },
+                            ),
+                        },
+                        source_span: Some(
+                            SourceSpan {
+                                start_byte: 0,
+                                end_byte: 11,
+                                start_row: 0,
+                                start_col: 0,
+                                end_row: 0,
+                                end_col: 11,
+                            },
+                        ),
+                    },
+                ],
                 transactions: [
                     Transaction {
                         date: Date {
@@ -170,11 +223,11 @@ mod tests {
                             day: 1,
                             source_span: Some(
                                 SourceSpan {
-                                    start_byte: 0,
-                                    end_byte: 10,
-                                    start_row: 0,
+                                    start_byte: 13,
+                                    end_byte: 23,
+                                    start_row: 2,
                                     start_col: 0,
-                                    end_row: 0,
+                                    end_row: 2,
                                     end_col: 10,
                                 },
                             ),
@@ -189,11 +242,11 @@ mod tests {
                                     ],
                                     source_span: Some(
                                         SourceSpan {
-                                            start_byte: 28,
-                                            end_byte: 46,
-                                            start_row: 1,
+                                            start_byte: 41,
+                                            end_byte: 59,
+                                            start_row: 3,
                                             start_col: 4,
-                                            end_row: 1,
+                                            end_row: 3,
                                             end_col: 22,
                                         },
                                     ),
@@ -202,22 +255,22 @@ mod tests {
                                     cents: 1091,
                                     source_span: Some(
                                         SourceSpan {
-                                            start_byte: 55,
-                                            end_byte: 60,
-                                            start_row: 1,
+                                            start_byte: 68,
+                                            end_byte: 73,
+                                            start_row: 3,
                                             start_col: 31,
-                                            end_row: 1,
+                                            end_row: 3,
                                             end_col: 36,
                                         },
                                     ),
                                 },
                                 source_span: Some(
                                     SourceSpan {
-                                        start_byte: 28,
-                                        end_byte: 60,
-                                        start_row: 1,
+                                        start_byte: 41,
+                                        end_byte: 73,
+                                        start_row: 3,
                                         start_col: 4,
-                                        end_row: 1,
+                                        end_row: 3,
                                         end_col: 36,
                                     },
                                 ),
@@ -230,11 +283,11 @@ mod tests {
                                     ],
                                     source_span: Some(
                                         SourceSpan {
-                                            start_byte: 65,
-                                            end_byte: 91,
-                                            start_row: 2,
+                                            start_byte: 78,
+                                            end_byte: 104,
+                                            start_row: 4,
                                             start_col: 4,
-                                            end_row: 2,
+                                            end_row: 4,
                                             end_col: 30,
                                         },
                                     ),
@@ -243,22 +296,22 @@ mod tests {
                                     cents: -1091,
                                     source_span: Some(
                                         SourceSpan {
-                                            start_byte: 92,
-                                            end_byte: 98,
-                                            start_row: 2,
+                                            start_byte: 105,
+                                            end_byte: 111,
+                                            start_row: 4,
                                             start_col: 31,
-                                            end_row: 2,
+                                            end_row: 4,
                                             end_col: 37,
                                         },
                                     ),
                                 },
                                 source_span: Some(
                                     SourceSpan {
-                                        start_byte: 65,
-                                        end_byte: 98,
-                                        start_row: 2,
+                                        start_byte: 78,
+                                        end_byte: 111,
+                                        start_row: 4,
                                         start_col: 4,
-                                        end_row: 2,
+                                        end_row: 4,
                                         end_col: 37,
                                     },
                                 ),
@@ -266,11 +319,11 @@ mod tests {
                         ],
                         source_span: Some(
                             SourceSpan {
-                                start_byte: 0,
-                                end_byte: 98,
-                                start_row: 0,
+                                start_byte: 13,
+                                end_byte: 111,
+                                start_row: 2,
                                 start_col: 0,
-                                end_row: 2,
+                                end_row: 4,
                                 end_col: 37,
                             },
                         ),
@@ -279,10 +332,10 @@ mod tests {
                 source_span: Some(
                     SourceSpan {
                         start_byte: 0,
-                        end_byte: 98,
+                        end_byte: 111,
                         start_row: 0,
                         start_col: 0,
-                        end_row: 2,
+                        end_row: 4,
                         end_col: 37,
                     },
                 ),

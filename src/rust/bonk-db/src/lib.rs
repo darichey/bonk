@@ -109,6 +109,7 @@ mod tests {
     #[test]
     fn test() {
         let ledger = Ledger {
+            declare_accounts: vec![],
             transactions: vec![
                 Transaction {
                     date: Date::new(2023, 1, 1),

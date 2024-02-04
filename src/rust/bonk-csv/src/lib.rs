@@ -40,6 +40,7 @@ pub fn do_import<D: io::Read>(
         .collect::<Result<Vec<_>, Box<dyn Error>>>()?;
 
     Ok(Ledger {
+        declare_accounts: vec![],
         transactions,
         source_span: None,
     })
@@ -59,6 +60,7 @@ mod tests {
 
         insta::assert_debug_snapshot!(ledger, @r###"
         Ledger {
+            declare_accounts: [],
             transactions: [
                 Transaction {
                     date: Date {
