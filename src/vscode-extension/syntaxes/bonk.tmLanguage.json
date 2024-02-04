@@ -3,6 +3,9 @@
   "name": "Bonk",
   "patterns": [
     {
+      "include": "#keywords"
+    },
+    {
       "include": "#strings"
     },
     {
@@ -16,6 +19,10 @@
     }
   ],
   "repository": {
+    "keywords": {
+      "name": "keyword.bonk",
+      "match": "\\baccount\\b"
+    },
     "strings": {
       "name": "string.quoted.double.bonk",
       "begin": "\"",
