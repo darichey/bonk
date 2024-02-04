@@ -1,5 +1,7 @@
 use bonk_ast::{Ledger, SourceSpan};
-use lsp_types::{Location, Position, Range, Url};
+use lsp_types::{Location, Position, Url};
+
+use crate::util::SourceSpanExt;
 
 pub fn get_go_to_def_result(
     ledger: &Ledger,
@@ -15,16 +17,7 @@ pub fn get_go_to_def_result(
                 let span = acc.span();
                 return Some(Location {
                     uri,
-                    range: Range {
-                        start: Position {
-                            line: span.start_row as u32,
-                            character: span.start_col as u32,
-                        },
-                        end: Position {
-                            line: span.end_row as u32,
-                            character: span.end_col as u32,
-                        },
-                    },
+                    range: span.into_lsp_range(),
                 });
             }
         }

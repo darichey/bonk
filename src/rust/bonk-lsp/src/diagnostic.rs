@@ -1,6 +1,8 @@
 use bonk_ast::Ledger;
 use bonk_check::{check, AccountRefError, BalanceError, CheckError, SyntaxError};
-use lsp_types::{Diagnostic, DiagnosticSeverity, Position, Range};
+use lsp_types::{Diagnostic, DiagnosticSeverity};
+
+use crate::util::SourceSpanExt;
 
 pub fn get_diagnostics(ledger: &Ledger, src: &str) -> Vec<Diagnostic> {
     eprintln!("{}", src);
@@ -12,16 +14,7 @@ pub fn get_diagnostics(ledger: &Ledger, src: &str) -> Vec<Diagnostic> {
             .into_iter()
             .map(|err| match err {
                 CheckError::AccountRefError(AccountRefError(span)) => Diagnostic {
-                    range: Range {
-                        start: Position {
-                            line: span.start_row as u32,
-                            character: span.start_col as u32,
-                        },
-                        end: Position {
-                            line: span.end_row as u32,
-                            character: span.end_col as u32,
-                        },
-                    },
+                    range: span.into_lsp_range(),
                     severity: Some(DiagnosticSeverity::ERROR),
                     code: None,
                     code_description: None,
@@ -32,16 +25,7 @@ pub fn get_diagnostics(ledger: &Ledger, src: &str) -> Vec<Diagnostic> {
                     data: None,
                 },
                 CheckError::BalanceError(BalanceError(span)) => Diagnostic {
-                    range: Range {
-                        start: Position {
-                            line: span.start_row as u32,
-                            character: span.start_col as u32,
-                        },
-                        end: Position {
-                            line: span.end_row as u32,
-                            character: span.end_col as u32,
-                        },
-                    },
+                    range: span.into_lsp_range(),
                     severity: Some(DiagnosticSeverity::ERROR),
                     code: None,
                     code_description: None,
@@ -52,16 +36,7 @@ pub fn get_diagnostics(ledger: &Ledger, src: &str) -> Vec<Diagnostic> {
                     data: None,
                 },
                 CheckError::SyntaxError(SyntaxError(span)) => Diagnostic {
-                    range: Range {
-                        start: Position {
-                            line: span.start_row as u32,
-                            character: span.start_col as u32,
-                        },
-                        end: Position {
-                            line: span.end_row as u32,
-                            character: span.end_col as u32,
-                        },
-                    },
+                    range: span.into_lsp_range(),
                     severity: Some(DiagnosticSeverity::ERROR),
                     code: None,
                     code_description: None,

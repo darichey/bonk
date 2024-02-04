@@ -1,6 +1,7 @@
 mod diagnostic;
 mod go_to_def;
 mod state;
+mod util;
 
 use std::error::Error;
 
