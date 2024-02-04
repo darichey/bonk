@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
 use bonk_ast::{byte_offset_to_position, position_to_byte_offset, Ledger, Parser};
-use lsp_types::{Range, TextDocumentContentChangeEvent};
+use lsp_types::{Range, TextDocumentContentChangeEvent, Url};
 
 pub struct Document {
     pub src: String,
@@ -10,7 +10,7 @@ pub struct Document {
 }
 
 pub struct State {
-    files: HashMap<String, Document>,
+    files: HashMap<Url, Document>,
 }
 
 impl State {
@@ -20,16 +20,16 @@ impl State {
         }
     }
 
-    pub fn get_doc(&self, file: &str) -> Option<&Document> {
-        self.files.get(file)
+    pub fn get_doc(&self, uri: &Url) -> Option<&Document> {
+        self.files.get(uri)
     }
 
-    pub fn on_open(&mut self, file: String, src: String) {
+    pub fn on_open(&mut self, uri: Url, src: String) {
         let mut parser = Parser::new();
         let ledger = parser.parse(&src, None);
 
         self.files.insert(
-            file,
+            uri,
             Document {
                 src,
                 ledger,
@@ -38,14 +38,14 @@ impl State {
         );
     }
 
-    pub fn on_change(&mut self, file: &str, changes: Vec<TextDocumentContentChangeEvent>) {
+    pub fn on_change(&mut self, uri: &Url, changes: Vec<TextDocumentContentChangeEvent>) {
         let Document {
             src,
             ledger,
             parser,
         } = self
             .files
-            .get_mut(file)
+            .get_mut(uri)
             .expect("we don't know about the file");
 
         for change in changes {
@@ -80,39 +80,37 @@ impl State {
         *ledger = parser.parse(src, Some(ledger));
     }
 
-    pub fn on_close(&mut self, file: &str) {
-        self.files.remove(file);
+    pub fn on_close(&mut self, uri: &Url) {
+        self.files.remove(uri);
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use lsp_types::{Position, Range, TextDocumentContentChangeEvent};
+    use lsp_types::{Position, Range, TextDocumentContentChangeEvent, Url};
 
     use super::State;
 
     fn assert_state_change(
         state: &mut State,
-        file: &str,
+        uri: &Url,
         changes: Vec<TextDocumentContentChangeEvent>,
         new_src: &str,
     ) {
-        state.on_change(file, changes);
+        state.on_change(uri, changes);
 
-        assert_eq!(state.files.get(file).unwrap().src, new_src);
+        assert_eq!(state.files.get(uri).unwrap().src, new_src);
     }
 
     #[test]
     fn test_on_change() {
+        let uri = Url::from_file_path("/test.bonk").unwrap();
         let mut state = State::new();
-        state.on_open(
-            "test".to_string(),
-            "some\ntext\nin\nthe\ndocument".to_string(),
-        );
+        state.on_open(uri.clone(), "some\ntext\nin\nthe\ndocument".to_string());
 
         assert_state_change(
             &mut state,
-            "test",
+            &uri,
             vec![TextDocumentContentChangeEvent {
                 range: Some(Range {
                     start: Position {
@@ -132,7 +130,7 @@ mod tests {
 
         assert_state_change(
             &mut state,
-            "test",
+            &uri,
             vec![TextDocumentContentChangeEvent {
                 range: Some(Range {
                     start: Position {
@@ -152,7 +150,7 @@ mod tests {
 
         assert_state_change(
             &mut state,
-            "test",
+            &uri,
             vec![TextDocumentContentChangeEvent {
                 range: Some(Range {
                     start: Position {
@@ -172,7 +170,7 @@ mod tests {
 
         assert_state_change(
             &mut state,
-            "test",
+            &uri,
             vec![TextDocumentContentChangeEvent {
                 range: Some(Range {
                     start: Position {
@@ -192,7 +190,7 @@ mod tests {
 
         assert_state_change(
             &mut state,
-            "test",
+            &uri,
             vec![TextDocumentContentChangeEvent {
                 range: Some(Range {
                     start: Position {
@@ -212,7 +210,7 @@ mod tests {
 
         assert_state_change(
             &mut state,
-            "test",
+            &uri,
             vec![
                 TextDocumentContentChangeEvent {
                     range: Some(Range {
@@ -248,7 +246,7 @@ mod tests {
 
         assert_state_change(
             &mut state,
-            "test",
+            &uri,
             vec![TextDocumentContentChangeEvent {
                 range: Some(Range {
                     start: Position {
@@ -268,7 +266,7 @@ mod tests {
 
         assert_state_change(
             &mut state,
-            "test",
+            &uri,
             vec![TextDocumentContentChangeEvent {
                 range: Some(Range {
                     start: Position {
@@ -288,7 +286,7 @@ mod tests {
 
         assert_state_change(
             &mut state,
-            "test",
+            &uri,
             vec![TextDocumentContentChangeEvent {
                 range: Some(Range {
                     start: Position {

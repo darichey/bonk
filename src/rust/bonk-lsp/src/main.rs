@@ -88,7 +88,7 @@ fn main_loop(
                     Ok((id, params)) => {
                         if let Some("bonk") = params.identifier.as_deref() {
                             let doc = state
-                                .get_doc(params.text_document.uri.as_str())
+                                .get_doc(&params.text_document.uri)
                                 .expect("we don't know about this file");
 
                             let result = DocumentDiagnosticReport::Full(
@@ -118,7 +118,7 @@ fn main_loop(
                     Ok((id, params)) => {
                         let params = params.text_document_position_params;
                         let doc = state
-                            .get_doc(params.text_document.uri.as_str())
+                            .get_doc(&params.text_document.uri)
                             .expect("we don't know about this file");
 
                         let result = get_go_to_def_result(
@@ -149,10 +149,7 @@ fn main_loop(
 
                 let not = match cast_not::<DidOpenTextDocument>(not) {
                     Ok(params) => {
-                        state.on_open(
-                            params.text_document.uri.to_string(),
-                            params.text_document.text,
-                        );
+                        state.on_open(params.text_document.uri, params.text_document.text);
                         continue;
                     }
                     Err(err @ ExtractError::JsonError { .. }) => panic!("{err:?}"),
@@ -161,7 +158,7 @@ fn main_loop(
 
                 let not = match cast_not::<DidChangeTextDocument>(not) {
                     Ok(params) => {
-                        state.on_change(params.text_document.uri.as_str(), params.content_changes);
+                        state.on_change(&params.text_document.uri, params.content_changes);
                         continue;
                     }
                     Err(err @ ExtractError::JsonError { .. }) => panic!("{err:?}"),
@@ -170,7 +167,7 @@ fn main_loop(
 
                 let _not = match cast_not::<DidCloseTextDocument>(not) {
                     Ok(params) => {
-                        state.on_close(params.text_document.uri.as_str());
+                        state.on_close(&params.text_document.uri);
                         continue;
                     }
                     Err(err @ ExtractError::JsonError { .. }) => panic!("{err:?}"),
