@@ -46,6 +46,10 @@ mod tests {
     fn test_no_errors() {
         // Note that we can get away with passing source: None because we expect that there are no errors
         let ledger = Ledger {
+            imports: vec![Import {
+                path: "./foo.bonk".to_string(),
+                source: None,
+            }],
             declare_accounts: vec![
                 DeclareAccount {
                     account: Account::parse("foo", None),
@@ -70,6 +74,11 @@ mod tests {
                         amount: Amount::from_dollars(-10.0, None),
                         source: None,
                     },
+                    // Posting { // TODO: resolve imports to make this work
+                    //     account: Account::parse("baz", None),
+                    //     amount: Amount::from_dollars(-5.0, None),
+                    //     source: None,
+                    // },
                 ],
                 source: None,
             }],
@@ -84,6 +93,7 @@ mod tests {
     #[test]
     fn test_error() {
         let ledger = Ledger {
+            imports: vec![],
             declare_accounts: vec![
                 DeclareAccount {
                     account: Account::parse("foo", None),

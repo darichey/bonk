@@ -77,6 +77,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         .collect();
 
     let ledger = Ledger {
+        imports: vec![],
         declare_accounts: vec![],
         transactions,
         source: None,

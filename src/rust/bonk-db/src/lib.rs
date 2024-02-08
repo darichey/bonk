@@ -109,6 +109,7 @@ mod tests {
     #[test]
     fn test() {
         let ledger = Ledger {
+            imports: vec![],
             declare_accounts: vec![],
             transactions: vec![
                 Transaction {

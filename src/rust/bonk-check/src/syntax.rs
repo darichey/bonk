@@ -25,7 +25,13 @@ fn convert_ledger(
     src: &str,
     path: Option<&Path>,
 ) -> Result<bonk_ast_errorless::Ledger, Vec<SyntaxError>> {
-    let (declared_accounts, errors_declared_accounts): (Vec<_>, Vec<_>) = ledger
+    let (imports, errors_imports): (Vec<_>, Vec<_>) = ledger
+        .imports()
+        .into_iter()
+        .map(|i| convert_import(i, src, path))
+        .partition_result();
+
+    let (declare_accounts, errors_declare_accounts): (Vec<_>, Vec<_>) = ledger
         .declare_accounts()
         .into_iter()
         .map(|d| convert_declared_account(d, src, path))
@@ -37,14 +43,16 @@ fn convert_ledger(
         .map(|t| convert_transaction(t, src, path))
         .partition_result();
 
-    let errors: Vec<_> = errors_declared_accounts
+    let errors: Vec<_> = errors_imports
         .into_iter()
+        .chain(errors_declare_accounts)
         .chain(errors_transactions)
         .collect();
 
     if errors.is_empty() {
         Ok(bonk_ast_errorless::Ledger {
-            declare_accounts: declared_accounts,
+            imports,
+            declare_accounts,
             transactions,
             source: Some(Source {
                 path: path.map(Path::to_path_buf),
@@ -204,6 +212,24 @@ fn convert_declared_account(
         }),
     })
 }
+
+fn convert_import(
+    import: bonk_ast::Import,
+    src: &str,
+    path: Option<&Path>,
+) -> Result<bonk_ast_errorless::Import, Vec<SyntaxError>> {
+    Ok(bonk_ast_errorless::Import {
+        path: import
+            .path()
+            .map(|p| p.value(src).to_string())
+            .ok_or(vec![SyntaxError(import.span())])?,
+        source: Some(Source {
+            path: path.map(Path::to_path_buf),
+            span: import.span(),
+        }),
+    })
+}
+
 #[cfg(test)]
 mod tests {
     use std::path::PathBuf;
@@ -225,6 +251,7 @@ mod tests {
         insta::assert_debug_snapshot!(ledger, @r###"
         Ok(
             Ledger {
+                imports: [],
                 declare_accounts: [
                     DeclareAccount {
                         account: Account {

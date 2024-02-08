@@ -41,6 +41,7 @@ mod tests {
     fn test_no_errors() {
         // Note that we can get away with passing source: None because we expect that there are no errors
         let ledger = Ledger {
+            imports: vec![],
             declare_accounts: vec![],
             transactions: vec![Transaction {
                 date: Date::parse("2023-01-01", None).unwrap(),
@@ -70,6 +71,7 @@ mod tests {
     #[test]
     fn test_error() {
         let ledger = Ledger {
+            imports: vec![],
             declare_accounts: vec![],
             transactions: vec![Transaction {
                 date: Date::parse("2023-01-01", None).unwrap(),
