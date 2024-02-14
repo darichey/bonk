@@ -4,9 +4,7 @@ use bonk_ast::Source;
 pub struct BalanceError(pub Source);
 
 // TODO: if/when we add inference for posting amounts (i.e., allowing one posting to have an implicit amount), there should be another ast type to represent that and this should go from bonk_ast_errorless::Ledger to that one instead
-pub fn check_balance(
-    ledger: bonk_ast_errorless::Ledger,
-) -> Result<bonk_ast_errorless::Ledger, Vec<BalanceError>> {
+pub fn check_balance(ledger: &bonk_ast_errorless::Ledger) -> Result<(), Vec<BalanceError>> {
     let mut errors = vec![];
 
     for transaction in &ledger.transactions {
@@ -24,7 +22,7 @@ pub fn check_balance(
     if !errors.is_empty() {
         Err(errors)
     } else {
-        Ok(ledger)
+        Ok(())
     }
 }
 
@@ -63,9 +61,7 @@ mod tests {
             source: None,
         };
 
-        let checked_ledger = check_balance(ledger.clone());
-
-        assert_eq!(checked_ledger, Ok(ledger));
+        assert!(check_balance(&ledger).is_ok())
     }
 
     #[test]
@@ -97,7 +93,7 @@ mod tests {
             source: None,
         };
 
-        let checked_ledger = check_balance(ledger.clone());
+        let checked_ledger = check_balance(&ledger);
 
         insta::assert_debug_snapshot!(checked_ledger, @r###"
         Err(

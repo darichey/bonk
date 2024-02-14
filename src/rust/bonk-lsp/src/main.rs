@@ -99,7 +99,12 @@ fn main_loop(
                                         items: get_diagnostics(
                                             &doc.ledger,
                                             &doc.src,
-                                            params.text_document.uri.to_file_path().ok().as_deref(),
+                                            params
+                                                .text_document
+                                                .uri
+                                                .to_file_path()
+                                                .as_deref()
+                                                .unwrap(),
                                         ),
                                     },
                                 },

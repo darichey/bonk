@@ -1,6 +1,7 @@
 use std::path::Path;
 
 use bonk_ast_errorless::{Ledger, Posting, Transaction};
+use bonk_check::CheckUnit;
 use sqlite::{Connection, State, Value};
 
 pub struct Db {
@@ -8,7 +9,7 @@ pub struct Db {
 }
 
 impl Db {
-    pub fn new<T: AsRef<Path>>(ledger: &Ledger, path: T) -> Result<Db, String> {
+    pub fn new<T: AsRef<Path>>(check_unit: &CheckUnit<Ledger>, path: T) -> Result<Db, String> {
         let con = Connection::open(path).map_err(|err| err.to_string())?;
 
         con.execute(
@@ -39,58 +40,60 @@ impl Db {
                 .prepare(r#"INSERT INTO "posting" VALUES (:transaction, :account, :amount)"#)
                 .map_err(|err| err.to_string())?;
 
-            for Transaction {
-                date,
-                description,
-                postings,
-                ..
-            } in ledger.transactions.iter()
-            {
-                insert_transaction
-                    .bind::<&[(_, Value)]>(
-                        &[
-                            (":date", date.to_string().into()),
-                            (":description", description.to_string().into()),
-                        ][..],
-                    )
-                    .map_err(|err| err.to_string())?;
-
-                let Ok(State::Done) = insert_transaction.next() else {
-                    return Err(
-                        "unexpected state while inserting transaction. Expected Done".to_string(),
-                    );
-                };
-
-                insert_transaction.reset().map_err(|err| err.to_string())?;
-
-                // TODO: https://github.com/stainless-steel/sqlite/pull/84
-                let transaction_id =
-                    unsafe { sqlite3_sys::sqlite3_last_insert_rowid(con.as_raw()) };
-
-                for Posting {
-                    account, amount, ..
-                } in postings
+            for (_, ledger) in check_unit.ledgers() {
+                for Transaction {
+                    date,
+                    description,
+                    postings,
+                    ..
+                } in ledger.transactions.iter()
                 {
-                    let account = account.path.join(":");
-                    let amount = amount.cents.to_string();
-
-                    insert_posting
+                    insert_transaction
                         .bind::<&[(_, Value)]>(
                             &[
-                                (":transaction", transaction_id.into()),
-                                (":account", account.into()),
-                                (":amount", amount.into()),
+                                (":date", date.to_string().into()),
+                                (":description", description.to_string().into()),
                             ][..],
                         )
                         .map_err(|err| err.to_string())?;
 
-                    let Ok(State::Done) = insert_posting.next() else {
+                    let Ok(State::Done) = insert_transaction.next() else {
                         return Err(
-                            "unexpected state while inserting posting. Expected Done".to_string()
+                            "unexpected state while inserting transaction. Expected Done"
+                                .to_string(),
                         );
                     };
 
-                    insert_posting.reset().map_err(|err| err.to_string())?;
+                    insert_transaction.reset().map_err(|err| err.to_string())?;
+
+                    // TODO: https://github.com/stainless-steel/sqlite/pull/84
+                    let transaction_id =
+                        unsafe { sqlite3_sys::sqlite3_last_insert_rowid(con.as_raw()) };
+
+                    for Posting {
+                        account, amount, ..
+                    } in postings
+                    {
+                        let account = account.path.join(":");
+                        let amount = amount.cents.to_string();
+
+                        insert_posting
+                            .bind::<&[(_, Value)]>(
+                                &[
+                                    (":transaction", transaction_id.into()),
+                                    (":account", account.into()),
+                                    (":amount", amount.into()),
+                                ][..],
+                            )
+                            .map_err(|err| err.to_string())?;
+
+                        let Ok(State::Done) = insert_posting.next() else {
+                            return Err("unexpected state while inserting posting. Expected Done"
+                                .to_string());
+                        };
+
+                        insert_posting.reset().map_err(|err| err.to_string())?;
+                    }
                 }
             }
         }
@@ -103,8 +106,11 @@ impl Db {
 
 #[cfg(test)]
 mod tests {
+    use std::{path::PathBuf, str::FromStr};
+
     use crate::Db;
     use bonk_ast_errorless::*;
+    use bonk_check::CheckUnit;
 
     #[test]
     fn test() {
@@ -162,7 +168,11 @@ mod tests {
             (2, "assets:my_checking", -1234),
         ];
 
-        let db = Db::new(&ledger, ":memory:").unwrap();
+        let db = Db::new(
+            &CheckUnit::one(&PathBuf::from_str("ledger.bonk").unwrap(), ledger),
+            ":memory:",
+        )
+        .unwrap();
 
         let mut stmt = db.con.prepare(r#"SELECT * FROM "transaction""#).unwrap();
 

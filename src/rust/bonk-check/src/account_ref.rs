@@ -5,9 +5,7 @@ use bonk_ast::Source;
 #[derive(Debug, PartialEq, Eq)]
 pub struct AccountRefError(pub Source);
 
-pub fn check_account_refs(
-    ledger: bonk_ast_errorless::Ledger,
-) -> Result<bonk_ast_errorless::Ledger, Vec<AccountRefError>> {
+pub fn check_account_refs(ledger: &bonk_ast_errorless::Ledger) -> Result<(), Vec<AccountRefError>> {
     let mut errors = vec![];
 
     let declared_accounts = ledger
@@ -29,7 +27,7 @@ pub fn check_account_refs(
     if !errors.is_empty() {
         Err(errors)
     } else {
-        Ok(ledger)
+        Ok(())
     }
 }
 
@@ -85,9 +83,7 @@ mod tests {
             source: None,
         };
 
-        let checked_ledger = check_account_refs(ledger.clone());
-
-        assert_eq!(checked_ledger, Ok(ledger));
+        assert!(check_account_refs(&ledger).is_ok())
     }
 
     #[test]
@@ -138,7 +134,7 @@ mod tests {
             source: None,
         };
 
-        let checked_ledger = check_account_refs(ledger.clone());
+        let checked_ledger = check_account_refs(&ledger);
 
         insta::assert_debug_snapshot!(checked_ledger, @r###"
         Err(

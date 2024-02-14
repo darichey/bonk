@@ -1,16 +1,18 @@
 use std::path::Path;
 
 use bonk_ast::Ledger;
-use bonk_check::{check, AccountRefError, BalanceError, CheckError, SyntaxError};
+use bonk_check::{AccountRefError, BalanceError, CheckError, CheckUnit, SyntaxError};
 use lsp_types::{Diagnostic, DiagnosticSeverity};
 
 use crate::util::SourceSpanExt;
 
-pub fn get_diagnostics(ledger: &Ledger, src: &str, path: Option<&Path>) -> Vec<Diagnostic> {
+pub fn get_diagnostics(ledger: &Ledger, src: &str, path: &Path) -> Vec<Diagnostic> {
     eprintln!("{}", src);
     eprintln!("{:?}", ledger);
 
-    match check(ledger, src, path) {
+    let check_unit = CheckUnit::one(path, ledger);
+
+    match check_unit.check(&CheckUnit::one(path, src)) {
         Ok(_) => vec![],
         Err(errs) => errs
             .into_iter()

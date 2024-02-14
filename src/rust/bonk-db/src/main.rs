@@ -1,5 +1,6 @@
 use std::{fs, path::PathBuf};
 
+use bonk_check::CheckUnit;
 use bonk_db::Db;
 use clap::Parser;
 
@@ -24,7 +25,10 @@ fn main() {
 
     let src = fs::read_to_string(&ledger_path).expect("Couldn't read ledger");
     let ledger = bonk_ast::Parser::new().parse(&src, None);
-    let ledger = bonk_check::check(&ledger, &src, Some(&ledger_path)).unwrap();
+    let check_unit = CheckUnit::one(&ledger_path, &ledger);
+    let check_unit = check_unit
+        .check(&CheckUnit::one(&ledger_path, &src))
+        .unwrap();
 
-    Db::new(&ledger, database).expect("Couldn't create database");
+    Db::new(&check_unit, database).expect("Couldn't create database");
 }
