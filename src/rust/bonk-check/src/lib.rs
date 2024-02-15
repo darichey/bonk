@@ -1,3 +1,5 @@
+// TODO: this whole crate really wants a nicer solution for applicative error handling
+
 mod account_ref;
 mod balance;
 mod import;
@@ -12,6 +14,7 @@ pub use balance::BalanceError;
 pub use import::ImportError;
 pub use syntax::SyntaxError;
 
+// TODO: replace this with a flat enum of error codes
 #[derive(Debug, PartialEq, Eq)]
 pub enum CheckError {
     AccountRefError(AccountRefError),
@@ -79,7 +82,7 @@ impl CheckUnit<&bonk_ast::Ledger> {
             errs.into_iter()
                 .map(CheckError::ImportError)
                 .collect::<Vec<_>>()
-        })?;
+        })?; // FIXME: don't short-circuit, these errors should accumulate
 
         errorless.check_account_refs().map_err(|errs| {
             errs.into_iter()
