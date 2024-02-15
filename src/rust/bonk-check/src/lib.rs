@@ -1,19 +1,22 @@
 mod account_ref;
 mod balance;
+mod import;
 mod syntax;
 
+use itertools::Itertools;
+use nonempty::{nonempty, NonEmpty};
 use std::path::{Path, PathBuf};
 
 pub use account_ref::AccountRefError;
 pub use balance::BalanceError;
-use itertools::Itertools;
-use nonempty::{nonempty, NonEmpty};
+pub use import::ImportError;
 pub use syntax::SyntaxError;
 
 #[derive(Debug, PartialEq, Eq)]
 pub enum CheckError {
     AccountRefError(AccountRefError),
     BalanceError(BalanceError),
+    ImportError(ImportError),
     SyntaxError(SyntaxError),
 }
 
@@ -31,6 +34,10 @@ impl<T> CheckUnit<T> {
     pub fn get_ledger(&self, path: &Path) -> Option<&T> {
         self.ledgers()
             .find_map(|(p, l)| if p == path { Some(l) } else { None })
+    }
+
+    pub fn push_ledger(&mut self, path: &Path, ledger: T) {
+        self.0.push((path.to_path_buf(), ledger))
     }
 }
 
@@ -68,6 +75,12 @@ impl CheckUnit<&bonk_ast::Ledger> {
                 .collect::<Vec<_>>()
         })?;
 
+        errorless.check_imports().map_err(|errs| {
+            errs.into_iter()
+                .map(CheckError::ImportError)
+                .collect::<Vec<_>>()
+        })?;
+
         errorless.check_account_refs().map_err(|errs| {
             errs.into_iter()
                 .map(CheckError::AccountRefError)
@@ -85,6 +98,23 @@ impl CheckUnit<&bonk_ast::Ledger> {
 }
 
 impl CheckUnit<bonk_ast_errorless::Ledger> {
+    fn check_imports(&self) -> Result<(), Vec<ImportError>> {
+        let mut errors = vec![];
+
+        for (path, ledger) in self.ledgers() {
+            match import::check_imports(path, ledger, self) {
+                Ok(_) => {}
+                Err(errs) => errors.extend(errs),
+            }
+        }
+
+        if errors.is_empty() {
+            Ok(())
+        } else {
+            Err(errors)
+        }
+    }
+
     fn check_account_refs(&self) -> Result<(), Vec<AccountRefError>> {
         let mut errors = vec![];
 

@@ -1,7 +1,7 @@
 use std::path::Path;
 
 use bonk_ast::Ledger;
-use bonk_check::{AccountRefError, BalanceError, CheckError, CheckUnit, SyntaxError};
+use bonk_check::{AccountRefError, BalanceError, CheckError, CheckUnit, ImportError, SyntaxError};
 use lsp_types::{Diagnostic, DiagnosticSeverity};
 
 use crate::util::SourceSpanExt;
@@ -35,6 +35,17 @@ pub fn get_diagnostics(ledger: &Ledger, src: &str, path: &Path) -> Vec<Diagnosti
                     code_description: None,
                     source: Some("bonk".to_string()),
                     message: "transaction doesn't balance".to_string(),
+                    related_information: None,
+                    tags: None,
+                    data: None,
+                },
+                CheckError::ImportError(ImportError(source)) => Diagnostic {
+                    range: source.span.into_lsp_range(),
+                    severity: Some(DiagnosticSeverity::ERROR),
+                    code: None,
+                    code_description: None,
+                    source: Some("bonk".to_string()),
+                    message: "can't import".to_string(),
                     related_information: None,
                     tags: None,
                     data: None,
