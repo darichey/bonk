@@ -6,7 +6,6 @@ mod import;
 mod syntax;
 
 use itertools::Itertools;
-use nonempty::{nonempty, NonEmpty};
 use std::path::{Path, PathBuf};
 
 pub use account_ref::AccountRefError;
@@ -23,11 +22,11 @@ pub enum CheckError {
     SyntaxError(SyntaxError),
 }
 
-pub struct CheckUnit<T>(NonEmpty<(PathBuf, T)>);
+pub struct CheckUnit<T>(Vec<(PathBuf, T)>);
 
 impl<T> CheckUnit<T> {
-    pub fn one(path: &Path, ledger: T) -> Self {
-        Self(nonempty![(path.to_path_buf(), ledger)])
+    pub fn new(ledgers: Vec<(PathBuf, T)>) -> Self {
+        Self(ledgers)
     }
 
     pub fn ledgers(&self) -> impl Iterator<Item = &(PathBuf, T)> + '_ {
@@ -62,9 +61,7 @@ impl CheckUnit<&bonk_ast::Ledger> {
         if !errors.is_empty() {
             Err(errors.into_iter().flatten().collect())
         } else {
-            Ok(CheckUnit(
-                NonEmpty::from_vec(ledgers).expect("errors was empty but so was ledgers"),
-            ))
+            Ok(CheckUnit(ledgers))
         }
     }
 

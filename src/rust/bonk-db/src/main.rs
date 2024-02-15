@@ -25,9 +25,9 @@ fn main() {
 
     let src = fs::read_to_string(&ledger_path).expect("Couldn't read ledger");
     let ledger = bonk_ast::Parser::new().parse(&src, None);
-    let check_unit = CheckUnit::one(&ledger_path, &ledger);
+    let check_unit = CheckUnit::new(vec![(ledger_path.clone(), &ledger)]);
     let check_unit = check_unit
-        .check(&CheckUnit::one(&ledger_path, &src))
+        .check(&CheckUnit::new(vec![(ledger_path, &src)]))
         .unwrap();
 
     Db::new(&check_unit, database).expect("Couldn't create database");

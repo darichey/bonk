@@ -169,7 +169,7 @@ mod tests {
         ];
 
         let db = Db::new(
-            &CheckUnit::one(&PathBuf::from_str("ledger.bonk").unwrap(), ledger),
+            &CheckUnit::new(vec![(PathBuf::from_str("ledger.bonk").unwrap(), ledger)]),
             ":memory:",
         )
         .unwrap();

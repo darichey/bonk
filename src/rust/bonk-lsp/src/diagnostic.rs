@@ -10,9 +10,9 @@ pub fn get_diagnostics(ledger: &Ledger, src: &str, path: &Path) -> Vec<Diagnosti
     eprintln!("{}", src);
     eprintln!("{:?}", ledger);
 
-    let check_unit = CheckUnit::one(path, ledger);
+    let check_unit = CheckUnit::new(vec![(path.to_path_buf(), ledger)]);
 
-    match check_unit.check(&CheckUnit::one(path, src)) {
+    match check_unit.check(&CheckUnit::new(vec![(path.to_path_buf(), src)])) {
         Ok(_) => vec![],
         Err(errs) => errs
             .into_iter()

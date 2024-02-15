@@ -71,7 +71,7 @@ mod tests {
             source: None,
         };
 
-        let mut check_unit = CheckUnit::one(&PathBuf::from_str(path_a).unwrap(), ledger_a);
+        let mut check_unit = CheckUnit::new(vec![(PathBuf::from_str(path_a).unwrap(), ledger_a)]);
         check_unit.push_ledger(&PathBuf::from_str(path_b).unwrap(), ledger_b.clone());
 
         assert!(check_imports(&PathBuf::from_str(path_b).unwrap(), &ledger_b, &check_unit).is_ok());
@@ -100,7 +100,8 @@ mod tests {
             source: None,
         };
 
-        let check_unit = CheckUnit::one(&PathBuf::from_str(path_a).unwrap(), ledger_a.clone());
+        let check_unit =
+            CheckUnit::new(vec![(PathBuf::from_str(path_a).unwrap(), ledger_a.clone())]);
 
         let checked_ledger =
             check_imports(&PathBuf::from_str(path_a).unwrap(), &ledger_a, &check_unit);
@@ -151,7 +152,8 @@ mod tests {
             source: None,
         };
 
-        let check_unit = CheckUnit::one(&PathBuf::from_str(path_a).unwrap(), ledger_a.clone());
+        let check_unit =
+            CheckUnit::new(vec![(PathBuf::from_str(path_a).unwrap(), ledger_a.clone())]);
 
         let checked_ledger =
             check_imports(&PathBuf::from_str(path_a).unwrap(), &ledger_a, &check_unit);
