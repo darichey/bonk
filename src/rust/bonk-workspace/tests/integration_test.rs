@@ -1,6 +1,6 @@
 use std::path::PathBuf;
 
-use bonk_cfg::Workspace;
+use bonk_workspace::Workspace;
 
 #[test]
 fn test() {

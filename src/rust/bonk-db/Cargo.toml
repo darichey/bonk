@@ -9,6 +9,7 @@ edition = "2021"
 bonk-ast = { path = "../bonk-ast" }
 bonk-ast-errorless = { path = "../bonk-ast-errorless" }
 bonk-check = { path = "../bonk-check" }
+bonk-workspace = { path = "../bonk-workspace" }
 clap = { version = "4.4.13", features = ["derive"] }
 sqlite = "0.32.0"
 sqlite3-sys = "0.15.2"

@@ -2,7 +2,6 @@
 members = [
     "bonk-ast",
     "bonk-ast-errorless",
-    "bonk-cfg",
     "bonk-check",
     "bonk-csv",
     "bonk-dashboard",
@@ -10,6 +9,7 @@ members = [
     "bonk-http",
     "bonk-lsp",
     "bonk-plaid",
+    "bonk-workspace",
     "plaid",
     "tree-sitter-bonk",
 ]

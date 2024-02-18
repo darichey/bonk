@@ -1,12 +1,12 @@
 use std::{
     collections::{hash_map::Entry, HashMap},
-    fs,
     path::PathBuf,
     sync::{Arc, Mutex},
 };
 
-use bonk_check::CheckUnit;
+use bonk_check::WorkspaceExt;
 use bonk_db::Db;
+use bonk_workspace::Workspace;
 use clap::Parser;
 use rouille::{router, Request, Response, Server};
 use serde::Serialize;
@@ -20,9 +20,9 @@ impl State {}
 #[derive(Parser, Debug)]
 #[command()]
 struct Args {
-    /// Path to the Bonk ledger.
+    /// Path to the Bonk workspace config.
     #[arg(short, long)]
-    ledger: PathBuf,
+    cfg: PathBuf,
 }
 
 #[derive(Serialize)]
@@ -77,19 +77,13 @@ fn get_transactions(_request: &Request, state: Arc<Mutex<State>>) -> Response {
 
 fn main() {
     let state = {
-        let Args {
-            ledger: ledger_path,
-        } = Args::parse();
+        let Args { cfg } = Args::parse();
 
-        let src = fs::read_to_string(&ledger_path).expect("Couldn't read ledger");
-        let ledger = bonk_ast::Parser::new().parse(&src, None);
-        let check_unit = CheckUnit::new(vec![(ledger_path.clone(), &ledger)]);
-        let check_unit = check_unit
-            .check(&CheckUnit::new(vec![(ledger_path, &src)]))
-            .unwrap();
+        let workspace = Workspace::from_cfg(&cfg).expect("Couldn't read cfg");
+        let workspace = workspace.check().unwrap();
 
         let state = State {
-            db: Db::new(&check_unit, ":memory:").expect("Couldn't create database"),
+            db: Db::new(&workspace, ":memory:").expect("Couldn't create database"),
         };
 
         Arc::new(Mutex::new(state))

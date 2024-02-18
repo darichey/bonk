@@ -1,7 +1,7 @@
 use std::path::Path;
 
-use bonk_ast_errorless::{Ledger, Posting, Transaction};
-use bonk_check::CheckUnit;
+use bonk_ast_errorless::{Posting, Transaction};
+use bonk_check::CheckedWorkspace;
 use sqlite::{Connection, State, Value};
 
 pub struct Db {
@@ -9,7 +9,7 @@ pub struct Db {
 }
 
 impl Db {
-    pub fn new<T: AsRef<Path>>(check_unit: &CheckUnit<Ledger>, path: T) -> Result<Db, String> {
+    pub fn new<T: AsRef<Path>>(workspace: &CheckedWorkspace, path: T) -> Result<Db, String> {
         let con = Connection::open(path).map_err(|err| err.to_string())?;
 
         con.execute(
@@ -40,7 +40,7 @@ impl Db {
                 .prepare(r#"INSERT INTO "posting" VALUES (:transaction, :account, :amount)"#)
                 .map_err(|err| err.to_string())?;
 
-            for (_, ledger) in check_unit.ledgers() {
+            for (_, ledger) in workspace.ledgers() {
                 for Transaction {
                     date,
                     description,

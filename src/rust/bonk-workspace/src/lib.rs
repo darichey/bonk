@@ -1,7 +1,7 @@
 use glob::glob;
 use serde::Deserialize;
 use std::{
-    fs,
+    fs, io,
     path::{Path, PathBuf},
 };
 
@@ -40,5 +40,12 @@ impl Workspace {
         glob(pattern.as_str())
             .expect("failed to read glob pattern") // TODO: validate the glob pattern in read()
             .filter_map(|entry| entry.ok())
+    }
+
+    pub fn read_ledgers(&self) -> impl Iterator<Item = (PathBuf, Result<String, io::Error>)> + '_ {
+        self.included_paths().map(|path| {
+            let src = fs::read_to_string(&path);
+            (path, src)
+        })
     }
 }

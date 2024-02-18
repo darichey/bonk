@@ -5,6 +5,7 @@ mod balance;
 mod import;
 mod syntax;
 
+use bonk_workspace::Workspace;
 use itertools::Itertools;
 use std::path::{Path, PathBuf};
 
@@ -147,5 +148,17 @@ impl CheckUnit<bonk_ast_errorless::Ledger> {
         } else {
             Err(errors)
         }
+    }
+}
+
+pub type CheckedWorkspace = CheckUnit<bonk_ast_errorless::Ledger>;
+
+pub trait WorkspaceExt {
+    fn check(&self) -> Result<CheckedWorkspace, ()>;
+}
+
+impl WorkspaceExt for Workspace {
+    fn check(&self) -> Result<CheckedWorkspace, ()> {
+        todo!()
     }
 }

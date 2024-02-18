@@ -192,20 +192,12 @@ dependencies = [
 ]
 
 [[package]]
-name = "bonk-cfg"
-version = "0.1.0"
-dependencies = [
- "glob",
- "serde",
- "toml",
-]
-
-[[package]]
 name = "bonk-check"
 version = "0.1.0"
 dependencies = [
  "bonk-ast",
  "bonk-ast-errorless",
+ "bonk-workspace",
  "insta",
  "itertools",
  "tree-sitter",
@@ -237,6 +229,7 @@ dependencies = [
  "bonk-ast",
  "bonk-ast-errorless",
  "bonk-check",
+ "bonk-workspace",
  "clap",
  "sqlite",
  "sqlite3-sys",
@@ -249,6 +242,7 @@ dependencies = [
  "bonk-ast",
  "bonk-check",
  "bonk-db",
+ "bonk-workspace",
  "clap",
  "rouille",
  "serde",
@@ -278,6 +272,15 @@ dependencies = [
  "rouille",
  "serde",
  "webbrowser",
+]
+
+[[package]]
+name = "bonk-workspace"
+version = "0.1.0"
+dependencies = [
+ "glob",
+ "serde",
+ "toml",
 ]
 
 [[package]]

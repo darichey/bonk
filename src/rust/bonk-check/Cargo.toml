@@ -8,6 +8,7 @@ edition = "2021"
 [dependencies]
 bonk-ast = { path = "../bonk-ast" }
 bonk-ast-errorless = { path = "../bonk-ast-errorless" }
+bonk-workspace = { path = "../bonk-workspace" }
 itertools = "0.12.0"
 
 [dev-dependencies]
