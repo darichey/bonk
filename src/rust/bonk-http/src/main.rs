@@ -4,8 +4,9 @@ use std::{
     sync::{Arc, Mutex},
 };
 
-use bonk_check::WorkspaceExt;
+use bonk_check::WorkspaceExt as _;
 use bonk_db::Db;
+use bonk_parse::WorkspaceExt as _;
 use bonk_workspace::Workspace;
 use clap::Parser;
 use rouille::{router, Request, Response, Server};
@@ -80,6 +81,7 @@ fn main() {
         let Args { cfg } = Args::parse();
 
         let workspace = Workspace::from_cfg(&cfg).expect("Couldn't read cfg");
+        let workspace = workspace.parse().unwrap();
         let workspace = workspace.check().unwrap();
 
         let state = State {

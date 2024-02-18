@@ -1,4 +1,4 @@
-use bonk_ast::Source;
+use bonk_parse::ast::Source;
 
 mod ser;
 

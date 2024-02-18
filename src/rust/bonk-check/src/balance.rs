@@ -1,4 +1,4 @@
-use bonk_ast::Source;
+use bonk_parse::ast::Source;
 
 #[derive(Debug, PartialEq, Eq)]
 pub struct BalanceError(pub Source);
@@ -30,7 +30,7 @@ pub fn check_balance(ledger: &bonk_ast_errorless::Ledger) -> Result<(), Vec<Bala
 mod tests {
     use std::path::PathBuf;
 
-    use bonk_ast::{Source, SourceSpan};
+    use bonk_parse::ast::{Source, SourceSpan};
     use bonk_ast_errorless::*;
 
     use super::check_balance;

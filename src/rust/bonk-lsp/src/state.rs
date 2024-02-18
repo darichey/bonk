@@ -1,92 +1,63 @@
-use std::collections::HashMap;
+use std::path::PathBuf;
 
-use bonk_ast::{byte_offset_to_position, position_to_byte_offset, Ledger, Parser};
+use bonk_parse::{ParsedLedger, ParsedWorkspace};
 use lsp_types::{Range, TextDocumentContentChangeEvent, Url};
 
-pub struct Document {
-    pub src: String,
-    pub ledger: Ledger,
-    parser: Parser,
-}
-
 pub struct State {
-    files: HashMap<Url, Document>,
+    workspace: ParsedWorkspace,
 }
 
 impl State {
     pub fn new() -> Self {
         Self {
-            files: HashMap::new(),
+            workspace: ParsedWorkspace::new(),
         }
     }
 
-    pub fn get_doc(&self, uri: &Url) -> Option<&Document> {
-        self.files.get(uri)
+    pub fn get_ledger(&self, uri: &Url) -> Option<&ParsedLedger> {
+        let path = PathBuf::from(uri.as_ref());
+        self.workspace.ledgers.get(&path)
     }
 
     pub fn on_open(&mut self, uri: Url, src: String) {
-        let mut parser = Parser::new();
-        let ledger = parser.parse(&src, None);
-
-        self.files.insert(
-            uri,
-            Document {
-                src,
-                ledger,
-                parser,
-            },
-        );
+        let path = PathBuf::from(uri.as_ref());
+        self.workspace.parse_new(path, src)
     }
 
     pub fn on_change(&mut self, uri: &Url, changes: Vec<TextDocumentContentChangeEvent>) {
-        let Document {
-            src,
-            ledger,
-            parser,
-        } = self
-            .files
-            .get_mut(uri)
-            .expect("we don't know about the file");
+        let path = PathBuf::from(uri.as_ref());
 
         for change in changes {
-            let old_src = src.clone();
-
             if let Some(Range { start, end }) = change.range {
                 let start_line = start.line as usize;
                 let start_col = start.character as usize;
                 let end_line = end.line as usize;
                 let end_col = end.character as usize;
 
-                let start_byte = position_to_byte_offset(src, start_line, start_col);
-                let end_byte = position_to_byte_offset(src, end_line, end_col);
-
-                src.replace_range(start_byte..end_byte, &change.text);
-                ledger.edit(
-                    &old_src,
-                    src,
+                self.workspace.parse_changed(
+                    path.clone(),
+                    change.text,
                     start_line,
                     start_col,
                     end_line,
                     end_col,
-                    change.text.len(),
-                );
+                )
             } else {
-                *src = change.text;
-                let (end_line, end_col) = byte_offset_to_position(src, src.len());
-                ledger.edit(&old_src, src, 0, 0, end_line, end_col, src.len());
+                self.workspace.parse_replaced(path.clone(), change.text)
             }
         }
-
-        *ledger = parser.parse(src, Some(ledger));
     }
 
     pub fn on_close(&mut self, uri: &Url) {
-        self.files.remove(uri);
+        let path = PathBuf::from(uri.as_ref());
+        self.workspace.remove(&path);
     }
 }
 
 #[cfg(test)]
 mod tests {
+    use std::path::PathBuf;
+
     use lsp_types::{Position, Range, TextDocumentContentChangeEvent, Url};
 
     use super::State;
@@ -99,7 +70,9 @@ mod tests {
     ) {
         state.on_change(uri, changes);
 
-        assert_eq!(state.files.get(uri).unwrap().src, new_src);
+        let path = PathBuf::from(uri.as_ref());
+
+        assert_eq!(state.workspace.ledgers.get(&path).unwrap().src, new_src);
     }
 
     #[test]

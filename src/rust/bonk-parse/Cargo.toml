@@ -1,9 +1,12 @@
 [package]
-name = "bonk-ast"
+name = "bonk-parse"
 version = "0.1.0"
 edition = "2021"
 
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
 [dependencies]
+bonk-workspace = { path = "../bonk-workspace" }
 tree-sitter = "~0.20.10"
 tree-sitter-bonk = { path = "../tree-sitter-bonk" }
 

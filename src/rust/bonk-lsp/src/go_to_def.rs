@@ -1,4 +1,4 @@
-use bonk_ast::{Ledger, SourceSpan};
+use bonk_parse::ast::{Ledger, SourceSpan};
 use lsp_types::{Location, Position, Url};
 
 use crate::util::SourceSpanExt;

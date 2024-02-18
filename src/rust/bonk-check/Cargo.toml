@@ -6,8 +6,8 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-bonk-ast = { path = "../bonk-ast" }
 bonk-ast-errorless = { path = "../bonk-ast-errorless" }
+bonk-parse = { path = "../bonk-parse" }
 bonk-workspace = { path = "../bonk-workspace" }
 itertools = "0.12.0"
 

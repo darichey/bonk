@@ -174,19 +174,10 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "327762f6e5a765692301e5bb513e0d9fef63be86bbc14528052b1cd3e6f03e07"
 
 [[package]]
-name = "bonk-ast"
-version = "0.1.0"
-dependencies = [
- "insta",
- "tree-sitter",
- "tree-sitter-bonk",
-]
-
-[[package]]
 name = "bonk-ast-errorless"
 version = "0.1.0"
 dependencies = [
- "bonk-ast",
+ "bonk-parse",
  "insta",
  "serde",
 ]
@@ -195,8 +186,8 @@ dependencies = [
 name = "bonk-check"
 version = "0.1.0"
 dependencies = [
- "bonk-ast",
  "bonk-ast-errorless",
+ "bonk-parse",
  "bonk-workspace",
  "insta",
  "itertools",
@@ -226,9 +217,9 @@ dependencies = [
 name = "bonk-db"
 version = "0.1.0"
 dependencies = [
- "bonk-ast",
  "bonk-ast-errorless",
  "bonk-check",
+ "bonk-parse",
  "bonk-workspace",
  "clap",
  "sqlite",
@@ -239,9 +230,9 @@ dependencies = [
 name = "bonk-http"
 version = "0.1.0"
 dependencies = [
- "bonk-ast",
  "bonk-check",
  "bonk-db",
+ "bonk-parse",
  "bonk-workspace",
  "clap",
  "rouille",
@@ -252,13 +243,23 @@ dependencies = [
 name = "bonk-lsp"
 version = "0.1.0"
 dependencies = [
- "bonk-ast",
  "bonk-ast-errorless",
  "bonk-check",
+ "bonk-parse",
  "lsp-server",
  "lsp-types",
  "serde",
  "serde_json",
+]
+
+[[package]]
+name = "bonk-parse"
+version = "0.1.0"
+dependencies = [
+ "bonk-workspace",
+ "insta",
+ "tree-sitter",
+ "tree-sitter-bonk",
 ]
 
 [[package]]

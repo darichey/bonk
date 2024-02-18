@@ -1,6 +1,6 @@
 use std::path::Path;
 
-use bonk_ast::{Source, SourceSpan};
+use bonk_parse::ast::{Source, SourceSpan};
 use bonk_ast_errorless::Date;
 use itertools::Itertools;
 
@@ -8,7 +8,7 @@ use itertools::Itertools;
 pub struct SyntaxError(pub SourceSpan);
 
 pub fn check_syntax(
-    ledger: &bonk_ast::Ledger,
+    ledger: &bonk_parse::ast::Ledger,
     src: &str,
     path: Option<&Path>,
 ) -> Result<bonk_ast_errorless::Ledger, Vec<SyntaxError>> {
@@ -21,7 +21,7 @@ pub fn check_syntax(
 }
 
 fn convert_ledger(
-    ledger: &bonk_ast::Ledger,
+    ledger: &bonk_parse::ast::Ledger,
     src: &str,
     path: Option<&Path>,
 ) -> Result<bonk_ast_errorless::Ledger, Vec<SyntaxError>> {
@@ -65,7 +65,7 @@ fn convert_ledger(
 }
 
 fn convert_transaction(
-    transaction: bonk_ast::Transaction,
+    transaction: bonk_parse::ast::Transaction,
     src: &str,
     path: Option<&Path>,
 ) -> Result<bonk_ast_errorless::Transaction, Vec<SyntaxError>> {
@@ -122,7 +122,7 @@ fn convert_transaction(
 }
 
 fn convert_posting(
-    posting: bonk_ast::Posting,
+    posting: bonk_parse::ast::Posting,
     src: &str,
     path: Option<&Path>,
 ) -> Result<bonk_ast_errorless::Posting, Vec<SyntaxError>> {
@@ -161,7 +161,7 @@ fn convert_posting(
 }
 
 fn convert_account(
-    account: bonk_ast::Account,
+    account: bonk_parse::ast::Account,
     src: &str,
     path: Option<&Path>,
 ) -> bonk_ast_errorless::Account {
@@ -179,7 +179,7 @@ fn convert_account(
 }
 
 fn convert_amount(
-    amount: bonk_ast::Amount,
+    amount: bonk_parse::ast::Amount,
     src: &str,
     path: Option<&Path>,
 ) -> Result<bonk_ast_errorless::Amount, Vec<SyntaxError>> {
@@ -197,7 +197,7 @@ fn convert_amount(
 }
 
 fn convert_declared_account(
-    account: bonk_ast::DeclareAccount,
+    account: bonk_parse::ast::DeclareAccount,
     src: &str,
     path: Option<&Path>,
 ) -> Result<bonk_ast_errorless::DeclareAccount, Vec<SyntaxError>> {
@@ -214,7 +214,7 @@ fn convert_declared_account(
 }
 
 fn convert_import(
-    import: bonk_ast::Import,
+    import: bonk_parse::ast::Import,
     src: &str,
     path: Option<&Path>,
 ) -> Result<bonk_ast_errorless::Import, Vec<SyntaxError>> {
@@ -245,7 +245,7 @@ mod tests {
     expenses:fast_food         10.91
     liabilities:my_credit_card -10.91"#;
 
-        let ledger = bonk_ast::Parser::new().parse(src, None);
+        let ledger = bonk_parse::Parser::new().parse(src, None);
         let ledger = check_syntax(&ledger, src, Some(&path));
 
         insta::assert_debug_snapshot!(ledger, @r###"
@@ -472,7 +472,7 @@ mod tests {
 expenses:fast_food         10.91
 liabilities:my_credit_card -10.91"#;
 
-        let ledger = bonk_ast::Parser::new().parse(src, None);
+        let ledger = bonk_parse::Parser::new().parse(src, None);
         let ledger = check_syntax(&ledger, src, Some(&path));
 
         insta::assert_debug_snapshot!(ledger, @r###"

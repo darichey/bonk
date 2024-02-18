@@ -88,7 +88,7 @@ fn main_loop(
                     Ok((id, params)) => {
                         if let Some("bonk") = params.identifier.as_deref() {
                             let doc = state
-                                .get_doc(&params.text_document.uri)
+                                .get_ledger(&params.text_document.uri)
                                 .expect("we don't know about this file");
 
                             let result = DocumentDiagnosticReport::Full(
@@ -127,7 +127,7 @@ fn main_loop(
                     Ok((id, params)) => {
                         let params = params.text_document_position_params;
                         let doc = state
-                            .get_doc(&params.text_document.uri)
+                            .get_ledger(&params.text_document.uri)
                             .expect("we don't know about this file");
 
                         let result = get_go_to_def_result(

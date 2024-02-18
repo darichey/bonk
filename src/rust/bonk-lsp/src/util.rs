@@ -1,4 +1,4 @@
-use bonk_ast::SourceSpan;
+use bonk_parse::ast::SourceSpan;
 use lsp_types::{Position, Range};
 
 pub trait SourceSpanExt {

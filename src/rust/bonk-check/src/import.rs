@@ -3,7 +3,7 @@ use std::{
     str::FromStr,
 };
 
-use bonk_ast::Source;
+use bonk_parse::ast::Source;
 
 use crate::CheckUnit;
 
@@ -45,7 +45,7 @@ pub fn check_imports(
 mod tests {
     use std::{path::PathBuf, str::FromStr};
 
-    use bonk_ast::{Source, SourceSpan};
+    use bonk_parse::ast::{Source, SourceSpan};
     use bonk_ast_errorless::{Import, Ledger};
 
     use crate::{import::check_imports, CheckUnit};

@@ -1,6 +1,5 @@
 [workspace]
 members = [
-    "bonk-ast",
     "bonk-ast-errorless",
     "bonk-check",
     "bonk-csv",
@@ -8,6 +7,7 @@ members = [
     "bonk-db",
     "bonk-http",
     "bonk-lsp",
+    "bonk-parse",
     "bonk-plaid",
     "bonk-workspace",
     "plaid",

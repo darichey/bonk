@@ -7,7 +7,7 @@ edition = "2021"
 
 [dependencies]
 serde = "1.0.194"
-bonk-ast = { path = "../bonk-ast" }
+bonk-parse = { path = "../bonk-parse" }
 
 [dev-dependencies]
 insta = "1.34.0"

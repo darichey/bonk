@@ -1,6 +1,6 @@
 use std::collections::HashSet;
 
-use bonk_ast::Source;
+use bonk_parse::ast::Source;
 
 #[derive(Debug, PartialEq, Eq)]
 pub struct AccountRefError(pub Source);
@@ -35,7 +35,7 @@ pub fn check_account_refs(ledger: &bonk_ast_errorless::Ledger) -> Result<(), Vec
 mod tests {
     use std::path::PathBuf;
 
-    use bonk_ast::{Source, SourceSpan};
+    use bonk_parse::ast::{Source, SourceSpan};
     use bonk_ast_errorless::*;
 
     use crate::account_ref::check_account_refs;

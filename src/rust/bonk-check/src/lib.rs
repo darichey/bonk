@@ -5,7 +5,7 @@ mod balance;
 mod import;
 mod syntax;
 
-use bonk_workspace::Workspace;
+use bonk_parse::ParsedWorkspace;
 use itertools::Itertools;
 use std::path::{Path, PathBuf};
 
@@ -44,7 +44,7 @@ impl<T> CheckUnit<T> {
     }
 }
 
-impl CheckUnit<&bonk_ast::Ledger> {
+impl CheckUnit<bonk_parse::ast::Ledger> {
     fn check_syntax(
         self,
         srcs: &CheckUnit<&str>,
@@ -54,7 +54,7 @@ impl CheckUnit<&bonk_ast::Ledger> {
             .into_iter()
             .map(|(path, ledger)| {
                 let src = srcs.get_ledger(&path).unwrap(); // FIXME
-                let ledger = syntax::check_syntax(ledger, src, Some(&path))?;
+                let ledger = syntax::check_syntax(&ledger, src, Some(&path))?;
                 Ok((path, ledger))
             })
             .partition_result();
@@ -157,7 +157,7 @@ pub trait WorkspaceExt {
     fn check(&self) -> Result<CheckedWorkspace, ()>;
 }
 
-impl WorkspaceExt for Workspace {
+impl WorkspaceExt for ParsedWorkspace {
     fn check(&self) -> Result<CheckedWorkspace, ()> {
         todo!()
     }
