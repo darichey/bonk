@@ -1,8 +1,24 @@
-use std::path::Path;
+use std::path::{Path, PathBuf};
 
 use bonk_ast_errorless::{Posting, Transaction};
-use bonk_check::CheckedWorkspace;
+use bonk_check::{CheckedWorkspace, WorkspaceExt as _};
+use bonk_parse::WorkspaceExt as _;
+use bonk_workspace::Workspace;
 use sqlite::{Connection, State, Value};
+
+// TODO errors with anyhow
+pub fn create_db(cfg: PathBuf, database: PathBuf) -> Result<Db, String> {
+    let workspace = Workspace::from_cfg(&cfg).expect("Couldn't read cfg");
+    let workspace = workspace.parse().map_err(|err| err.to_string())?;
+    let workspace = workspace.check().map_err(|err| {
+        err.into_iter()
+            .map(|err| format!("{:?}", err))
+            .collect::<Vec<_>>()
+            .join("\n")
+    })?;
+
+    Ok(Db::new(&workspace, database).expect("Couldn't create database"))
+}
 
 pub struct Db {
     pub con: Connection,

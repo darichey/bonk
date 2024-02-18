@@ -5,7 +5,7 @@ mod balance;
 mod import;
 mod syntax;
 
-use bonk_parse::ParsedWorkspace;
+use bonk_parse::{ParsedLedger, ParsedWorkspace};
 use itertools::Itertools;
 use std::path::{Path, PathBuf};
 
@@ -44,7 +44,7 @@ impl<T> CheckUnit<T> {
     }
 }
 
-impl CheckUnit<bonk_parse::ast::Ledger> {
+impl CheckUnit<&bonk_parse::ast::Ledger> {
     fn check_syntax(
         self,
         srcs: &CheckUnit<&str>,
@@ -54,7 +54,7 @@ impl CheckUnit<bonk_parse::ast::Ledger> {
             .into_iter()
             .map(|(path, ledger)| {
                 let src = srcs.get_ledger(&path).unwrap(); // FIXME
-                let ledger = syntax::check_syntax(&ledger, src, Some(&path))?;
+                let ledger = syntax::check_syntax(ledger, src, Some(&path))?;
                 Ok((path, ledger))
             })
             .partition_result();
@@ -154,11 +154,22 @@ impl CheckUnit<bonk_ast_errorless::Ledger> {
 pub type CheckedWorkspace = CheckUnit<bonk_ast_errorless::Ledger>;
 
 pub trait WorkspaceExt {
-    fn check(&self) -> Result<CheckedWorkspace, ()>;
+    fn check(&self) -> Result<CheckedWorkspace, Vec<CheckError>>;
 }
 
 impl WorkspaceExt for ParsedWorkspace {
-    fn check(&self) -> Result<CheckedWorkspace, ()> {
-        todo!()
+    fn check(&self) -> Result<CheckedWorkspace, Vec<CheckError>> {
+        let mut srcs = vec![];
+        let mut ledgers = vec![];
+
+        for (path, ParsedLedger { src, ledger, .. }) in &self.ledgers {
+            srcs.push((path.clone(), src.as_str()));
+            ledgers.push((path.clone(), ledger));
+        }
+
+        let srcs = CheckUnit::new(srcs);
+        let check_unit = CheckUnit::new(ledgers);
+
+        check_unit.check(&srcs)
     }
 }

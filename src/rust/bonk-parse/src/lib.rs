@@ -1,7 +1,7 @@
 pub mod ast;
 mod util;
 
-use std::{collections::HashMap, path::PathBuf};
+use std::{collections::HashMap, io, path::PathBuf};
 
 use bonk_workspace::Workspace;
 use util::{byte_offset_to_position, edit_ledger, position_to_byte_offset};
@@ -131,11 +131,29 @@ impl Default for ParsedWorkspace {
 }
 
 pub trait WorkspaceExt {
-    fn parse(&self) -> Result<ParsedWorkspace, ()>;
+    fn parse(&self) -> Result<ParsedWorkspace, io::Error>;
 }
 
 impl WorkspaceExt for Workspace {
-    fn parse(&self) -> Result<ParsedWorkspace, ()> {
-        todo!()
+    fn parse(&self) -> Result<ParsedWorkspace, io::Error> {
+        Ok(ParsedWorkspace {
+            ledgers: self
+                .read_ledgers()
+                .map(|(path, src)| {
+                    let src = src?;
+                    let mut parser = Parser::new();
+                    let ledger = parser.parse(&src, None);
+
+                    Ok((
+                        path,
+                        ParsedLedger {
+                            src,
+                            ledger,
+                            parser,
+                        },
+                    ))
+                })
+                .collect::<Result<HashMap<_, _>, io::Error>>()?,
+        })
     }
 }
