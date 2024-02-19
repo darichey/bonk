@@ -2,9 +2,10 @@ use crate::plaid_config;
 use crate::plaid_get_access_token;
 use crate::plaid_get_transactions;
 use crate::PlaidTransaction;
+use anyhow::Result;
 use bonk_ast_errorless::{Account, Amount, Date, Ledger, Posting, Transaction};
 use clap::Parser;
-use std::{error::Error, fs, path::PathBuf};
+use std::{fs, path::PathBuf};
 
 /// Produces a partial Bonk ledger by converting transactions fetched via Plaid.
 #[derive(Parser, Debug)]
@@ -27,7 +28,7 @@ pub struct Args {
     pub output: PathBuf,
 }
 
-pub fn run(args: Args) -> Result<(), Box<dyn Error>> {
+pub fn run(args: Args) -> Result<()> {
     let Args {
         start_date,
         end_date,

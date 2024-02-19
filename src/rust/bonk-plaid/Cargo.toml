@@ -13,3 +13,4 @@ rouille = "3.6.2"
 reqwest = "~0.9"
 webbrowser = "0.8.12"
 clap = { version = "4.4.13", features = ["derive"] }
+anyhow = "1.0.80"

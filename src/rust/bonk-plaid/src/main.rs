@@ -1,8 +1,8 @@
+use anyhow::Result;
 use bonk_plaid::cli;
 use clap::Parser;
-use std::error::Error;
 
-fn main() -> Result<(), Box<dyn Error>> {
+fn main() -> Result<()> {
     let args = cli::Args::parse();
     cli::run(args)
 }

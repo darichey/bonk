@@ -1,10 +1,9 @@
-use std::error::Error;
-
+use anyhow::Result;
 use clap::Parser;
 
 use bonk_lsp::cli;
 
-fn main() -> Result<(), Box<dyn Error + Send + Sync>> {
+fn main() -> Result<()> {
     let args = cli::Args::parse();
     cli::run(args)
 }

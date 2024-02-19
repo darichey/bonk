@@ -1,5 +1,6 @@
-use std::{error::Error, fs, path::PathBuf};
+use std::{fs, path::PathBuf};
 
+use anyhow::Result;
 use clap::Parser;
 
 use crate::do_convert;
@@ -21,7 +22,7 @@ pub struct Args {
     pub output: PathBuf,
 }
 
-pub fn run(args: Args) -> Result<(), Box<dyn Error>> {
+pub fn run(args: Args) -> Result<()> {
     let Args {
         account,
         input,

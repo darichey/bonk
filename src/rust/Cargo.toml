@@ -2,6 +2,7 @@
 members = [
     "bonk-ast-errorless",
     "bonk-check",
+    "bonk-cli",
     "bonk-csv",
     "bonk-dashboard",
     "bonk-db",

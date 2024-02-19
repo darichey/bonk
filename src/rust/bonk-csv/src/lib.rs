@@ -1,7 +1,8 @@
 pub mod cli;
 
-use std::{error::Error, io};
+use std::io;
 
+use anyhow::{Context, Result};
 use bonk_ast_errorless::{Account, Amount, Date, Ledger, Posting, Transaction};
 use csv::Reader;
 use serde::Deserialize;
@@ -13,10 +14,7 @@ struct CsvTransaction {
     amount: f64,
 }
 
-pub fn do_convert<D: io::Read>(
-    account: &str,
-    reader: &mut Reader<D>,
-) -> Result<Ledger, Box<dyn Error>> {
+pub fn do_convert<D: io::Read>(account: &str, reader: &mut Reader<D>) -> Result<Ledger> {
     let account = Account::parse(account, None);
 
     let transactions = reader
@@ -29,7 +27,7 @@ pub fn do_convert<D: io::Read>(
             } = result?;
 
             Ok(Transaction {
-                date: Date::parse(&date, None).ok_or("Couldn't parse date")?,
+                date: Date::parse(&date, None).context("Couldn't parse date")?,
                 description,
                 postings: vec![Posting {
                     account: account.clone(),
@@ -39,7 +37,7 @@ pub fn do_convert<D: io::Read>(
                 source: None,
             })
         })
-        .collect::<Result<Vec<_>, Box<dyn Error>>>()?;
+        .collect::<Result<Vec<_>>>()?;
 
     Ok(Ledger {
         declare_accounts: vec![],

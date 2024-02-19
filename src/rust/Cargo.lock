@@ -111,6 +111,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "anyhow"
+version = "1.0.80"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5ad32ce52e4161730f7098c077cd2ed6229b5804ccf99e5366be1ab72a98b4e1"
+
+[[package]]
 name = "ascii"
 version = "1.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -195,9 +201,23 @@ dependencies = [
 ]
 
 [[package]]
+name = "bonk-cli"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "bonk-csv",
+ "bonk-db",
+ "bonk-http",
+ "bonk-lsp",
+ "bonk-plaid",
+ "clap",
+]
+
+[[package]]
 name = "bonk-csv"
 version = "0.1.0"
 dependencies = [
+ "anyhow",
  "bonk-ast-errorless",
  "clap",
  "csv",
@@ -217,6 +237,7 @@ dependencies = [
 name = "bonk-db"
 version = "0.1.0"
 dependencies = [
+ "anyhow",
  "bonk-ast-errorless",
  "bonk-check",
  "bonk-parse",
@@ -230,6 +251,7 @@ dependencies = [
 name = "bonk-http"
 version = "0.1.0"
 dependencies = [
+ "anyhow",
  "bonk-check",
  "bonk-db",
  "bonk-parse",
@@ -243,6 +265,7 @@ dependencies = [
 name = "bonk-lsp"
 version = "0.1.0"
 dependencies = [
+ "anyhow",
  "bonk-ast-errorless",
  "bonk-check",
  "bonk-parse",
@@ -268,6 +291,7 @@ dependencies = [
 name = "bonk-plaid"
 version = "0.1.0"
 dependencies = [
+ "anyhow",
  "bonk-ast-errorless",
  "clap",
  "plaid",

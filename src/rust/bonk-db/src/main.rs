@@ -1,9 +1,8 @@
-use std::error::Error;
-
+use anyhow::Result;
 use bonk_db::cli;
 use clap::Parser;
 
-fn main() -> Result<(), Box<dyn Error>> {
+fn main() -> Result<()> {
     let args = cli::Args::parse();
     cli::run(args)
 }

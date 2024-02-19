@@ -1,3 +1,4 @@
+use anyhow::Result;
 use bonk_workspace::Workspace;
 use clap::Parser;
 use lsp_types::ServerCapabilities;
@@ -6,7 +7,7 @@ use lsp_types::{
     TextDocumentSyncCapability, TextDocumentSyncKind, TextDocumentSyncOptions,
     WorkDoneProgressOptions,
 };
-use std::error::Error;
+
 use std::path::PathBuf;
 
 use lsp_server::Connection;
@@ -23,7 +24,7 @@ pub struct Args {
     pub stdio: bool,
 }
 
-pub fn run(args: Args) -> Result<(), Box<dyn Error + Send + Sync>> {
+pub fn run(args: Args) -> Result<()> {
     let Args { cfg_path, .. } = args;
 
     let workspace = Workspace::from_cfg(cfg_path).expect("failed to parse workspace");

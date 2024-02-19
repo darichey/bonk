@@ -1,9 +1,9 @@
 use std::{
-    error::Error,
     path::PathBuf,
     sync::{Arc, Mutex},
 };
 
+use anyhow::Result;
 use bonk_check::WorkspaceExt as _;
 use bonk_db::Db;
 use bonk_parse::WorkspaceExt as _;
@@ -21,7 +21,7 @@ pub struct Args {
     pub cfg: PathBuf,
 }
 
-pub fn run(args: Args) -> Result<(), Box<dyn Error>> {
+pub fn run(args: Args) -> Result<()> {
     let state = {
         let Args { cfg } = args;
 

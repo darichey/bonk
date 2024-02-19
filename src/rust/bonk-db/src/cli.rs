@@ -1,5 +1,6 @@
+use anyhow::Result;
 use clap::Parser;
-use std::{error::Error, path::PathBuf};
+use std::path::PathBuf;
 
 use crate::create_db;
 
@@ -16,7 +17,7 @@ pub struct Args {
     pub database: PathBuf,
 }
 
-pub fn run(args: Args) -> Result<(), Box<dyn Error>> {
+pub fn run(args: Args) -> Result<()> {
     let Args { cfg, database } = args;
     create_db(cfg, database)?;
     Ok(())

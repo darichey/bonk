@@ -5,10 +5,10 @@ mod go_to_def;
 mod state;
 mod util;
 
-use std::error::Error;
-
+use anyhow::Result;
 use bonk_parse::WorkspaceExt;
 use bonk_workspace::Workspace;
+use lsp_server::{Connection, ExtractError, Message, Notification, Request, RequestId, Response};
 use lsp_types::notification::{DidChangeTextDocument, DidOpenTextDocument};
 use lsp_types::request::{Completion, DocumentDiagnosticRequest, GotoDefinition};
 use lsp_types::InitializeParams;
@@ -16,8 +16,6 @@ use lsp_types::{
     CompletionList, DocumentDiagnosticReport, FullDocumentDiagnosticReport, GotoDefinitionResponse,
     RelatedFullDocumentDiagnosticReport,
 };
-
-use lsp_server::{Connection, ExtractError, Message, Notification, Request, RequestId, Response};
 
 use crate::complete::get_completion_results;
 use crate::diagnostic::get_doc_diagnostics;
@@ -28,7 +26,7 @@ fn main_loop(
     connection: Connection,
     params: serde_json::Value,
     workspace: Workspace,
-) -> Result<(), Box<dyn Error + Sync + Send>> {
+) -> Result<()> {
     let _params: InitializeParams = serde_json::from_value(params).unwrap();
 
     let workspace = workspace.parse().expect("couldn't read ledgers");

@@ -2,24 +2,25 @@ pub mod cli;
 
 use std::path::{Path, PathBuf};
 
+use anyhow::{anyhow, bail, Result};
 use bonk_ast_errorless::{Posting, Transaction};
 use bonk_check::{CheckedWorkspace, WorkspaceExt as _};
 use bonk_parse::WorkspaceExt as _;
 use bonk_workspace::Workspace;
 use sqlite::{Connection, State, Value};
 
-// TODO errors with anyhow
-pub fn create_db(cfg: PathBuf, database: PathBuf) -> Result<Db, String> {
-    let workspace = Workspace::from_cfg(cfg).expect("Couldn't read cfg");
-    let workspace = workspace.parse().map_err(|err| err.to_string())?;
+pub fn create_db(cfg: PathBuf, database: PathBuf) -> Result<Db> {
+    let workspace = Workspace::from_cfg(cfg).map_err(|err| anyhow!(err))?;
+    let workspace = workspace.parse()?;
     let workspace = workspace.check().map_err(|err| {
-        err.into_iter()
+        anyhow!(err
+            .into_iter()
             .map(|err| format!("{:?}", err))
             .collect::<Vec<_>>()
-            .join("\n")
+            .join("\n"))
     })?;
 
-    Ok(Db::new(&workspace, database).expect("Couldn't create database"))
+    Db::new(&workspace, database)
 }
 
 pub struct Db {
@@ -27,8 +28,8 @@ pub struct Db {
 }
 
 impl Db {
-    pub fn new<T: AsRef<Path>>(workspace: &CheckedWorkspace, path: T) -> Result<Db, String> {
-        let con = Connection::open(path).map_err(|err| err.to_string())?;
+    pub fn new<T: AsRef<Path>>(workspace: &CheckedWorkspace, path: T) -> Result<Db> {
+        let con = Connection::open(path)?;
 
         con.execute(
             r#"CREATE TABLE "transaction" (
@@ -43,20 +44,16 @@ impl Db {
             "amount" INTEGER NOT NULL,
             FOREIGN KEY("transaction") REFERENCES "transaction"("id")
         );"#,
-        )
-        .map_err(|err| err.to_string())?;
+        )?;
 
-        con.execute("BEGIN TRANSACTION")
-            .map_err(|err| err.to_string())?;
+        con.execute("BEGIN TRANSACTION")?;
 
         {
-            let mut insert_transaction = con
-                .prepare(r#"INSERT INTO "transaction" VALUES (:id, :date, :description)"#)
-                .map_err(|err| err.to_string())?;
+            let mut insert_transaction =
+                con.prepare(r#"INSERT INTO "transaction" VALUES (:id, :date, :description)"#)?;
 
-            let mut insert_posting = con
-                .prepare(r#"INSERT INTO "posting" VALUES (:transaction, :account, :amount)"#)
-                .map_err(|err| err.to_string())?;
+            let mut insert_posting =
+                con.prepare(r#"INSERT INTO "posting" VALUES (:transaction, :account, :amount)"#)?;
 
             for (_, ledger) in workspace.ledgers() {
                 for Transaction {
@@ -66,23 +63,18 @@ impl Db {
                     ..
                 } in ledger.transactions.iter()
                 {
-                    insert_transaction
-                        .bind::<&[(_, Value)]>(
-                            &[
-                                (":date", date.to_string().into()),
-                                (":description", description.to_string().into()),
-                            ][..],
-                        )
-                        .map_err(|err| err.to_string())?;
+                    insert_transaction.bind::<&[(_, Value)]>(
+                        &[
+                            (":date", date.to_string().into()),
+                            (":description", description.to_string().into()),
+                        ][..],
+                    )?;
 
                     let Ok(State::Done) = insert_transaction.next() else {
-                        return Err(
-                            "unexpected state while inserting transaction. Expected Done"
-                                .to_string(),
-                        );
+                        bail!("unexpected state while inserting transaction. Expected Done")
                     };
 
-                    insert_transaction.reset().map_err(|err| err.to_string())?;
+                    insert_transaction.reset()?;
 
                     // TODO: https://github.com/stainless-steel/sqlite/pull/84
                     let transaction_id =
@@ -95,28 +87,25 @@ impl Db {
                         let account = account.path.join(":");
                         let amount = amount.cents.to_string();
 
-                        insert_posting
-                            .bind::<&[(_, Value)]>(
-                                &[
-                                    (":transaction", transaction_id.into()),
-                                    (":account", account.into()),
-                                    (":amount", amount.into()),
-                                ][..],
-                            )
-                            .map_err(|err| err.to_string())?;
+                        insert_posting.bind::<&[(_, Value)]>(
+                            &[
+                                (":transaction", transaction_id.into()),
+                                (":account", account.into()),
+                                (":amount", amount.into()),
+                            ][..],
+                        )?;
 
                         let Ok(State::Done) = insert_posting.next() else {
-                            return Err("unexpected state while inserting posting. Expected Done"
-                                .to_string());
+                            bail!("unexpected state while inserting posting. Expected Done")
                         };
 
-                        insert_posting.reset().map_err(|err| err.to_string())?;
+                        insert_posting.reset()?;
                     }
                 }
             }
         }
 
-        con.execute("COMMIT").map_err(|err| err.to_string())?;
+        con.execute("COMMIT")?;
 
         Ok(Self { con })
     }
