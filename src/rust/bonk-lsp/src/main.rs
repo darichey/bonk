@@ -1,3 +1,4 @@
+mod complete;
 mod diagnostic;
 mod go_to_def;
 mod state;
@@ -8,10 +9,10 @@ use std::error::Error;
 use bonk_parse::WorkspaceExt;
 use bonk_workspace::Workspace;
 use lsp_types::notification::{DidChangeTextDocument, DidOpenTextDocument};
-use lsp_types::request::{DocumentDiagnosticRequest, GotoDefinition};
+use lsp_types::request::{Completion, DocumentDiagnosticRequest, GotoDefinition};
 use lsp_types::{
-    DiagnosticOptions, DiagnosticServerCapabilities, DocumentDiagnosticReport,
-    FullDocumentDiagnosticReport, GotoDefinitionResponse, OneOf,
+    CompletionList, CompletionOptions, DiagnosticOptions, DiagnosticServerCapabilities,
+    DocumentDiagnosticReport, FullDocumentDiagnosticReport, GotoDefinitionResponse, OneOf,
     RelatedFullDocumentDiagnosticReport, TextDocumentSyncCapability, TextDocumentSyncKind,
     TextDocumentSyncOptions, WorkDoneProgressOptions,
 };
@@ -19,6 +20,7 @@ use lsp_types::{InitializeParams, ServerCapabilities};
 
 use lsp_server::{Connection, ExtractError, Message, Notification, Request, RequestId, Response};
 
+use crate::complete::get_completion_results;
 use crate::diagnostic::get_doc_diagnostics;
 use crate::go_to_def::get_go_to_def_result;
 use crate::state::State;
@@ -59,6 +61,9 @@ fn main() -> Result<(), Box<dyn Error + Sync + Send>> {
                 work_done_progress: Some(false),
             },
         })),
+        completion_provider: Some(CompletionOptions {
+            ..Default::default()
+        }),
         definition_provider: Some(OneOf::Left(true)),
         ..Default::default()
     })
@@ -95,9 +100,11 @@ fn main_loop(
         match msg {
             Message::Request(req) => {
                 eprintln!("Received request {} ({})", req.method, req.id);
+
                 if connection.handle_shutdown(&req)? {
                     return Ok(());
                 }
+
                 let req = match cast_req::<DocumentDiagnosticRequest>(req) {
                     Ok((id, params)) => {
                         if let Some("bonk") = params.identifier.as_deref() {
@@ -126,7 +133,7 @@ fn main_loop(
                     Err(ExtractError::MethodMismatch(req)) => req,
                 };
 
-                let _req = match cast_req::<GotoDefinition>(req) {
+                let req = match cast_req::<GotoDefinition>(req) {
                     Ok((id, params)) => {
                         let params = params.text_document_position_params;
                         let doc = state
@@ -136,6 +143,33 @@ fn main_loop(
                         let result =
                             get_go_to_def_result(&state, &doc.ledger, &doc.src, params.position)
                                 .map(GotoDefinitionResponse::Scalar);
+                        let result = serde_json::to_value(&result).unwrap();
+                        let resp = Response {
+                            id,
+                            result: Some(result),
+                            error: None,
+                        };
+                        connection.sender.send(Message::Response(resp))?;
+                        continue;
+                    }
+                    Err(err @ ExtractError::JsonError { .. }) => panic!("{err:?}"),
+                    Err(ExtractError::MethodMismatch(req)) => req,
+                };
+
+                let _req = match cast_req::<Completion>(req) {
+                    Ok((id, params)) => {
+                        let params = params.text_document_position;
+                        let doc = state
+                            .get_ledger(&params.text_document.uri)
+                            .expect("we don't know about this file");
+
+                        let items =
+                            get_completion_results(&state, &doc.ledger, &doc.src, params.position);
+
+                        let result = CompletionList {
+                            is_incomplete: false,
+                            items,
+                        };
                         let result = serde_json::to_value(&result).unwrap();
                         let resp = Response {
                             id,

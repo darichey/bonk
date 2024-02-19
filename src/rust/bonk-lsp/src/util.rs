@@ -19,3 +19,29 @@ impl SourceSpanExt for SourceSpan {
         }
     }
 }
+
+pub fn find_account<'s>(
+    ledger: &bonk_parse::ast::Ledger,
+    src: &'s str,
+    pos: Position,
+) -> Option<&'s str> {
+    // TODO: replace with a generic "find the most specific node covered by pos" algorithm
+    for transaction in ledger.transactions() {
+        for posting in transaction.postings() {
+            if let Some(acc) = posting.account() {
+                if span_covers(acc.span(), pos) {
+                    return Some(acc.value(src));
+                }
+            }
+        }
+    }
+
+    None
+}
+
+pub fn span_covers(span: SourceSpan, pos: Position) -> bool {
+    let row = pos.line as usize;
+    let col = pos.character as usize;
+
+    row >= span.start_row && row <= span.end_row && col >= span.start_col && col <= span.end_col
+}
