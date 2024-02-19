@@ -40,7 +40,6 @@ pub fn do_convert<D: io::Read>(
         .collect::<Result<Vec<_>, Box<dyn Error>>>()?;
 
     Ok(Ledger {
-        imports: vec![],
         declare_accounts: vec![],
         transactions,
         source: None,
@@ -61,7 +60,6 @@ mod tests {
 
         insta::assert_debug_snapshot!(ledger, @r###"
         Ledger {
-            imports: [],
             declare_accounts: [],
             transactions: [
                 Transaction {

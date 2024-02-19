@@ -33,8 +33,6 @@ pub fn get_diagnostics(workspace: &ParsedWorkspace) -> HashMap<PathBuf, Vec<Diag
                     message: match err.code {
                         CheckErrorCode::UnknownAccount => "unknown account".to_string(),
                         CheckErrorCode::NoBalance => "transaction doesn't balance".to_string(),
-                        CheckErrorCode::SelfImport => "attempt to import self".to_string(),
-                        CheckErrorCode::UnknownLedger => "can't import unknown ledger".to_string(),
                         CheckErrorCode::SyntaxError => "syntax error".to_string(),
                     },
                     related_information: None,

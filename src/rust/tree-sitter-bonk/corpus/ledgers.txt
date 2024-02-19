@@ -1,10 +1,6 @@
 ================================================================================
 Ledger
 ================================================================================
-import ./foo.bonk
-import ../bar.bonk
-import ../baz/qux.bonk
-
 account expenses:fast_food
 account liabilities:my_credit_card
 account assets:my_checking
@@ -20,12 +16,6 @@ account assets:my_checking
 --------------------------------------------------------------------------------
 
 (ledger
-  (import
-    (path))
-  (import
-    (path))
-  (import
-    (path))
   (declare_account
     (account))
   (declare_account

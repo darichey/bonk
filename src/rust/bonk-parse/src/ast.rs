@@ -57,15 +57,6 @@ impl Ledger {
             .collect()
     }
 
-    pub fn imports(&self) -> Vec<Import<'_>> {
-        let mut cursor = self.0.walk();
-        self.0
-            .root_node()
-            .children_by_field_name("import", &mut cursor)
-            .map(Import)
-            .collect()
-    }
-
     pub fn errors(&self) -> Vec<SourceSpan> {
         let mut cursor = self.0.walk();
 
@@ -262,32 +253,6 @@ impl DeclareAccount<'_> {
     }
 }
 
-pub struct Import<'a>(Node<'a>);
-
-impl Import<'_> {
-    pub fn path(&self) -> Option<Path> {
-        self.0.child_by_field_name("path").map(Path)
-    }
-
-    pub fn span(&self) -> SourceSpan {
-        self.0.range().into()
-    }
-}
-
-pub struct Path<'a>(Node<'a>);
-
-impl Path<'_> {
-    pub fn value<'s>(&self, src: &'s str) -> &'s str {
-        self.0
-            .utf8_text(src.as_bytes())
-            .expect("src is not valid utf-8")
-    }
-
-    pub fn span(&self) -> SourceSpan {
-        self.0.range().into()
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use crate::Parser;
@@ -331,8 +296,7 @@ mod tests {
 
     #[test]
     fn test_parse() {
-        let src = r#"import ./foo
-account expenses:fast_food
+        let src = r#"account expenses:fast_food
 account liabilities:my_credit_card
 account assets:my_checking
 
@@ -345,10 +309,6 @@ account assets:my_checking
   assets:my_checking           -10.91"#;
 
         let ledger = Parser::new().parse(src, None);
-
-        let imports = ledger.imports();
-        assert_eq!(imports.len(), 1);
-        assert_eq!(imports[0].path().map(|p| p.value(src)), Some("./foo"));
 
         let declared_accounts = ledger.declare_accounts();
         assert_eq!(declared_accounts.len(), 3);

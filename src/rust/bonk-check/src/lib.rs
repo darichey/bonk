@@ -2,7 +2,6 @@
 
 mod account_ref;
 mod balance;
-mod import;
 mod syntax;
 mod util;
 
@@ -15,8 +14,6 @@ use util::normalize_path;
 pub enum CheckErrorCode {
     UnknownAccount,
     NoBalance,
-    SelfImport,
-    UnknownLedger,
     SyntaxError,
 }
 
@@ -81,8 +78,7 @@ impl CheckUnit<&bonk_parse::ast::Ledger> {
     ) -> Result<CheckUnit<bonk_ast_errorless::Ledger>, Vec<CheckError>> {
         let errorless = self.check_syntax(srcs)?;
 
-        errorless.check_imports()?; // FIXME: don't short-circuit, these errors should accumulate
-        errorless.check_account_refs()?;
+        errorless.check_account_refs()?; // FIXME: don't short-circuit, these errors should accumulate
         errorless.check_balance()?;
 
         Ok(errorless)
@@ -90,23 +86,6 @@ impl CheckUnit<&bonk_parse::ast::Ledger> {
 }
 
 impl CheckUnit<bonk_ast_errorless::Ledger> {
-    fn check_imports(&self) -> Result<(), Vec<CheckError>> {
-        let mut errors = vec![];
-
-        for (path, ledger) in self.ledgers() {
-            match import::check_imports(path, ledger, self) {
-                Ok(_) => {}
-                Err(errs) => errors.extend(errs),
-            }
-        }
-
-        if errors.is_empty() {
-            Ok(())
-        } else {
-            Err(errors)
-        }
-    }
-
     fn check_account_refs(&self) -> Result<(), Vec<CheckError>> {
         let mut errors = vec![];
 

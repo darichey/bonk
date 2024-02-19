@@ -4,14 +4,6 @@ use crate::{Account, Amount, Ledger, Posting, Transaction};
 
 impl Display for Ledger {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        // TODO: include declare_accounts
-        let imports = self
-            .imports
-            .iter()
-            .map(|i| format!("import {}", i.path))
-            .collect::<Vec<_>>()
-            .join("\n");
-
         let transactions = self
             .transactions
             .iter()
@@ -19,8 +11,6 @@ impl Display for Ledger {
             .collect::<Vec<_>>()
             .join("\n");
 
-        f.write_str(&imports)?;
-        f.write_str("\n\n")?;
         f.write_str(&transactions)?;
 
         Ok(())
@@ -62,15 +52,11 @@ fn to_string_amount(amount: &Amount) -> String {
 #[cfg(test)]
 mod tests {
 
-    use crate::{Account, Amount, Date, DeclareAccount, Import, Ledger, Posting, Transaction};
+    use crate::{Account, Amount, Date, DeclareAccount, Ledger, Posting, Transaction};
 
     #[test]
     fn test() {
         let ledger = Ledger {
-            imports: vec![Import {
-                path: "./foo.bonk".to_string(),
-                source: None,
-            }],
             declare_accounts: vec![
                 DeclareAccount {
                     account: Account::parse("expenses:fast_food", None),
@@ -127,8 +113,6 @@ mod tests {
         insta::assert_display_snapshot!(
             ledger,
             @r###"
-        import ./foo.bonk
-
         2023-01-01 "some food"
           expenses:food 12.34
           liabilities:my_credit_card -12.34

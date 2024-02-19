@@ -41,12 +41,6 @@ fn convert_ledger(
     src: &str,
     path: Option<&Path>,
 ) -> Result<bonk_ast_errorless::Ledger, Vec<Source>> {
-    let (imports, errors_imports): (Vec<_>, Vec<_>) = ledger
-        .imports()
-        .into_iter()
-        .map(|i| convert_import(i, src, path))
-        .partition_result();
-
     let (declare_accounts, errors_declare_accounts): (Vec<_>, Vec<_>) = ledger
         .declare_accounts()
         .into_iter()
@@ -59,15 +53,13 @@ fn convert_ledger(
         .map(|t| convert_transaction(t, src, path))
         .partition_result();
 
-    let errors: Vec<_> = errors_imports
+    let errors: Vec<_> = errors_declare_accounts
         .into_iter()
-        .chain(errors_declare_accounts)
         .chain(errors_transactions)
         .collect();
 
     if errors.is_empty() {
         Ok(bonk_ast_errorless::Ledger {
-            imports,
             declare_accounts,
             transactions,
             source: Some(Source {
@@ -255,25 +247,6 @@ fn convert_declared_account(
     })
 }
 
-fn convert_import(
-    import: bonk_parse::ast::Import,
-    src: &str,
-    path: Option<&Path>,
-) -> Result<bonk_ast_errorless::Import, Vec<Source>> {
-    Ok(bonk_ast_errorless::Import {
-        path: import.path().map(|p| p.value(src).to_string()).ok_or(vec![
-            (Source {
-                path: path.map(|p| p.to_path_buf()),
-                span: import.span(),
-            }),
-        ])?,
-        source: Some(Source {
-            path: path.map(Path::to_path_buf),
-            span: import.span(),
-        }),
-    })
-}
-
 #[cfg(test)]
 mod tests {
     use std::path::PathBuf;
@@ -295,7 +268,6 @@ mod tests {
         insta::assert_debug_snapshot!(ledger, @r###"
         Ok(
             Ledger {
-                imports: [],
                 declare_accounts: [
                     DeclareAccount {
                         account: Account {

@@ -4,7 +4,6 @@ mod ser;
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Ledger {
-    pub imports: Vec<Import>,
     pub declare_accounts: Vec<DeclareAccount>,
     pub transactions: Vec<Transaction>,
     pub source: Option<Source>,
@@ -13,12 +12,6 @@ pub struct Ledger {
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct DeclareAccount {
     pub account: Account,
-    pub source: Option<Source>,
-}
-
-#[derive(Clone, Debug, PartialEq, Eq)]
-pub struct Import {
-    pub path: String, // TODO: I guess really this should be a Path node so it can hold the nested Source
     pub source: Option<Source>,
 }
 
