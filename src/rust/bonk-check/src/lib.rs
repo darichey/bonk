@@ -110,8 +110,8 @@ impl CheckUnit<bonk_ast_errorless::Ledger> {
     fn check_account_refs(&self) -> Result<(), Vec<CheckError>> {
         let mut errors = vec![];
 
-        for (_, ledger) in self.ledgers() {
-            match account_ref::check_account_refs(ledger) {
+        for (path, ledger) in self.ledgers() {
+            match account_ref::check_account_refs(path, ledger, self) {
                 Ok(_) => {}
                 Err(errs) => errors.extend(errs),
             }

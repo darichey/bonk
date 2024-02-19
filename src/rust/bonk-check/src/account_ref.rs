@@ -1,14 +1,30 @@
-use std::collections::HashSet;
+use std::{
+    collections::HashSet,
+    path::{Path, PathBuf},
+};
 
-use crate::{CheckError, CheckErrorCode};
+use crate::{CheckError, CheckErrorCode, CheckUnit};
 
-pub fn check_account_refs(ledger: &bonk_ast_errorless::Ledger) -> Result<(), Vec<CheckError>> {
+pub fn check_account_refs(
+    path: &Path,
+    ledger: &bonk_ast_errorless::Ledger,
+    check_unit: &CheckUnit<bonk_ast_errorless::Ledger>,
+) -> Result<(), Vec<CheckError>> {
     let mut errors = vec![];
 
-    let declared_accounts = ledger
-        .declare_accounts
-        .iter()
-        .map(|a| a.account.path_string())
+    let declared_accounts = std::iter::once(ledger)
+        .chain(ledger.imports.iter().map(|import| {
+            // TODO: deduplicate with some kind of "resolve_import function"
+            let relative_import_path = PathBuf::from(&import.path);
+            let import_path = path.parent().unwrap().join(relative_import_path);
+            check_unit.get_ledger(&import_path).unwrap() // TODO imports should've already been checked. but this is bad because we want to accumulate errors and because we should represent this in the types somehow
+        }))
+        .flat_map(|ledger| {
+            ledger
+                .declare_accounts
+                .iter()
+                .map(|a| a.account.path_string())
+        })
         .collect::<HashSet<String>>();
 
     for transaction in &ledger.transactions {
@@ -38,16 +54,13 @@ mod tests {
     use bonk_ast_errorless::*;
     use bonk_parse::ast::{Source, SourceSpan};
 
-    use crate::account_ref::check_account_refs;
+    use crate::{account_ref::check_account_refs, CheckUnit};
 
     #[test]
     fn test_no_errors() {
         // Note that we can get away with passing source: None because we expect that there are no errors
         let ledger = Ledger {
-            imports: vec![Import {
-                path: "./foo.bonk".to_string(),
-                source: None,
-            }],
+            imports: vec![],
             declare_accounts: vec![
                 DeclareAccount {
                     account: Account::parse("foo", None),
@@ -83,7 +96,11 @@ mod tests {
             source: None,
         };
 
-        assert!(check_account_refs(&ledger).is_ok())
+        let path = PathBuf::from("ledger.bonk");
+
+        let check_unit = CheckUnit::new(vec![(path.clone(), ledger.clone())]);
+
+        assert!(check_account_refs(&path, &ledger, &check_unit).is_ok())
     }
 
     #[test]
@@ -134,7 +151,11 @@ mod tests {
             source: None,
         };
 
-        let checked_ledger = check_account_refs(&ledger);
+        let path = PathBuf::from("ledger.bonk");
+
+        let check_unit = CheckUnit::new(vec![(path.clone(), ledger.clone())]);
+
+        let checked_ledger = check_account_refs(&path, &ledger, &check_unit);
 
         insta::assert_debug_snapshot!(checked_ledger, @r###"
         Err(
