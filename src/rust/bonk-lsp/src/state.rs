@@ -6,12 +6,6 @@ pub struct State {
 }
 
 impl State {
-    pub fn empty() -> Self {
-        Self {
-            workspace: ParsedWorkspace::new(),
-        }
-    }
-
     pub fn new(workspace: ParsedWorkspace) -> Self {
         Self { workspace }
     }
@@ -64,6 +58,7 @@ impl State {
 #[cfg(test)]
 mod tests {
 
+    use bonk_parse::ParsedWorkspace;
     use lsp_types::{Position, Range, TextDocumentContentChangeEvent, Url};
 
     use super::State;
@@ -84,7 +79,7 @@ mod tests {
     #[test]
     fn test_on_change() {
         let uri = Url::from_file_path("/test.bonk").unwrap();
-        let mut state = State::empty();
+        let mut state = State::new(ParsedWorkspace::new());
         state.on_open(uri.clone(), "some\ntext\nin\nthe\ndocument".to_string());
 
         assert_state_change(

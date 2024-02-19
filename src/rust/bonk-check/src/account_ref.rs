@@ -1,12 +1,8 @@
-use std::{
-    collections::HashSet,
-    path::{Path, PathBuf},
-};
+use std::collections::HashSet;
 
 use crate::{CheckError, CheckErrorCode, CheckUnit};
 
 pub fn check_account_refs(
-    path: &Path,
     ledger: &bonk_ast_errorless::Ledger,
     check_unit: &CheckUnit<bonk_ast_errorless::Ledger>,
 ) -> Result<(), Vec<CheckError>> {
@@ -89,7 +85,7 @@ mod tests {
 
         let check_unit = CheckUnit::new(vec![(path.clone(), ledger.clone())]);
 
-        assert!(check_account_refs(&path, &ledger, &check_unit).is_ok())
+        assert!(check_account_refs(&ledger, &check_unit).is_ok())
     }
 
     #[test]
@@ -143,7 +139,7 @@ mod tests {
 
         let check_unit = CheckUnit::new(vec![(path.clone(), ledger.clone())]);
 
-        let checked_ledger = check_account_refs(&path, &ledger, &check_unit);
+        let checked_ledger = check_account_refs(&ledger, &check_unit);
 
         insta::assert_debug_snapshot!(checked_ledger, @r###"
         Err(
