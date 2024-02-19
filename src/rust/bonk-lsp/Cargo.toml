@@ -10,6 +10,7 @@ bonk-ast-errorless = { path = "../bonk-ast-errorless" }
 bonk-check = { path = "../bonk-check" }
 bonk-parse = { path = "../bonk-parse" }
 bonk-workspace = { path = "../bonk-workspace" }
+clap = { version = "4.4.13", features = ["derive"] }
 lsp-server = "0.7.6"
 lsp-types = "0.95.0"
 serde = "1.0.194"
