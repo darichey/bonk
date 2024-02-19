@@ -331,7 +331,8 @@ mod tests {
 
     #[test]
     fn test_parse() {
-        let src = r#"account expenses:fast_food
+        let src = r#"import ./foo
+account expenses:fast_food
 account liabilities:my_credit_card
 account assets:my_checking
 
@@ -344,6 +345,10 @@ account assets:my_checking
   assets:my_checking           -10.91"#;
 
         let ledger = Parser::new().parse(src, None);
+
+        let imports = ledger.imports();
+        assert_eq!(imports.len(), 1);
+        assert_eq!(imports[0].path().map(|p| p.value(src)), Some("./foo"));
 
         let declared_accounts = ledger.declare_accounts();
         assert_eq!(declared_accounts.len(), 3);

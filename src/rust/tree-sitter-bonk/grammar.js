@@ -29,6 +29,6 @@ module.exports = grammar({
     description: ($) => /"([^"\\]|\\["\\bnfrt])*"/,
     account: ($) => /[A-Za-z_][A-Za-z0-9_]*(:[A-Za-z_][A-Za-z0-9_]*)*/,
     amount: ($) => /-?\d+(\.\d+)?/,
-    path: ($) => /(.+)\/([^\/\s]+)/,
+    path: ($) => /(\.|\.\.)\/[^\s]+/,
   },
 });

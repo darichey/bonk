@@ -10,7 +10,7 @@ use lsp_types::{Diagnostic, DiagnosticSeverity, Url};
 use crate::{state::State, util::SourceSpanExt};
 
 pub fn get_doc_diagnostics(state: &State, uri: &Url) -> Vec<Diagnostic> {
-    let path = PathBuf::from(uri.as_ref());
+    let path = uri.to_file_path().unwrap();
     let mut all_diagnostics = get_diagnostics(&state.workspace);
 
     all_diagnostics.remove(&path).unwrap_or_default()

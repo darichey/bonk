@@ -52,10 +52,6 @@ impl ParsedWorkspace {
     }
 
     pub fn parse_new(&mut self, path: PathBuf, src: String) {
-        if self.ledgers.contains_key(&path) {
-            panic!("TODO");
-        }
-
         let mut parser = Parser::new();
         let ledger = parser.parse(&src, None);
         self.ledgers.insert(

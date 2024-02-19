@@ -1,5 +1,3 @@
-use std::path::PathBuf;
-
 use bonk_parse::{ParsedLedger, ParsedWorkspace};
 use lsp_types::{Range, TextDocumentContentChangeEvent, Url};
 
@@ -19,17 +17,22 @@ impl State {
     }
 
     pub fn get_ledger(&self, uri: &Url) -> Option<&ParsedLedger> {
-        let path = PathBuf::from(uri.as_ref());
+        let path = uri.to_file_path().unwrap();
         self.workspace.ledgers.get(&path)
     }
 
     pub fn on_open(&mut self, uri: Url, src: String) {
-        let path = PathBuf::from(uri.as_ref());
-        self.workspace.parse_new(path, src)
+        let path = uri.to_file_path().unwrap();
+
+        if self.workspace.ledgers.contains_key(&path) {
+            self.workspace.parse_replaced(path, src)
+        } else {
+            self.workspace.parse_new(path, src)
+        }
     }
 
     pub fn on_change(&mut self, uri: &Url, changes: Vec<TextDocumentContentChangeEvent>) {
-        let path = PathBuf::from(uri.as_ref());
+        let path = uri.to_file_path().unwrap();
 
         for change in changes {
             if let Some(Range { start, end }) = change.range {
@@ -53,14 +56,13 @@ impl State {
     }
 
     pub fn on_close(&mut self, uri: &Url) {
-        let path = PathBuf::from(uri.as_ref());
+        let path = uri.to_file_path().unwrap();
         self.workspace.remove(&path);
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use std::path::PathBuf;
 
     use lsp_types::{Position, Range, TextDocumentContentChangeEvent, Url};
 
@@ -74,7 +76,7 @@ mod tests {
     ) {
         state.on_change(uri, changes);
 
-        let path = PathBuf::from(uri.as_ref());
+        let path = uri.to_file_path().unwrap();
 
         assert_eq!(state.workspace.ledgers.get(&path).unwrap().src, new_src);
     }

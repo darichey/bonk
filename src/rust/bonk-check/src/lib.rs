@@ -4,10 +4,12 @@ mod account_ref;
 mod balance;
 mod import;
 mod syntax;
+mod util;
 
 use bonk_parse::{ast::Source, ParsedLedger, ParsedWorkspace};
 use itertools::Itertools;
 use std::path::{Path, PathBuf};
+use util::normalize_path;
 
 #[derive(Clone, Copy, Debug, Hash, PartialEq, Eq)]
 pub enum CheckErrorCode {
@@ -36,8 +38,14 @@ impl<T> CheckUnit<T> {
     }
 
     pub fn get_ledger(&self, path: &Path) -> Option<&T> {
-        self.ledgers()
-            .find_map(|(p, l)| if p == path { Some(l) } else { None })
+        self.ledgers().find_map(|(p, l)| {
+            // TODO: normalization of p should be done elsewhere since we have to redo it every time this way
+            if normalize_path(p) == normalize_path(path) {
+                Some(l)
+            } else {
+                None
+            }
+        })
     }
 
     pub fn push_ledger(&mut self, path: &Path, ledger: T) {

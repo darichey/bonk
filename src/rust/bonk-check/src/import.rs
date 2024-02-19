@@ -5,7 +5,7 @@ use std::{
 
 use bonk_parse::ast::Source;
 
-use crate::{CheckError, CheckErrorCode, CheckUnit};
+use crate::{util::normalize_path, CheckError, CheckErrorCode, CheckUnit};
 
 // TODO: handle import cycles
 pub fn check_imports(
@@ -16,18 +16,17 @@ pub fn check_imports(
     let mut errors = vec![];
 
     for import in &ledger.imports {
-        let import_path = PathBuf::from(&import.path); // TODO: this should just be a PathBuf to begin with
+        let relative_import_path = PathBuf::from(&import.path); // TODO: this should just be a PathBuf to begin with
+        let import_path = path.parent().unwrap().join(relative_import_path);
 
-        if path == import_path {
+        if normalize_path(path) == normalize_path(&import_path) {
             errors.push(CheckError {
                 code: CheckErrorCode::SelfImport,
                 source: import.source.clone().expect(
                     "foo ast passed to check_balance isn't annotated with source spans", // TODO: I really want to encode this in the types
                 ),
             })
-        }
-
-        if check_unit.get_ledger(&import_path).is_none() {
+        } else if check_unit.get_ledger(&import_path).is_none() {
             errors.push(CheckError {
                 code: CheckErrorCode::UnknownLedger,
                 source: import.source.clone().expect(
@@ -55,7 +54,7 @@ mod tests {
 
     #[test]
     fn test_no_errors() {
-        let path_a = "ledger_a.bonk";
+        let path_a = "./ledger_a.bonk";
         let ledger_a = Ledger {
             imports: vec![],
             declare_accounts: vec![],
@@ -63,7 +62,7 @@ mod tests {
             source: None,
         };
 
-        let path_b = "ledger_b.bonk";
+        let path_b = "./ledger_b.bonk";
         let ledger_b = Ledger {
             imports: vec![Import {
                 path: path_a.to_string(),
@@ -82,7 +81,7 @@ mod tests {
 
     #[test]
     fn test_error_self_import() {
-        let path_a = "ledger_a.bonk";
+        let path_a = "./ledger_a.bonk";
         let ledger_a = Ledger {
             imports: vec![Import {
                 path: path_a.to_string(),
