@@ -1,11 +1,8 @@
 use std::collections::HashSet;
 
-use bonk_parse::ast::Source;
+use crate::{CheckError, CheckErrorCode};
 
-#[derive(Debug, PartialEq, Eq)]
-pub struct AccountRefError(pub Source);
-
-pub fn check_account_refs(ledger: &bonk_ast_errorless::Ledger) -> Result<(), Vec<AccountRefError>> {
+pub fn check_account_refs(ledger: &bonk_ast_errorless::Ledger) -> Result<(), Vec<CheckError>> {
     let mut errors = vec![];
 
     let declared_accounts = ledger
@@ -17,9 +14,12 @@ pub fn check_account_refs(ledger: &bonk_ast_errorless::Ledger) -> Result<(), Vec
     for transaction in &ledger.transactions {
         for posting in &transaction.postings {
             if !declared_accounts.contains(&posting.account.path_string()) {
-                errors.push(AccountRefError(posting.account.source.clone().expect(
-                    "ast passed to check_account_refs isn't annotated with source spans", // TODO: I really want to encode this in the types
-                )))
+                errors.push(CheckError {
+                    code: CheckErrorCode::UnknownAccount,
+                    source: posting.account.source.clone().expect(
+                        "ast passed to check_account_refs isn't annotated with source spans", // TODO: I really want to encode this in the types
+                    ),
+                })
             }
         }
     }
@@ -35,8 +35,8 @@ pub fn check_account_refs(ledger: &bonk_ast_errorless::Ledger) -> Result<(), Vec
 mod tests {
     use std::path::PathBuf;
 
-    use bonk_parse::ast::{Source, SourceSpan};
     use bonk_ast_errorless::*;
+    use bonk_parse::ast::{Source, SourceSpan};
 
     use crate::account_ref::check_account_refs;
 
@@ -139,8 +139,9 @@ mod tests {
         insta::assert_debug_snapshot!(checked_ledger, @r###"
         Err(
             [
-                AccountRefError(
-                    Source {
+                CheckError {
+                    code: UnknownAccount,
+                    source: Source {
                         path: Some(
                             "ledger.bonk",
                         ),
@@ -153,7 +154,7 @@ mod tests {
                             end_col: 5,
                         },
                     },
-                ),
+                },
             ],
         )
         "###);

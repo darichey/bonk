@@ -4,25 +4,33 @@ use bonk_ast_errorless::Date;
 use bonk_parse::ast::Source;
 use itertools::Itertools;
 
-#[derive(Debug, PartialEq, Eq)]
-pub struct SyntaxError(pub Source);
+use crate::{CheckError, CheckErrorCode};
 
 pub fn check_syntax(
     ledger: &bonk_parse::ast::Ledger,
     src: &str,
     path: Option<&Path>,
-) -> Result<bonk_ast_errorless::Ledger, Vec<SyntaxError>> {
+) -> Result<bonk_ast_errorless::Ledger, Vec<CheckError>> {
     let errors = ledger.errors();
     if errors.is_empty() {
-        convert_ledger(ledger, src, path)
+        convert_ledger(ledger, src, path).map_err(|sources| {
+            sources
+                .into_iter()
+                .map(|source| CheckError {
+                    code: CheckErrorCode::SyntaxError,
+                    source,
+                })
+                .collect()
+        })
     } else {
         Err(errors
             .into_iter()
-            .map(|span| {
-                SyntaxError(Source {
+            .map(|span| CheckError {
+                code: CheckErrorCode::SyntaxError,
+                source: Source {
                     path: path.map(|p| p.to_path_buf()),
                     span,
-                })
+                },
             })
             .collect())
     }
@@ -32,7 +40,7 @@ fn convert_ledger(
     ledger: &bonk_parse::ast::Ledger,
     src: &str,
     path: Option<&Path>,
-) -> Result<bonk_ast_errorless::Ledger, Vec<SyntaxError>> {
+) -> Result<bonk_ast_errorless::Ledger, Vec<Source>> {
     let (imports, errors_imports): (Vec<_>, Vec<_>) = ledger
         .imports()
         .into_iter()
@@ -76,7 +84,7 @@ fn convert_transaction(
     transaction: bonk_parse::ast::Transaction,
     src: &str,
     path: Option<&Path>,
-) -> Result<bonk_ast_errorless::Transaction, Vec<SyntaxError>> {
+) -> Result<bonk_ast_errorless::Transaction, Vec<Source>> {
     let date = transaction
         .date()
         .and_then(|date| {
@@ -88,15 +96,19 @@ fn convert_transaction(
                 }),
             )
         })
-        .ok_or(vec![SyntaxError(Source {
+        .ok_or(vec![
+            (Source {
+                path: path.map(|p| p.to_path_buf()),
+                span: transaction.span(),
+            }),
+        ]);
+
+    let description = transaction.description(src).ok_or(vec![
+        (Source {
             path: path.map(|p| p.to_path_buf()),
             span: transaction.span(),
-        })]);
-
-    let description = transaction.description(src).ok_or(vec![SyntaxError(Source {
-        path: path.map(|p| p.to_path_buf()),
-        span: transaction.span(),
-    })]);
+        }),
+    ]);
 
     let (postings, errors): (Vec<_>, Vec<_>) = transaction
         .postings()
@@ -137,21 +149,25 @@ fn convert_posting(
     posting: bonk_parse::ast::Posting,
     src: &str,
     path: Option<&Path>,
-) -> Result<bonk_ast_errorless::Posting, Vec<SyntaxError>> {
+) -> Result<bonk_ast_errorless::Posting, Vec<Source>> {
     let account = posting
         .account()
-        .ok_or(vec![SyntaxError(Source {
-            path: path.map(|p| p.to_path_buf()),
-            span: posting.span(),
-        })])
+        .ok_or(vec![
+            (Source {
+                path: path.map(|p| p.to_path_buf()),
+                span: posting.span(),
+            }),
+        ])
         .map(|acc| convert_account(acc, src, path));
 
     let amount = posting
         .amount()
-        .ok_or(vec![SyntaxError(Source {
-            path: path.map(|p| p.to_path_buf()),
-            span: posting.span(),
-        })])
+        .ok_or(vec![
+            (Source {
+                path: path.map(|p| p.to_path_buf()),
+                span: posting.span(),
+            }),
+        ])
         .and_then(|amt| convert_amount(amt, src, path));
 
     let mut errors = Vec::new();
@@ -200,13 +216,15 @@ fn convert_amount(
     amount: bonk_parse::ast::Amount,
     src: &str,
     path: Option<&Path>,
-) -> Result<bonk_ast_errorless::Amount, Vec<SyntaxError>> {
+) -> Result<bonk_ast_errorless::Amount, Vec<Source>> {
     Ok(bonk_ast_errorless::Amount {
         cents: amount.value(src).replace('.', "").parse().map_err(|_| {
-            vec![SyntaxError(Source {
-                path: path.map(|p| p.to_path_buf()),
-                span: amount.span(),
-            })]
+            vec![
+                (Source {
+                    path: path.map(|p| p.to_path_buf()),
+                    span: amount.span(),
+                }),
+            ]
         })?,
         source: Some(Source {
             path: path.map(Path::to_path_buf),
@@ -219,14 +237,16 @@ fn convert_declared_account(
     account: bonk_parse::ast::DeclareAccount,
     src: &str,
     path: Option<&Path>,
-) -> Result<bonk_ast_errorless::DeclareAccount, Vec<SyntaxError>> {
+) -> Result<bonk_ast_errorless::DeclareAccount, Vec<Source>> {
     Ok(bonk_ast_errorless::DeclareAccount {
         account: account
             .account()
-            .ok_or(vec![SyntaxError(Source {
-                path: path.map(|p| p.to_path_buf()),
-                span: account.span(),
-            })])
+            .ok_or(vec![
+                (Source {
+                    path: path.map(|p| p.to_path_buf()),
+                    span: account.span(),
+                }),
+            ])
             .map(|a| convert_account(a, src, path))?,
         source: Some(Source {
             path: path.map(Path::to_path_buf),
@@ -239,15 +259,14 @@ fn convert_import(
     import: bonk_parse::ast::Import,
     src: &str,
     path: Option<&Path>,
-) -> Result<bonk_ast_errorless::Import, Vec<SyntaxError>> {
+) -> Result<bonk_ast_errorless::Import, Vec<Source>> {
     Ok(bonk_ast_errorless::Import {
-        path: import
-            .path()
-            .map(|p| p.value(src).to_string())
-            .ok_or(vec![SyntaxError(Source {
+        path: import.path().map(|p| p.value(src).to_string()).ok_or(vec![
+            (Source {
                 path: path.map(|p| p.to_path_buf()),
                 span: import.span(),
-            })])?,
+            }),
+        ])?,
         source: Some(Source {
             path: path.map(Path::to_path_buf),
             span: import.span(),
@@ -503,8 +522,9 @@ liabilities:my_credit_card -10.91"#;
         insta::assert_debug_snapshot!(ledger, @r###"
         Err(
             [
-                SyntaxError(
-                    Source {
+                CheckError {
+                    code: SyntaxError,
+                    source: Source {
                         path: Some(
                             "ledger.bonk",
                         ),
@@ -517,7 +537,7 @@ liabilities:my_credit_card -10.91"#;
                             end_col: 13,
                         },
                     },
-                ),
+                },
             ],
         )
         "###);

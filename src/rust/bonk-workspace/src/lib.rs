@@ -14,7 +14,6 @@ pub struct BonkCfg {
 impl BonkCfg {
     // FIXME: errors
     pub fn read<T: AsRef<Path>>(cfg_path: T) -> Result<Self, String> {
-        eprintln!("{}", cfg_path.as_ref().display());
         let s = fs::read_to_string(cfg_path).map_err(|err| err.to_string())?;
         toml::from_str(&s).map_err(|err| err.to_string())
     }

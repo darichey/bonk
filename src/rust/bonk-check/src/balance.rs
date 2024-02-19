@@ -1,21 +1,19 @@
-use bonk_parse::ast::Source;
-
-#[derive(Debug, PartialEq, Eq)]
-pub struct BalanceError(pub Source);
+use crate::{CheckError, CheckErrorCode};
 
 // TODO: if/when we add inference for posting amounts (i.e., allowing one posting to have an implicit amount), there should be another ast type to represent that and this should go from bonk_ast_errorless::Ledger to that one instead
-pub fn check_balance(ledger: &bonk_ast_errorless::Ledger) -> Result<(), Vec<BalanceError>> {
+pub fn check_balance(ledger: &bonk_ast_errorless::Ledger) -> Result<(), Vec<CheckError>> {
     let mut errors = vec![];
 
     for transaction in &ledger.transactions {
         let sum: i32 = transaction.postings.iter().map(|p| p.amount.cents).sum();
         if sum != 0 {
-            errors.push(BalanceError(
-                transaction
+            errors.push(CheckError {
+                code: CheckErrorCode::NoBalance,
+                source: transaction
                     .source
                     .clone()
                     .expect("ast passed to check_balance isn't annotated with source spans"), // TODO: I really want to encode this in the types
-            ))
+            })
         }
     }
 
@@ -30,8 +28,8 @@ pub fn check_balance(ledger: &bonk_ast_errorless::Ledger) -> Result<(), Vec<Bala
 mod tests {
     use std::path::PathBuf;
 
-    use bonk_parse::ast::{Source, SourceSpan};
     use bonk_ast_errorless::*;
+    use bonk_parse::ast::{Source, SourceSpan};
 
     use super::check_balance;
 
@@ -98,8 +96,9 @@ mod tests {
         insta::assert_debug_snapshot!(checked_ledger, @r###"
         Err(
             [
-                BalanceError(
-                    Source {
+                CheckError {
+                    code: NoBalance,
+                    source: Source {
                         path: Some(
                             "ledger.bonk",
                         ),
@@ -112,7 +111,7 @@ mod tests {
                             end_col: 5,
                         },
                     },
-                ),
+                },
             ],
         )
         "###);

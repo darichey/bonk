@@ -5,32 +5,35 @@ use std::{
 
 use bonk_parse::ast::Source;
 
-use crate::CheckUnit;
-
-#[derive(Debug, PartialEq, Eq)]
-pub struct ImportError(pub Source);
+use crate::{CheckError, CheckErrorCode, CheckUnit};
 
 // TODO: handle import cycles
 pub fn check_imports(
     path: &Path,
     ledger: &bonk_ast_errorless::Ledger,
     check_unit: &CheckUnit<bonk_ast_errorless::Ledger>,
-) -> Result<(), Vec<ImportError>> {
+) -> Result<(), Vec<CheckError>> {
     let mut errors = vec![];
 
     for import in &ledger.imports {
-        let import_path = PathBuf::from_str(&import.path).unwrap(); // TODO: this should just be a PathBuf to begin with
+        let import_path = PathBuf::from(&import.path); // TODO: this should just be a PathBuf to begin with
 
         if path == import_path {
-            errors.push(ImportError(import.source.clone().expect(
-                "foo ast passed to check_balance isn't annotated with source spans", // TODO: I really want to encode this in the types
-            )))
+            errors.push(CheckError {
+                code: CheckErrorCode::SelfImport,
+                source: import.source.clone().expect(
+                    "foo ast passed to check_balance isn't annotated with source spans", // TODO: I really want to encode this in the types
+                ),
+            })
         }
 
         if check_unit.get_ledger(&import_path).is_none() {
-            errors.push(ImportError(import.source.clone().expect(
-                "bar ast passed to check_balance isn't annotated with source spans", // TODO: I really want to encode this in the types
-            )))
+            errors.push(CheckError {
+                code: CheckErrorCode::UnknownLedger,
+                source: import.source.clone().expect(
+                    "bar ast passed to check_balance isn't annotated with source spans", // TODO: I really want to encode this in the types
+                ),
+            })
         }
     }
 
@@ -45,8 +48,8 @@ pub fn check_imports(
 mod tests {
     use std::{path::PathBuf, str::FromStr};
 
-    use bonk_parse::ast::{Source, SourceSpan};
     use bonk_ast_errorless::{Import, Ledger};
+    use bonk_parse::ast::{Source, SourceSpan};
 
     use crate::{import::check_imports, CheckUnit};
 
@@ -109,8 +112,9 @@ mod tests {
         insta::assert_debug_snapshot!(checked_ledger, @r###"
         Err(
             [
-                ImportError(
-                    Source {
+                CheckError {
+                    code: SelfImport,
+                    source: Source {
                         path: Some(
                             "ledger_a.bonk",
                         ),
@@ -123,7 +127,7 @@ mod tests {
                             end_col: 5,
                         },
                     },
-                ),
+                },
             ],
         )
         "###);
@@ -132,11 +136,13 @@ mod tests {
     #[test]
     fn test_error_unknown_import() {
         let path_a = "ledger_a.bonk";
+        let path_b = "ledger_b.bonk";
+
         let ledger_a = Ledger {
             imports: vec![Import {
-                path: path_a.to_string(),
+                path: path_b.to_string(),
                 source: Some(Source {
-                    path: Some(PathBuf::from("ledger_b.bonk")),
+                    path: Some(PathBuf::from(path_a)),
                     span: SourceSpan {
                         start_byte: 0,
                         end_byte: 1,
@@ -161,10 +167,11 @@ mod tests {
         insta::assert_debug_snapshot!(checked_ledger, @r###"
         Err(
             [
-                ImportError(
-                    Source {
+                CheckError {
+                    code: UnknownLedger,
+                    source: Source {
                         path: Some(
-                            "ledger_b.bonk",
+                            "ledger_a.bonk",
                         ),
                         span: SourceSpan {
                             start_byte: 0,
@@ -175,7 +182,7 @@ mod tests {
                             end_col: 5,
                         },
                     },
-                ),
+                },
             ],
         )
         "###);

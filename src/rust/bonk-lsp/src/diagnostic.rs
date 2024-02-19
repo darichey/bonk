@@ -3,9 +3,7 @@ use std::{
     path::{Path, PathBuf},
 };
 
-use bonk_check::{
-    AccountRefError, BalanceError, CheckError, CheckUnit, ImportError, SyntaxError, WorkspaceExt,
-};
+use bonk_check::{CheckError, CheckErrorCode, CheckUnit, WorkspaceExt};
 use bonk_parse::{ast::Ledger, ParsedWorkspace};
 use lsp_types::{Diagnostic, DiagnosticSeverity, Url};
 
@@ -25,63 +23,23 @@ pub fn get_diagnostics(workspace: &ParsedWorkspace) -> HashMap<PathBuf, Vec<Diag
             let mut map: HashMap<PathBuf, Vec<Diagnostic>> = HashMap::new();
 
             for err in errs {
-                let (path, diagnostic) = match err {
-                    CheckError::AccountRefError(AccountRefError(source)) => (
-                        source.path.unwrap(),
-                        Diagnostic {
-                            range: source.span.into_lsp_range(),
-                            severity: Some(DiagnosticSeverity::ERROR),
-                            code: None,
-                            code_description: None,
-                            source: Some("bonk".to_string()),
-                            message: "can't find account".to_string(),
-                            related_information: None,
-                            tags: None,
-                            data: None,
-                        },
-                    ),
-                    CheckError::BalanceError(BalanceError(source)) => (
-                        source.path.unwrap(),
-                        Diagnostic {
-                            range: source.span.into_lsp_range(),
-                            severity: Some(DiagnosticSeverity::ERROR),
-                            code: None,
-                            code_description: None,
-                            source: Some("bonk".to_string()),
-                            message: "transaction doesn't balance".to_string(),
-                            related_information: None,
-                            tags: None,
-                            data: None,
-                        },
-                    ),
-                    CheckError::ImportError(ImportError(source)) => (
-                        source.path.unwrap(),
-                        Diagnostic {
-                            range: source.span.into_lsp_range(),
-                            severity: Some(DiagnosticSeverity::ERROR),
-                            code: None,
-                            code_description: None,
-                            source: Some("bonk".to_string()),
-                            message: "can't import".to_string(),
-                            related_information: None,
-                            tags: None,
-                            data: None,
-                        },
-                    ),
-                    CheckError::SyntaxError(SyntaxError(source)) => (
-                        source.path.unwrap(),
-                        Diagnostic {
-                            range: source.span.into_lsp_range(),
-                            severity: Some(DiagnosticSeverity::ERROR),
-                            code: None,
-                            code_description: None,
-                            source: Some("bonk".to_string()),
-                            message: "syntax error".to_string(),
-                            related_information: None,
-                            tags: None,
-                            data: None,
-                        },
-                    ),
+                let path = err.source.path.unwrap();
+                let diagnostic = Diagnostic {
+                    range: err.source.span.into_lsp_range(),
+                    severity: Some(DiagnosticSeverity::ERROR),
+                    code: None,
+                    code_description: None,
+                    source: Some("bonk".to_string()),
+                    message: match err.code {
+                        CheckErrorCode::UnknownAccount => "unknown account".to_string(),
+                        CheckErrorCode::NoBalance => "transaction doesn't balance".to_string(),
+                        CheckErrorCode::SelfImport => "attempt to import self".to_string(),
+                        CheckErrorCode::UnknownLedger => "can't import unknown ledger".to_string(),
+                        CheckErrorCode::SyntaxError => "syntax error".to_string(),
+                    },
+                    related_information: None,
+                    tags: None,
+                    data: None,
                 };
 
                 match map.entry(path) {

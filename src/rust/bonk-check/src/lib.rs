@@ -5,22 +5,23 @@ mod balance;
 mod import;
 mod syntax;
 
-use bonk_parse::{ParsedLedger, ParsedWorkspace};
+use bonk_parse::{ast::Source, ParsedLedger, ParsedWorkspace};
 use itertools::Itertools;
 use std::path::{Path, PathBuf};
 
-pub use account_ref::AccountRefError;
-pub use balance::BalanceError;
-pub use import::ImportError;
-pub use syntax::SyntaxError;
+#[derive(Clone, Copy, Debug, Hash, PartialEq, Eq)]
+pub enum CheckErrorCode {
+    UnknownAccount,
+    NoBalance,
+    SelfImport,
+    UnknownLedger,
+    SyntaxError,
+}
 
-// TODO: replace this with a flat enum of error codes
-#[derive(Debug, PartialEq, Eq)]
-pub enum CheckError {
-    AccountRefError(AccountRefError),
-    BalanceError(BalanceError),
-    ImportError(ImportError),
-    SyntaxError(SyntaxError),
+#[derive(Clone, Debug, Hash, PartialEq, Eq)]
+pub struct CheckError {
+    pub code: CheckErrorCode,
+    pub source: Source,
 }
 
 pub struct CheckUnit<T>(Vec<(PathBuf, T)>);
@@ -48,8 +49,8 @@ impl CheckUnit<&bonk_parse::ast::Ledger> {
     fn check_syntax(
         self,
         srcs: &CheckUnit<&str>,
-    ) -> Result<CheckUnit<bonk_ast_errorless::Ledger>, Vec<SyntaxError>> {
-        let (ledgers, errors): (Vec<_>, Vec<Vec<SyntaxError>>) = self
+    ) -> Result<CheckUnit<bonk_ast_errorless::Ledger>, Vec<CheckError>> {
+        let (ledgers, errors): (Vec<_>, Vec<Vec<CheckError>>) = self
             .0
             .into_iter()
             .map(|(path, ledger)| {
@@ -70,36 +71,18 @@ impl CheckUnit<&bonk_parse::ast::Ledger> {
         self,
         srcs: &CheckUnit<&str>,
     ) -> Result<CheckUnit<bonk_ast_errorless::Ledger>, Vec<CheckError>> {
-        let errorless = self.check_syntax(srcs).map_err(|errs| {
-            errs.into_iter()
-                .map(CheckError::SyntaxError)
-                .collect::<Vec<_>>()
-        })?;
+        let errorless = self.check_syntax(srcs)?;
 
-        errorless.check_imports().map_err(|errs| {
-            errs.into_iter()
-                .map(CheckError::ImportError)
-                .collect::<Vec<_>>()
-        })?; // FIXME: don't short-circuit, these errors should accumulate
-
-        errorless.check_account_refs().map_err(|errs| {
-            errs.into_iter()
-                .map(CheckError::AccountRefError)
-                .collect::<Vec<_>>()
-        })?;
-
-        errorless.check_balance().map_err(|errs| {
-            errs.into_iter()
-                .map(CheckError::BalanceError)
-                .collect::<Vec<_>>()
-        })?;
+        errorless.check_imports()?; // FIXME: don't short-circuit, these errors should accumulate
+        errorless.check_account_refs()?;
+        errorless.check_balance()?;
 
         Ok(errorless)
     }
 }
 
 impl CheckUnit<bonk_ast_errorless::Ledger> {
-    fn check_imports(&self) -> Result<(), Vec<ImportError>> {
+    fn check_imports(&self) -> Result<(), Vec<CheckError>> {
         let mut errors = vec![];
 
         for (path, ledger) in self.ledgers() {
@@ -116,7 +99,7 @@ impl CheckUnit<bonk_ast_errorless::Ledger> {
         }
     }
 
-    fn check_account_refs(&self) -> Result<(), Vec<AccountRefError>> {
+    fn check_account_refs(&self) -> Result<(), Vec<CheckError>> {
         let mut errors = vec![];
 
         for (_, ledger) in self.ledgers() {
@@ -133,7 +116,7 @@ impl CheckUnit<bonk_ast_errorless::Ledger> {
         }
     }
 
-    fn check_balance(&self) -> Result<(), Vec<BalanceError>> {
+    fn check_balance(&self) -> Result<(), Vec<CheckError>> {
         let mut errors = vec![];
 
         for (_, ledger) in self.ledgers() {
