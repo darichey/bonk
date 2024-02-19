@@ -80,7 +80,7 @@ fn main() {
     let state = {
         let Args { cfg } = Args::parse();
 
-        let workspace = Workspace::from_cfg(&cfg).expect("Couldn't read cfg");
+        let workspace = Workspace::from_cfg(cfg).expect("Couldn't read cfg");
         let workspace = workspace.parse().unwrap();
         let workspace = workspace.check().unwrap();
 

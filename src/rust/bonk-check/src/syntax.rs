@@ -1,11 +1,11 @@
 use std::path::Path;
 
-use bonk_parse::ast::{Source, SourceSpan};
 use bonk_ast_errorless::Date;
+use bonk_parse::ast::Source;
 use itertools::Itertools;
 
 #[derive(Debug, PartialEq, Eq)]
-pub struct SyntaxError(pub SourceSpan);
+pub struct SyntaxError(pub Source);
 
 pub fn check_syntax(
     ledger: &bonk_parse::ast::Ledger,
@@ -16,7 +16,15 @@ pub fn check_syntax(
     if errors.is_empty() {
         convert_ledger(ledger, src, path)
     } else {
-        Err(errors.into_iter().map(SyntaxError).collect())
+        Err(errors
+            .into_iter()
+            .map(|span| {
+                SyntaxError(Source {
+                    path: path.map(|p| p.to_path_buf()),
+                    span,
+                })
+            })
+            .collect())
     }
 }
 
@@ -80,11 +88,15 @@ fn convert_transaction(
                 }),
             )
         })
-        .ok_or(vec![SyntaxError(transaction.span())]);
+        .ok_or(vec![SyntaxError(Source {
+            path: path.map(|p| p.to_path_buf()),
+            span: transaction.span(),
+        })]);
 
-    let description = transaction
-        .description(src)
-        .ok_or(vec![SyntaxError(transaction.span())]);
+    let description = transaction.description(src).ok_or(vec![SyntaxError(Source {
+        path: path.map(|p| p.to_path_buf()),
+        span: transaction.span(),
+    })]);
 
     let (postings, errors): (Vec<_>, Vec<_>) = transaction
         .postings()
@@ -128,12 +140,18 @@ fn convert_posting(
 ) -> Result<bonk_ast_errorless::Posting, Vec<SyntaxError>> {
     let account = posting
         .account()
-        .ok_or(vec![SyntaxError(posting.span())])
+        .ok_or(vec![SyntaxError(Source {
+            path: path.map(|p| p.to_path_buf()),
+            span: posting.span(),
+        })])
         .map(|acc| convert_account(acc, src, path));
 
     let amount = posting
         .amount()
-        .ok_or(vec![SyntaxError(posting.span())])
+        .ok_or(vec![SyntaxError(Source {
+            path: path.map(|p| p.to_path_buf()),
+            span: posting.span(),
+        })])
         .and_then(|amt| convert_amount(amt, src, path));
 
     let mut errors = Vec::new();
@@ -184,11 +202,12 @@ fn convert_amount(
     path: Option<&Path>,
 ) -> Result<bonk_ast_errorless::Amount, Vec<SyntaxError>> {
     Ok(bonk_ast_errorless::Amount {
-        cents: amount
-            .value(src)
-            .replace('.', "")
-            .parse()
-            .map_err(|_| vec![SyntaxError(amount.span())])?,
+        cents: amount.value(src).replace('.', "").parse().map_err(|_| {
+            vec![SyntaxError(Source {
+                path: path.map(|p| p.to_path_buf()),
+                span: amount.span(),
+            })]
+        })?,
         source: Some(Source {
             path: path.map(Path::to_path_buf),
             span: amount.span(),
@@ -204,7 +223,10 @@ fn convert_declared_account(
     Ok(bonk_ast_errorless::DeclareAccount {
         account: account
             .account()
-            .ok_or(vec![SyntaxError(account.span())])
+            .ok_or(vec![SyntaxError(Source {
+                path: path.map(|p| p.to_path_buf()),
+                span: account.span(),
+            })])
             .map(|a| convert_account(a, src, path))?,
         source: Some(Source {
             path: path.map(Path::to_path_buf),
@@ -222,7 +244,10 @@ fn convert_import(
         path: import
             .path()
             .map(|p| p.value(src).to_string())
-            .ok_or(vec![SyntaxError(import.span())])?,
+            .ok_or(vec![SyntaxError(Source {
+                path: path.map(|p| p.to_path_buf()),
+                span: import.span(),
+            })])?,
         source: Some(Source {
             path: path.map(Path::to_path_buf),
             span: import.span(),
@@ -479,13 +504,18 @@ liabilities:my_credit_card -10.91"#;
         Err(
             [
                 SyntaxError(
-                    SourceSpan {
-                        start_byte: 10,
-                        end_byte: 13,
-                        start_row: 0,
-                        start_col: 10,
-                        end_row: 0,
-                        end_col: 13,
+                    Source {
+                        path: Some(
+                            "ledger.bonk",
+                        ),
+                        span: SourceSpan {
+                            start_byte: 10,
+                            end_byte: 13,
+                            start_row: 0,
+                            start_col: 10,
+                            end_row: 0,
+                            end_col: 13,
+                        },
                     },
                 ),
             ],

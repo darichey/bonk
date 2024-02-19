@@ -8,7 +8,7 @@ use sqlite::{Connection, State, Value};
 
 // TODO errors with anyhow
 pub fn create_db(cfg: PathBuf, database: PathBuf) -> Result<Db, String> {
-    let workspace = Workspace::from_cfg(&cfg).expect("Couldn't read cfg");
+    let workspace = Workspace::from_cfg(cfg).expect("Couldn't read cfg");
     let workspace = workspace.parse().map_err(|err| err.to_string())?;
     let workspace = workspace.check().map_err(|err| {
         err.into_iter()

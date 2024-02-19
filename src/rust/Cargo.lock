@@ -246,6 +246,7 @@ dependencies = [
  "bonk-ast-errorless",
  "bonk-check",
  "bonk-parse",
+ "bonk-workspace",
  "lsp-server",
  "lsp-types",
  "serde",

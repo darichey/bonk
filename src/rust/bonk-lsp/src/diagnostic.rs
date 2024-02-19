@@ -1,70 +1,100 @@
-use std::path::Path;
+use std::{
+    collections::{hash_map::Entry, HashMap},
+    path::{Path, PathBuf},
+};
 
-use bonk_check::{AccountRefError, BalanceError, CheckError, CheckUnit, ImportError, SyntaxError};
-use bonk_parse::ast::Ledger;
-use lsp_types::{Diagnostic, DiagnosticSeverity};
+use bonk_check::{
+    AccountRefError, BalanceError, CheckError, CheckUnit, ImportError, SyntaxError, WorkspaceExt,
+};
+use bonk_parse::{ast::Ledger, ParsedWorkspace};
+use lsp_types::{Diagnostic, DiagnosticSeverity, Url};
 
-use crate::util::SourceSpanExt;
+use crate::{state::State, util::SourceSpanExt};
 
-pub fn get_diagnostics(ledger: &Ledger, src: &str, path: &Path) -> Vec<Diagnostic> {
-    eprintln!("{}", src);
-    eprintln!("{:?}", ledger);
+pub fn get_doc_diagnostics(state: &State, uri: &Url) -> Vec<Diagnostic> {
+    let path = PathBuf::from(uri.as_ref());
+    let mut all_diagnostics = get_diagnostics(&state.workspace);
 
-    // TODO reimplement
-    vec![]
+    all_diagnostics.remove(&path).unwrap_or_default()
+}
 
-    // let check_unit = CheckUnit::new(vec![(path.to_path_buf(), ledger)]);
+pub fn get_diagnostics(workspace: &ParsedWorkspace) -> HashMap<PathBuf, Vec<Diagnostic>> {
+    match workspace.check() {
+        Ok(_) => HashMap::new(),
+        Err(errs) => {
+            let mut map: HashMap<PathBuf, Vec<Diagnostic>> = HashMap::new();
 
-    // match check_unit.check(&CheckUnit::new(vec![(path.to_path_buf(), src)])) {
-    //     Ok(_) => vec![],
-    //     Err(errs) => errs
-    //         .into_iter()
-    //         .map(|err| match err {
-    //             CheckError::AccountRefError(AccountRefError(source)) => Diagnostic {
-    //                 range: source.span.into_lsp_range(),
-    //                 severity: Some(DiagnosticSeverity::ERROR),
-    //                 code: None,
-    //                 code_description: None,
-    //                 source: Some("bonk".to_string()),
-    //                 message: "can't find account".to_string(),
-    //                 related_information: None,
-    //                 tags: None,
-    //                 data: None,
-    //             },
-    //             CheckError::BalanceError(BalanceError(source)) => Diagnostic {
-    //                 range: source.span.into_lsp_range(),
-    //                 severity: Some(DiagnosticSeverity::ERROR),
-    //                 code: None,
-    //                 code_description: None,
-    //                 source: Some("bonk".to_string()),
-    //                 message: "transaction doesn't balance".to_string(),
-    //                 related_information: None,
-    //                 tags: None,
-    //                 data: None,
-    //             },
-    //             CheckError::ImportError(ImportError(source)) => Diagnostic {
-    //                 range: source.span.into_lsp_range(),
-    //                 severity: Some(DiagnosticSeverity::ERROR),
-    //                 code: None,
-    //                 code_description: None,
-    //                 source: Some("bonk".to_string()),
-    //                 message: "can't import".to_string(),
-    //                 related_information: None,
-    //                 tags: None,
-    //                 data: None,
-    //             },
-    //             CheckError::SyntaxError(SyntaxError(span)) => Diagnostic {
-    //                 range: span.into_lsp_range(),
-    //                 severity: Some(DiagnosticSeverity::ERROR),
-    //                 code: None,
-    //                 code_description: None,
-    //                 source: Some("bonk".to_string()),
-    //                 message: "syntax error".to_string(),
-    //                 related_information: None,
-    //                 tags: None,
-    //                 data: None,
-    //             },
-    //         })
-    //         .collect(),
-    // }
+            for err in errs {
+                let (path, diagnostic) = match err {
+                    CheckError::AccountRefError(AccountRefError(source)) => (
+                        source.path.unwrap(),
+                        Diagnostic {
+                            range: source.span.into_lsp_range(),
+                            severity: Some(DiagnosticSeverity::ERROR),
+                            code: None,
+                            code_description: None,
+                            source: Some("bonk".to_string()),
+                            message: "can't find account".to_string(),
+                            related_information: None,
+                            tags: None,
+                            data: None,
+                        },
+                    ),
+                    CheckError::BalanceError(BalanceError(source)) => (
+                        source.path.unwrap(),
+                        Diagnostic {
+                            range: source.span.into_lsp_range(),
+                            severity: Some(DiagnosticSeverity::ERROR),
+                            code: None,
+                            code_description: None,
+                            source: Some("bonk".to_string()),
+                            message: "transaction doesn't balance".to_string(),
+                            related_information: None,
+                            tags: None,
+                            data: None,
+                        },
+                    ),
+                    CheckError::ImportError(ImportError(source)) => (
+                        source.path.unwrap(),
+                        Diagnostic {
+                            range: source.span.into_lsp_range(),
+                            severity: Some(DiagnosticSeverity::ERROR),
+                            code: None,
+                            code_description: None,
+                            source: Some("bonk".to_string()),
+                            message: "can't import".to_string(),
+                            related_information: None,
+                            tags: None,
+                            data: None,
+                        },
+                    ),
+                    CheckError::SyntaxError(SyntaxError(source)) => (
+                        source.path.unwrap(),
+                        Diagnostic {
+                            range: source.span.into_lsp_range(),
+                            severity: Some(DiagnosticSeverity::ERROR),
+                            code: None,
+                            code_description: None,
+                            source: Some("bonk".to_string()),
+                            message: "syntax error".to_string(),
+                            related_information: None,
+                            tags: None,
+                            data: None,
+                        },
+                    ),
+                };
+
+                match map.entry(path) {
+                    Entry::Occupied(mut e) => {
+                        e.get_mut().push(diagnostic);
+                    }
+                    Entry::Vacant(e) => {
+                        e.insert(vec![diagnostic]);
+                    }
+                }
+            }
+
+            map
+        }
+    }
 }

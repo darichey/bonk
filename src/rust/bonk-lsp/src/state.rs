@@ -4,14 +4,18 @@ use bonk_parse::{ParsedLedger, ParsedWorkspace};
 use lsp_types::{Range, TextDocumentContentChangeEvent, Url};
 
 pub struct State {
-    workspace: ParsedWorkspace,
+    pub workspace: ParsedWorkspace,
 }
 
 impl State {
-    pub fn new() -> Self {
+    pub fn empty() -> Self {
         Self {
             workspace: ParsedWorkspace::new(),
         }
+    }
+
+    pub fn new(workspace: ParsedWorkspace) -> Self {
+        Self { workspace }
     }
 
     pub fn get_ledger(&self, uri: &Url) -> Option<&ParsedLedger> {
@@ -78,7 +82,7 @@ mod tests {
     #[test]
     fn test_on_change() {
         let uri = Url::from_file_path("/test.bonk").unwrap();
-        let mut state = State::new();
+        let mut state = State::empty();
         state.on_open(uri.clone(), "some\ntext\nin\nthe\ndocument".to_string());
 
         assert_state_change(

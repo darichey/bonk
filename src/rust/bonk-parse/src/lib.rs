@@ -145,7 +145,7 @@ impl WorkspaceExt for Workspace {
                     let ledger = parser.parse(&src, None);
 
                     Ok((
-                        path,
+                        path.clone(),
                         ParsedLedger {
                             src,
                             ledger,

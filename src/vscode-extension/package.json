@@ -1,6 +1,7 @@
 {
   "name": "bonk",
   "displayName": "bonk",
+  "publisher": "darichey",
   "description": "Language support for Bonk",
   "version": "0.0.1",
   "engines": {

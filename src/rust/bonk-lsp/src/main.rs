@@ -5,6 +5,8 @@ mod util;
 
 use std::error::Error;
 
+use bonk_parse::WorkspaceExt;
+use bonk_workspace::Workspace;
 use lsp_types::notification::{DidChangeTextDocument, DidCloseTextDocument, DidOpenTextDocument};
 use lsp_types::request::{DocumentDiagnosticRequest, GotoDefinition};
 use lsp_types::{
@@ -17,11 +19,21 @@ use lsp_types::{InitializeParams, ServerCapabilities};
 
 use lsp_server::{Connection, ExtractError, Message, Notification, Request, RequestId, Response};
 
-use crate::diagnostic::get_diagnostics;
+use crate::diagnostic::{get_diagnostics, get_doc_diagnostics};
 use crate::go_to_def::get_go_to_def_result;
 use crate::state::State;
 
 fn main() -> Result<(), Box<dyn Error + Sync + Send>> {
+    let args: Vec<_> = std::env::args().collect();
+
+    eprintln!("{:?}", args);
+
+    let [_, cfg_path, _] = &args[..] else {
+        panic!("must pass cfg path as first argument")
+    };
+
+    let workspace = Workspace::from_cfg(cfg_path).expect("failed to parse workspace");
+
     eprintln!("Starting...");
 
     // Create the transport. Includes the stdio (stdin and stdout) versions but this could
@@ -41,8 +53,8 @@ fn main() -> Result<(), Box<dyn Error + Sync + Send>> {
         )),
         diagnostic_provider: Some(DiagnosticServerCapabilities::Options(DiagnosticOptions {
             identifier: Some("bonk".to_string()),
-            inter_file_dependencies: false,
-            workspace_diagnostics: false,
+            inter_file_dependencies: true,
+            workspace_diagnostics: true, // FIXME: we should respond to workspace/diagnostic requests
             work_done_progress_options: WorkDoneProgressOptions {
                 work_done_progress: Some(false),
             },
@@ -60,7 +72,7 @@ fn main() -> Result<(), Box<dyn Error + Sync + Send>> {
             return Err(e.into());
         }
     };
-    main_loop(connection, initialization_params)?;
+    main_loop(connection, initialization_params, workspace)?;
     io_threads.join()?;
 
     // Shut down gracefully.
@@ -71,10 +83,12 @@ fn main() -> Result<(), Box<dyn Error + Sync + Send>> {
 fn main_loop(
     connection: Connection,
     params: serde_json::Value,
+    workspace: Workspace,
 ) -> Result<(), Box<dyn Error + Sync + Send>> {
     let _params: InitializeParams = serde_json::from_value(params).unwrap();
 
-    let mut state = State::new();
+    let workspace = workspace.parse().expect("couldn't read ledgers");
+    let mut state = State::new(workspace);
 
     eprintln!("Starting main loop...");
     for msg in &connection.receiver {
@@ -87,25 +101,14 @@ fn main_loop(
                 let req = match cast_req::<DocumentDiagnosticRequest>(req) {
                     Ok((id, params)) => {
                         if let Some("bonk") = params.identifier.as_deref() {
-                            let doc = state
-                                .get_ledger(&params.text_document.uri)
-                                .expect("we don't know about this file");
+                            let items = get_doc_diagnostics(&state, &params.text_document.uri);
 
                             let result = DocumentDiagnosticReport::Full(
                                 RelatedFullDocumentDiagnosticReport {
                                     related_documents: None,
                                     full_document_diagnostic_report: FullDocumentDiagnosticReport {
                                         result_id: None,
-                                        items: get_diagnostics(
-                                            &doc.ledger,
-                                            &doc.src,
-                                            params
-                                                .text_document
-                                                .uri
-                                                .to_file_path()
-                                                .as_deref()
-                                                .unwrap(),
-                                        ),
+                                        items,
                                     },
                                 },
                             );
