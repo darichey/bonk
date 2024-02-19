@@ -1,3 +1,5 @@
+pub mod cli;
+
 use std::{error::Error, io};
 
 use bonk_ast_errorless::{Account, Amount, Date, Ledger, Posting, Transaction};
