@@ -7,7 +7,7 @@ use std::error::Error;
 
 use bonk_parse::WorkspaceExt;
 use bonk_workspace::Workspace;
-use lsp_types::notification::{DidChangeTextDocument, DidCloseTextDocument, DidOpenTextDocument};
+use lsp_types::notification::{DidChangeTextDocument, DidOpenTextDocument};
 use lsp_types::request::{DocumentDiagnosticRequest, GotoDefinition};
 use lsp_types::{
     DiagnosticOptions, DiagnosticServerCapabilities, DocumentDiagnosticReport,
@@ -133,13 +133,9 @@ fn main_loop(
                             .get_ledger(&params.text_document.uri)
                             .expect("we don't know about this file");
 
-                        let result = get_go_to_def_result(
-                            &doc.ledger,
-                            &doc.src,
-                            params.text_document.uri,
-                            params.position,
-                        )
-                        .map(GotoDefinitionResponse::Scalar);
+                        let result =
+                            get_go_to_def_result(&state, &doc.ledger, &doc.src, params.position)
+                                .map(GotoDefinitionResponse::Scalar);
                         let result = serde_json::to_value(&result).unwrap();
                         let resp = Response {
                             id,
@@ -168,18 +164,9 @@ fn main_loop(
                     Err(ExtractError::MethodMismatch(not)) => not,
                 };
 
-                let not = match cast_not::<DidChangeTextDocument>(not) {
+                let _not = match cast_not::<DidChangeTextDocument>(not) {
                     Ok(params) => {
                         state.on_change(&params.text_document.uri, params.content_changes);
-                        continue;
-                    }
-                    Err(err @ ExtractError::JsonError { .. }) => panic!("{err:?}"),
-                    Err(ExtractError::MethodMismatch(not)) => not,
-                };
-
-                let _not = match cast_not::<DidCloseTextDocument>(not) {
-                    Ok(params) => {
-                        state.on_close(&params.text_document.uri);
                         continue;
                     }
                     Err(err @ ExtractError::JsonError { .. }) => panic!("{err:?}"),

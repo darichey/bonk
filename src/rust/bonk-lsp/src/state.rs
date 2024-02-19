@@ -48,11 +48,6 @@ impl State {
             }
         }
     }
-
-    pub fn on_close(&mut self, uri: &Url) {
-        let path = uri.to_file_path().unwrap();
-        self.workspace.remove(&path);
-    }
 }
 
 #[cfg(test)]
