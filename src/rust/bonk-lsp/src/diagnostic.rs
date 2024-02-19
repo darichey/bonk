@@ -1,10 +1,10 @@
 use std::{
     collections::{hash_map::Entry, HashMap},
-    path::{PathBuf},
+    path::PathBuf,
 };
 
 use bonk_check::{CheckErrorCode, WorkspaceExt};
-use bonk_parse::{ParsedWorkspace};
+use bonk_parse::ParsedWorkspace;
 use lsp_types::{Diagnostic, DiagnosticSeverity, Url};
 
 use crate::{state::State, util::SourceSpanExt};

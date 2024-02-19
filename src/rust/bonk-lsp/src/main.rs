@@ -19,7 +19,7 @@ use lsp_types::{InitializeParams, ServerCapabilities};
 
 use lsp_server::{Connection, ExtractError, Message, Notification, Request, RequestId, Response};
 
-use crate::diagnostic::{get_doc_diagnostics};
+use crate::diagnostic::get_doc_diagnostics;
 use crate::go_to_def::get_go_to_def_result;
 use crate::state::State;
 
