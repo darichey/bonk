@@ -1,3 +1,5 @@
+pub mod cli;
+
 use std::path::{Path, PathBuf};
 
 use bonk_ast_errorless::{Posting, Transaction};
