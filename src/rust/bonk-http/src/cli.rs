@@ -13,6 +13,7 @@ use rouille::{router, Response, Server};
 
 use crate::{get_transactions, State};
 
+/// Starts an http server that can be used to interact with the Bonk workspace
 #[derive(Parser, Debug)]
 #[command()]
 pub struct Args {

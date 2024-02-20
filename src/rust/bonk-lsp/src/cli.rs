@@ -14,6 +14,7 @@ use lsp_server::Connection;
 
 use crate::main_loop;
 
+/// Starts a Bonk LSP server
 #[derive(Parser)]
 #[command()]
 pub struct Args {
