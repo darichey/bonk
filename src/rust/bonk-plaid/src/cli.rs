@@ -12,23 +12,23 @@ use std::{fs, path::PathBuf};
 #[command()]
 pub struct Args {
     /// The earliest transaction date (e.g., "2023-01-01").
-    #[arg(short, long)]
+    #[arg(long)]
     pub start_date: String,
 
     /// The latest transaction date (e.g., "2023-12-31").
-    #[arg(short, long)]
+    #[arg(long)]
     pub end_date: String,
 
     /// The Bonk account to associate the converted transactions to (e.g., "assets:my_checking").
-    #[arg(short, long)]
+    #[arg(long)]
     pub account: String,
 
     /// The path to output the ledger to (e.g., "./foo.partial.bonk").
-    #[arg(short, long)]
+    #[arg(long)]
     pub output: PathBuf,
 
     /// An existing Plaid access token to use.
-    #[arg(short, long)]
+    #[arg(long)]
     pub access_token: Option<String>,
 }
 
