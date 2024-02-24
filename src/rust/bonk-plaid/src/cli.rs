@@ -41,9 +41,12 @@ pub fn run(args: Args) -> Result<()> {
     let config = plaid_config()?;
     let access_token = plaid_get_access_token(&config)?;
 
-    println!("Got access token");
+    println!("Got access token: {access_token}");
 
     let mut transactions = plaid_get_transactions(&config, &access_token, &start_date, &end_date)?;
+
+    println!("Fetched {} transactions", transactions.len());
+
     transactions.sort_by(
         |PlaidTransaction { date: date_a, .. }, PlaidTransaction { date: date_b, .. }| {
             date_a.cmp(date_b)

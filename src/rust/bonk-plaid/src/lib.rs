@@ -51,6 +51,7 @@ fn handle_post(request: &Request, public_token: Arc<Mutex<Option<String>>>) -> R
 
 fn plaid_get_access_token(config: &Configuration) -> Result<String> {
     let link_token = plaid_create_link_token(config)?;
+    println!("Got link token: {link_token}");
 
     let public_token: Arc<Mutex<Option<String>>> = Arc::new(Mutex::new(None));
 
@@ -78,7 +79,7 @@ fn plaid_get_access_token(config: &Configuration) -> Result<String> {
         }
     };
 
-    println!("Plaid link done");
+    println!("Got public token: {public_token}");
 
     let access_token = plaid_exchange_public_token(config, &public_token)?;
 
