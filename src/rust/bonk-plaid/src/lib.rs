@@ -5,7 +5,7 @@ use plaid::{
     apis::{configuration::Configuration, plaid_api},
     models::{
         CountryCode, LinkTokenCreateRequest, LinkTokenCreateRequestUser, Products,
-        TransactionsGetRequest,
+        TransactionsGetRequest, TransactionsGetRequestOptions,
     },
 };
 use reqwest::header::HeaderMap;
@@ -129,27 +129,56 @@ fn plaid_get_transactions(
     start_date: &str,
     end_date: &str,
 ) -> Result<Vec<PlaidTransaction>> {
-    let response = plaid_api::transactions_get(
-        config,
-        TransactionsGetRequest {
-            access_token: access_token.to_string(),
-            start_date: start_date.to_string(),
-            end_date: end_date.to_string(),
-            client_id: None,
-            options: None,
-            secret: None,
-        },
-    )?;
+    let mut transactions = vec![];
 
-    let transactions = response
-        .transactions
-        .into_iter()
-        .map(|transaction| PlaidTransaction {
-            amount: transaction.amount,
-            date: transaction.date,
-            name: transaction.name,
-        })
-        .collect();
+    loop {
+        let offset = transactions.len(); // skip all the transactions we've already received
+
+        println!("Fetching offset: {}", offset);
+
+        let response = plaid_api::transactions_get(
+            config,
+            TransactionsGetRequest {
+                access_token: access_token.to_string(),
+                start_date: start_date.to_string(),
+                end_date: end_date.to_string(),
+                client_id: None,
+                options: Some(Box::new(TransactionsGetRequestOptions {
+                    account_ids: None,
+                    count: Some(500), // hardcode to the max allowed value
+                    offset: Some(offset as i32),
+                    include_original_description: None,
+                    include_personal_finance_category_beta: None,
+                    include_personal_finance_category: None,
+                    include_logo_and_counterparty_beta: None,
+                    days_requested: None,
+                })),
+                secret: None,
+            },
+        )?;
+
+        transactions.extend(response.transactions.into_iter().map(|transaction| {
+            PlaidTransaction {
+                amount: transaction.amount,
+                date: transaction.date,
+                name: transaction.name,
+            }
+        }));
+
+        // transactions.len() is the number of transactions we'ved received so far
+        // response.total_transactions is the total number of transactions between start_date and end_date
+        // if we've received at least that many transactions, then we're done
+        // otherwise, we'll loop again and use the number we've received so far as the new offset
+        if transactions.len() >= response.total_transactions as usize {
+            break;
+        }
+    }
+
+    transactions.sort_by(
+        |PlaidTransaction { date: date_a, .. }, PlaidTransaction { date: date_b, .. }| {
+            date_a.cmp(date_b)
+        },
+    );
 
     Ok(transactions)
 }
