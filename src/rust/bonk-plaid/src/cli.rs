@@ -26,6 +26,10 @@ pub struct Args {
     /// The path to output the ledger to (e.g., "./foo.partial.bonk").
     #[arg(short, long)]
     pub output: PathBuf,
+
+    /// An existing Plaid access token to use.
+    #[arg(short, long)]
+    pub access_token: Option<String>,
 }
 
 pub fn run(args: Args) -> Result<()> {
@@ -34,12 +38,17 @@ pub fn run(args: Args) -> Result<()> {
         end_date,
         account,
         output,
+        access_token,
     } = args;
 
     let account = Account::parse(&account, None);
 
     let config = plaid_config()?;
-    let access_token = plaid_get_access_token(&config)?;
+
+    let access_token = match access_token {
+        Some(access_token) => access_token,
+        None => plaid_get_access_token(&config)?,
+    };
 
     println!("Got access token: {access_token}");
 
