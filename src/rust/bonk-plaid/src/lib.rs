@@ -90,7 +90,7 @@ fn plaid_create_link_token(config: &Configuration) -> Result<String> {
     Ok(plaid_api::link_token_create(
         config,
         LinkTokenCreateRequest {
-            products: Some(Some(vec![Products::Auth, Products::Transactions])),
+            products: Some(Some(vec![Products::Transactions])),
             ..LinkTokenCreateRequest::new(
                 "finance-app".to_string(),
                 "en".to_string(),
