@@ -136,6 +136,7 @@ fn plaid_get_transactions(
 
         println!("Fetching offset: {}", offset);
 
+        // TODO: handle PRODUCT_NOT_READY. We can probably restructure stuff so that we can reuse the existing http server and pass a webhook url here
         let response = plaid_api::transactions_get(
             config,
             TransactionsGetRequest {
