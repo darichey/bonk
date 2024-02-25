@@ -1,4 +1,7 @@
-use std::{fs, path::PathBuf};
+use std::{
+    fs::File,
+    io::{self, stdin, stdout},
+};
 
 use anyhow::Result;
 use clap::Parser;
@@ -13,13 +16,13 @@ pub struct Args {
     #[arg(short, long)]
     pub account: String,
 
-    /// The path to the csv file to read from (e.g., "./foo.csv").
+    /// The path to the csv file to read from (e.g., "./foo.csv"). If not given, or "-" is given, read from stdin.
     #[arg(short, long)]
-    pub input: PathBuf,
+    pub input: Option<String>,
 
-    /// The path to output the ledger to (e.g., "./foo.partial.bonk").
+    /// The path to output the ledger to (e.g., "./foo.partial.bonk"). If not given, or "-" is given, write to stdout.
     #[arg(short, long)]
-    pub output: PathBuf,
+    pub output: Option<String>,
 }
 
 pub fn run(args: Args) -> Result<()> {
@@ -29,9 +32,22 @@ pub fn run(args: Args) -> Result<()> {
         output,
     } = args;
 
-    let mut reader = csv::Reader::from_path(input)?;
+    let mut reader = {
+        let r: Box<dyn io::Read> = match input.as_deref() {
+            Some("-") | None => Box::new(stdin().lock()),
+            Some(input) => Box::new(File::open(input)?),
+        };
+        csv::Reader::from_reader(r)
+    };
+
     let ledger = do_convert(&account, &mut reader)?;
-    fs::write(output, ledger.to_string())?;
+
+    let mut w: Box<dyn io::Write> = match output.as_deref() {
+        Some("-") | None => Box::new(stdout().lock()),
+        Some(output) => Box::new(File::open(output)?),
+    };
+
+    w.write_fmt(format_args!("{}", ledger))?;
 
     Ok(())
 }
