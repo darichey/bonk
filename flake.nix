@@ -31,6 +31,7 @@
 
             # JS dev
             nodejs_20
+            vsce
 
             # Python dev
             (python3.withPackages (ps: with ps; [ pandas pytorch ]))
