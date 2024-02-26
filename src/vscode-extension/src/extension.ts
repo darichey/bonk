@@ -18,7 +18,7 @@ export async function activate(_context: vscode.ExtensionContext) {
   // TODO: track changes to the Bonk.toml and workspaces
   const bonkCfg = await findBonkCfg();
 
-  const serverCommand = process.env["__BONK_LSP_SERVER_DEBUG"];
+  const serverCommand = getServerCommand();
   if (!serverCommand) {
     output.appendLine(`No path to lsp binary, not activating`);
     return;
@@ -73,4 +73,10 @@ async function findBonkCfg(): Promise<string> {
   await fs.access(bonkCfg, fs.constants.F_OK);
 
   return bonkCfg;
+}
+
+function getServerCommand(): string | undefined {
+  const config = vscode.workspace.getConfiguration("bonk");
+
+  return config.get("server") ?? process.env["__BONK_LSP_SERVER_DEBUG"];
 }

@@ -36,6 +36,11 @@
     "configuration": {
       "title": "Bonk",
       "properties": {
+        "bonk.server": {
+          "type": "string",
+          "description": "The command to use to start the Bonk LSP server. The default (`bonk lsp`) assumes `bonk` is available on `PATH`.",
+          "default": "bonk lsp"
+        },
         "bonk.trace.server": {
           "type": "string",
           "scope": "window",
