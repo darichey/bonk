@@ -20,7 +20,7 @@ impl Display for Ledger {
 impl Display for Transaction {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let date = self.date.to_string();
-        let description = format!("\"{}\"", &self.description.escape_debug());
+        let description = format!("\"{}\"", escape(&self.description));
         let postings = self
             .postings
             .iter()
@@ -47,6 +47,11 @@ fn to_string_account(account: &Account) -> String {
 
 fn to_string_amount(amount: &Amount) -> String {
     format!("{}.{}", amount.cents / 100, (amount.cents % 100).abs())
+}
+
+// TODO: test
+fn escape(s: &str) -> String {
+    s.replace('\"', "\\\"").replace('\n', "\\n")
 }
 
 #[cfg(test)]
