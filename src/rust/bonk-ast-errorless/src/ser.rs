@@ -20,7 +20,7 @@ impl Display for Ledger {
 impl Display for Transaction {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let date = self.date.to_string();
-        let description = format!("\"{}\"", &self.description);
+        let description = format!("\"{}\"", &self.description.escape_debug());
         let postings = self
             .postings
             .iter()
