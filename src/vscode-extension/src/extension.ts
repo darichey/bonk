@@ -28,13 +28,13 @@ export async function activate(_context: vscode.ExtensionContext) {
 
   const serverOptions: ServerOptions = {
     run: {
-      command: serverCommand,
-      args: [bonkCfg],
+      command: serverCommand.cmd,
+      args: [...serverCommand.args, bonkCfg],
       transport: TransportKind.stdio,
     },
     debug: {
-      command: serverCommand,
-      args: [bonkCfg],
+      command: serverCommand.cmd,
+      args: [...serverCommand.args, bonkCfg],
       transport: TransportKind.stdio,
     },
   };
@@ -75,8 +75,19 @@ async function findBonkCfg(): Promise<string> {
   return bonkCfg;
 }
 
-function getServerCommand(): string | undefined {
+function getServerCommand(): { cmd: string; args: string[] } | undefined {
   const config = vscode.workspace.getConfiguration("bonk");
+  const server =
+    config.get<string | undefined>("server") ??
+    process.env["__BONK_LSP_SERVER_DEBUG"];
 
-  return config.get("server") ?? process.env["__BONK_LSP_SERVER_DEBUG"];
+  if (server) {
+    const [cmd, ...args] = server.split(" ");
+    return {
+      cmd,
+      args,
+    };
+  }
+
+  return;
 }
