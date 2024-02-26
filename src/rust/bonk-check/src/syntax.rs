@@ -154,13 +154,8 @@ fn convert_posting(
 
     let amount = posting
         .amount()
-        .ok_or(vec![
-            (Source {
-                path: path.map(|p| p.to_path_buf()),
-                span: posting.span(),
-            }),
-        ])
-        .and_then(|amt| convert_amount(amt, src, path));
+        .map(|amt| convert_amount(amt, src, path))
+        .transpose();
 
     let mut errors = Vec::new();
 
@@ -353,24 +348,26 @@ mod tests {
                                         },
                                     ),
                                 },
-                                amount: Amount {
-                                    cents: 1091,
-                                    source: Some(
-                                        Source {
-                                            path: Some(
-                                                "ledger.bonk",
-                                            ),
-                                            span: SourceSpan {
-                                                start_byte: 68,
-                                                end_byte: 73,
-                                                start_row: 3,
-                                                start_col: 31,
-                                                end_row: 3,
-                                                end_col: 36,
+                                amount: Some(
+                                    Amount {
+                                        cents: 1091,
+                                        source: Some(
+                                            Source {
+                                                path: Some(
+                                                    "ledger.bonk",
+                                                ),
+                                                span: SourceSpan {
+                                                    start_byte: 68,
+                                                    end_byte: 73,
+                                                    start_row: 3,
+                                                    start_col: 31,
+                                                    end_row: 3,
+                                                    end_col: 36,
+                                                },
                                             },
-                                        },
-                                    ),
-                                },
+                                        ),
+                                    },
+                                ),
                                 source: Some(
                                     Source {
                                         path: Some(
@@ -409,24 +406,26 @@ mod tests {
                                         },
                                     ),
                                 },
-                                amount: Amount {
-                                    cents: -1091,
-                                    source: Some(
-                                        Source {
-                                            path: Some(
-                                                "ledger.bonk",
-                                            ),
-                                            span: SourceSpan {
-                                                start_byte: 105,
-                                                end_byte: 111,
-                                                start_row: 4,
-                                                start_col: 31,
-                                                end_row: 4,
-                                                end_col: 37,
+                                amount: Some(
+                                    Amount {
+                                        cents: -1091,
+                                        source: Some(
+                                            Source {
+                                                path: Some(
+                                                    "ledger.bonk",
+                                                ),
+                                                span: SourceSpan {
+                                                    start_byte: 105,
+                                                    end_byte: 111,
+                                                    start_row: 4,
+                                                    start_col: 31,
+                                                    end_row: 4,
+                                                    end_col: 37,
+                                                },
                                             },
-                                        },
-                                    ),
-                                },
+                                        ),
+                                    },
+                                ),
                                 source: Some(
                                     Source {
                                         path: Some(

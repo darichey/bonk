@@ -31,7 +31,7 @@ pub fn do_convert<D: io::Read>(account: &str, reader: &mut Reader<D>) -> Result<
                 description,
                 postings: vec![Posting {
                     account: account.clone(),
-                    amount: Amount::from_dollars(amount, None),
+                    amount: Some(Amount::from_dollars(amount, None)),
                     source: None,
                 }],
                 source: None,
@@ -79,10 +79,12 @@ mod tests {
                                 ],
                                 source: None,
                             },
-                            amount: Amount {
-                                cents: 250000,
-                                source: None,
-                            },
+                            amount: Some(
+                                Amount {
+                                    cents: 250000,
+                                    source: None,
+                                },
+                            ),
                             source: None,
                         },
                     ],
@@ -105,10 +107,12 @@ mod tests {
                                 ],
                                 source: None,
                             },
-                            amount: Amount {
-                                cents: -12050,
-                                source: None,
-                            },
+                            amount: Some(
+                                Amount {
+                                    cents: -12050,
+                                    source: None,
+                                },
+                            ),
                             source: None,
                         },
                     ],

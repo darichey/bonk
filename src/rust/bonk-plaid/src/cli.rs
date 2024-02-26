@@ -63,7 +63,7 @@ pub fn run(args: Args) -> Result<()> {
             description: name,
             postings: vec![Posting {
                 account: account.clone(),
-                amount: Amount::from_dollars(-amount, None), // flip sign
+                amount: Some(Amount::from_dollars(-amount, None)), // flip sign
                 source: None,
             }],
             source: None,

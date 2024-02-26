@@ -64,7 +64,7 @@ impl ToString for Date {
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Posting {
     pub account: Account,
-    pub amount: Amount,
+    pub amount: Option<Amount>,
     pub source: Option<Source>,
 }
 

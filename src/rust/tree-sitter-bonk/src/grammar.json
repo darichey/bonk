@@ -89,8 +89,16 @@
           "type": "FIELD",
           "name": "amount",
           "content": {
-            "type": "SYMBOL",
-            "name": "amount"
+            "type": "CHOICE",
+            "members": [
+              {
+                "type": "SYMBOL",
+                "name": "amount"
+              },
+              {
+                "type": "BLANK"
+              }
+            ]
           }
         }
       ]

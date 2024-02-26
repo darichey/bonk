@@ -85,7 +85,11 @@ impl Db {
                     } in postings
                     {
                         let account = account.path.join(":");
-                        let amount = amount.cents.to_string();
+                        let amount = amount
+                            .as_ref()
+                            .map(|a| a.cents)
+                            .unwrap_or_else(|| infer_amount(postings))
+                            .to_string();
 
                         insert_posting.bind::<&[(_, Value)]>(
                             &[
@@ -111,6 +115,15 @@ impl Db {
     }
 }
 
+fn infer_amount(postings: &[Posting]) -> i32 {
+    let sum: i32 = postings
+        .iter()
+        .filter_map(|posting| posting.amount.as_ref().map(|a| a.cents))
+        .sum();
+
+    -sum
+}
+
 #[cfg(test)]
 mod tests {
     use std::{path::PathBuf, str::FromStr};
@@ -130,12 +143,12 @@ mod tests {
                     postings: vec![
                         Posting {
                             account: Account::parse("expenses:food", None),
-                            amount: Amount::from_dollars(12.34, None),
+                            amount: Some(Amount::from_dollars(12.34, None)),
                             source: None,
                         },
                         Posting {
                             account: Account::parse("liabilities:my_credit_card", None),
-                            amount: Amount::from_dollars(-12.34, None),
+                            amount: Some(Amount::from_dollars(-12.34, None)),
                             source: None,
                         },
                     ],
@@ -147,12 +160,12 @@ mod tests {
                     postings: vec![
                         Posting {
                             account: Account::parse("liabilities:my_credit_card", None),
-                            amount: Amount::from_dollars(12.34, None),
+                            amount: Some(Amount::from_dollars(12.34, None)),
                             source: None,
                         },
                         Posting {
                             account: Account::parse("assets:my_checking", None),
-                            amount: Amount::from_dollars(-12.34, None),
+                            amount: None,
                             source: None,
                         },
                     ],

@@ -67,12 +67,12 @@ mod tests {
                 postings: vec![
                     Posting {
                         account: Account::parse("foo", None),
-                        amount: Amount::from_dollars(10.0, None),
+                        amount: Some(Amount::from_dollars(10.0, None)),
                         source: None,
                     },
                     Posting {
                         account: Account::parse("bar", None),
-                        amount: Amount::from_dollars(-10.0, None),
+                        amount: Some(Amount::from_dollars(-10.0, None)),
                         source: None,
                     },
                 ],
@@ -107,7 +107,7 @@ mod tests {
                 postings: vec![
                     Posting {
                         account: Account::parse("foo", None),
-                        amount: Amount::from_dollars(10.0, None),
+                        amount: Some(Amount::from_dollars(10.0, None)),
                         source: None,
                     },
                     Posting {
@@ -126,7 +126,7 @@ mod tests {
                                 },
                             }),
                         ),
-                        amount: Amount::from_dollars(-10.0, None),
+                        amount: Some(Amount::from_dollars(-10.0, None)),
                         source: None,
                     },
                 ],

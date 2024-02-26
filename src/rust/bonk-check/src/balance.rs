@@ -4,8 +4,19 @@ use crate::{CheckError, CheckErrorCode};
 pub fn check_balance(ledger: &bonk_ast_errorless::Ledger) -> Result<(), Vec<CheckError>> {
     let mut errors = vec![];
 
-    for transaction in &ledger.transactions {
-        let sum: i32 = transaction.postings.iter().map(|p| p.amount.cents).sum();
+    'outer: for transaction in &ledger.transactions {
+        let mut sum = 0;
+        for posting in &transaction.postings {
+            let Some(amount) = &posting.amount else {
+                // if a transaction contains a posting with an inferred amount, it always balances, because the inferred amount is whatever's left over
+                // TODO: we separately check that every transaction has at most one posting with an inferred amount
+                continue 'outer;
+            };
+
+            sum += amount.cents;
+        }
+
+        // let sum: i32 = transaction.postings.iter().map(|p| p.amount.cents).sum();
         if sum != 0 {
             errors.push(CheckError {
                 code: CheckErrorCode::NoBalance,
@@ -44,12 +55,40 @@ mod tests {
                 postings: vec![
                     Posting {
                         account: Account::parse("expenses:fast_food", None),
-                        amount: Amount::from_dollars(10.91, None),
+                        amount: Some(Amount::from_dollars(10.91, None)),
                         source: None,
                     },
                     Posting {
                         account: Account::parse("liabilities:my_credit_card", None),
-                        amount: Amount::from_dollars(-10.91, None),
+                        amount: Some(Amount::from_dollars(-10.91, None)),
+                        source: None,
+                    },
+                ],
+                source: None,
+            }],
+            source: None,
+        };
+
+        assert!(check_balance(&ledger).is_ok())
+    }
+
+    #[test]
+    fn test_no_errors_inferred_amount() {
+        // Note that we can get away with passing source: None because we expect that there are no errors
+        let ledger = Ledger {
+            declare_accounts: vec![],
+            transactions: vec![Transaction {
+                date: Date::parse("2023-01-01", None).unwrap(),
+                description: "\"Mcdonald's\"".to_string(),
+                postings: vec![
+                    Posting {
+                        account: Account::parse("expenses:fast_food", None),
+                        amount: Some(Amount::from_dollars(10.91, None)),
+                        source: None,
+                    },
+                    Posting {
+                        account: Account::parse("liabilities:my_credit_card", None),
+                        amount: None,
                         source: None,
                     },
                 ],
@@ -70,7 +109,7 @@ mod tests {
                 description: "\"Mcdonald's\"".to_string(),
                 postings: vec![Posting {
                     account: Account::parse("expenses:fast_food", None),
-                    amount: Amount::from_dollars(10.91, None),
+                    amount: Some(Amount::from_dollars(10.91, None)),
                     source: None,
                 }],
                 // only supply a (fake) source here since it's the only error loc

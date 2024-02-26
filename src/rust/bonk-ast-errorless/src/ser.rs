@@ -37,8 +37,13 @@ impl Display for Transaction {
 
 fn to_string_posting(p: &Posting) -> String {
     let account = to_string_account(&p.account);
-    let amount = to_string_amount(&p.amount);
-    format!("{account} {amount}")
+    match &p.amount {
+        Some(amount) => {
+            let amount = to_string_amount(amount);
+            format!("{account} {amount}")
+        }
+        None => account.to_string(),
+    }
 }
 
 fn to_string_account(account: &Account) -> String {
@@ -83,12 +88,12 @@ mod tests {
                     postings: vec![
                         Posting {
                             account: Account::parse("expenses:food", None),
-                            amount: Amount::from_dollars(12.34, None),
+                            amount: Some(Amount::from_dollars(12.34, None)),
                             source: None,
                         },
                         Posting {
                             account: Account::parse("liabilities:my_credit_card", None),
-                            amount: Amount::from_dollars(-12.34, None),
+                            amount: Some(Amount::from_dollars(-12.34, None)),
                             source: None,
                         },
                     ],
@@ -100,12 +105,12 @@ mod tests {
                     postings: vec![
                         Posting {
                             account: Account::parse("liabilities:my_credit_card", None),
-                            amount: Amount::from_dollars(12.34, None),
+                            amount: Some(Amount::from_dollars(12.34, None)),
                             source: None,
                         },
                         Posting {
                             account: Account::parse("assets:my_checking", None),
-                            amount: Amount::from_dollars(-12.34, None),
+                            amount: None,
                             source: None,
                         },
                     ],
@@ -124,7 +129,7 @@ mod tests {
 
         2023-01-02 "paying credit card"
           liabilities:my_credit_card 12.34
-          assets:my_checking -12.34
+          assets:my_checking
         "###
         );
     }
