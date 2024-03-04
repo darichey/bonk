@@ -31,9 +31,12 @@ pub fn get_diagnostics(workspace: &ParsedWorkspace) -> HashMap<PathBuf, Vec<Diag
                     code_description: None,
                     source: Some("bonk".to_string()),
                     message: match err.code {
-                        CheckErrorCode::UnknownAccount => "unknown account".to_string(),
+                        CheckErrorCode::MultipleInfers => {
+                            "transaction has multiple inferred amounts".to_string()
+                        }
                         CheckErrorCode::NoBalance => "transaction doesn't balance".to_string(),
                         CheckErrorCode::SyntaxError => "syntax error".to_string(),
+                        CheckErrorCode::UnknownAccount => "unknown account".to_string(),
                     },
                     related_information: None,
                     tags: None,

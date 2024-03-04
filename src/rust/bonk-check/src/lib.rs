@@ -2,6 +2,7 @@
 
 mod account_ref;
 mod balance;
+mod single_infer;
 mod syntax;
 mod util;
 
@@ -12,9 +13,10 @@ use util::normalize_path;
 
 #[derive(Clone, Copy, Debug, Hash, PartialEq, Eq)]
 pub enum CheckErrorCode {
-    UnknownAccount,
+    MultipleInfers,
     NoBalance,
     SyntaxError,
+    UnknownAccount,
 }
 
 #[derive(Clone, Debug, Hash, PartialEq, Eq)]
@@ -78,14 +80,34 @@ impl CheckUnit<&bonk_parse::ast::Ledger> {
     ) -> Result<CheckUnit<bonk_ast_errorless::Ledger>, Vec<CheckError>> {
         let errorless = self.check_syntax(srcs)?;
 
-        errorless.check_account_refs()?; // FIXME: don't short-circuit, these errors should accumulate
+        // FIXME: don't short-circuit, these errors should accumulate
+        errorless.check_single_infer()?;
+        errorless.check_account_refs()?;
         errorless.check_balance()?;
 
         Ok(errorless)
     }
 }
 
+// TODO: deduplicate
 impl CheckUnit<bonk_ast_errorless::Ledger> {
+    fn check_single_infer(&self) -> Result<(), Vec<CheckError>> {
+        let mut errors = vec![];
+
+        for (_, ledger) in self.ledgers() {
+            match single_infer::check_single_infer(ledger) {
+                Ok(_) => {}
+                Err(errs) => errors.extend(errs),
+            }
+        }
+
+        if errors.is_empty() {
+            Ok(())
+        } else {
+            Err(errors)
+        }
+    }
+
     fn check_account_refs(&self) -> Result<(), Vec<CheckError>> {
         let mut errors = vec![];
 
