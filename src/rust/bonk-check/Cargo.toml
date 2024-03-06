@@ -6,12 +6,12 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-bonk-ast-errorless = { path = "../bonk-ast-errorless" }
-bonk-parse = { path = "../bonk-parse" }
-bonk-workspace = { path = "../bonk-workspace" }
-itertools = "0.12.0"
-clap = { version = "4.4.13", features = ["derive"] }
-anyhow = "1.0.80"
+bonk-ast-errorless.workspace = true
+bonk-parse.workspace = true
+bonk-workspace.workspace = true
+itertools.workspace = true
+clap.workspace = true
+anyhow.workspace = true
 
 [dev-dependencies]
 tree-sitter = "~0.20.10"

@@ -6,11 +6,11 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-anyhow = "1.0.80"
-bonk-check = { path = "../bonk-check" }
-bonk-csv = { path = "../bonk-csv" }
-bonk-db = { path = "../bonk-db" }
-bonk-http = { path = "../bonk-http" }
-bonk-lsp = { path = "../bonk-lsp" }
-bonk-plaid = { path = "../bonk-plaid" }
-clap = { version = "4.4.13", features = ["derive"] }
+anyhow.workspace = true
+bonk-check.workspace = true
+bonk-csv.workspace = true
+bonk-db.workspace = true
+bonk-http.workspace = true
+bonk-lsp.workspace = true
+bonk-plaid.workspace = true
+clap.workspace = true
