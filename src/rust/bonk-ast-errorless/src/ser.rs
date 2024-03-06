@@ -47,7 +47,7 @@ fn to_string_posting(p: &Posting) -> String {
 }
 
 fn to_string_account(account: &Account) -> String {
-    account.path.join(":")
+    account.path_string()
 }
 
 fn to_string_amount(amount: &Amount) -> String {
@@ -69,15 +69,15 @@ mod tests {
         let ledger = Ledger {
             declare_accounts: vec![
                 DeclareAccount {
-                    account: Account::parse("expenses:fast_food", None),
+                    account: Account::parse("expenses/fast_food", None),
                     source: None,
                 },
                 DeclareAccount {
-                    account: Account::parse("liabilities:my_credit_card", None),
+                    account: Account::parse("liabilities/my_credit_card", None),
                     source: None,
                 },
                 DeclareAccount {
-                    account: Account::parse("assets:my_checking", None),
+                    account: Account::parse("assets/my_checking", None),
                     source: None,
                 },
             ],
@@ -87,12 +87,12 @@ mod tests {
                     description: "some food".to_string(),
                     postings: vec![
                         Posting {
-                            account: Account::parse("expenses:food", None),
+                            account: Account::parse("expenses/food", None),
                             amount: Some(Amount::from_dollars(12.34, None)),
                             source: None,
                         },
                         Posting {
-                            account: Account::parse("liabilities:my_credit_card", None),
+                            account: Account::parse("liabilities/my_credit_card", None),
                             amount: Some(Amount::from_dollars(-12.34, None)),
                             source: None,
                         },
@@ -104,12 +104,12 @@ mod tests {
                     description: "paying credit card".to_string(),
                     postings: vec![
                         Posting {
-                            account: Account::parse("liabilities:my_credit_card", None),
+                            account: Account::parse("liabilities/my_credit_card", None),
                             amount: Some(Amount::from_dollars(12.05, None)),
                             source: None,
                         },
                         Posting {
-                            account: Account::parse("assets:my_checking", None),
+                            account: Account::parse("assets/my_checking", None),
                             amount: None,
                             source: None,
                         },
@@ -124,12 +124,12 @@ mod tests {
             ledger,
             @r###"
         2023-01-01 "some food"
-          expenses:food 12.34
-          liabilities:my_credit_card -12.34
+          expenses/food 12.34
+          liabilities/my_credit_card -12.34
 
         2023-01-02 "paying credit card"
-          liabilities:my_credit_card 12.05
-          assets:my_checking
+          liabilities/my_credit_card 12.05
+          assets/my_checking
         "###
         );
     }

@@ -75,16 +75,16 @@ pub struct Account {
 }
 
 impl Account {
-    /// Creates an Account from a string like "assets:foo:my_checking"
+    /// Creates an Account from a string like "assets/foo/my_checking"
     pub fn parse(account: &str, source: Option<Source>) -> Self {
         Self {
-            path: account.split(':').map(|s| s.to_string()).collect(),
+            path: account.split('/').map(|s| s.to_string()).collect(),
             source,
         }
     }
 
     pub fn path_string(&self) -> String {
-        self.path.join(":")
+        self.path.join("/")
     }
 }
 

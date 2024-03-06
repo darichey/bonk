@@ -9,7 +9,7 @@ pub fn get_completion_results(
     src: &str,
     pos: Position,
 ) -> Vec<CompletionItem> {
-    // FIXME: there's a bug here where completion doesn't work if the user has typed "assets:" I think because then there's no account node but a syntax error. I'm ok with this for now
+    // FIXME: there's a bug here where completion doesn't work if the user has typed "assets/" I think because then there's no account node but a syntax error. I'm ok with this for now
     let Some(_) = find_account(ledger, src, pos) else {
         return vec![];
     };

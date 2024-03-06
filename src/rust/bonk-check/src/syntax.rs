@@ -186,17 +186,13 @@ fn convert_account(
     src: &str,
     path: Option<&Path>,
 ) -> bonk_ast_errorless::Account {
-    bonk_ast_errorless::Account {
-        path: account
-            .value(src)
-            .split(':')
-            .map(|s| s.to_string())
-            .collect_vec(),
-        source: Some(Source {
+    bonk_ast_errorless::Account::parse(
+        account.value(src),
+        Some(Source {
             path: path.map(Path::to_path_buf),
             span: account.span(),
         }),
-    }
+    )
 }
 
 fn convert_amount(
@@ -254,8 +250,8 @@ mod tests {
         let src = r#"account foo
 
 2023-01-01 "Mcdonald's"
-    expenses:fast_food         10.91
-    liabilities:my_credit_card -10.91"#;
+    expenses/fast_food         10.91
+    liabilities/my_credit_card -10.91"#;
 
         let ledger = bonk_parse::Parser::new().parse(src, None);
         let ledger = check_syntax(&ledger, src, Some(&path));
@@ -484,8 +480,8 @@ mod tests {
     fn test_error() {
         let path = PathBuf::from("ledger.bonk");
         let src = r#"2023-01-01abc "Mcdonald's"
-expenses:fast_food         10.91
-liabilities:my_credit_card -10.91"#;
+expenses/fast_food         10.91
+liabilities/my_credit_card -10.91"#;
 
         let ledger = bonk_parse::Parser::new().parse(src, None);
         let ledger = check_syntax(&ledger, src, Some(&path));

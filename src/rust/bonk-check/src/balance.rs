@@ -54,12 +54,12 @@ mod tests {
                 description: "\"Mcdonald's\"".to_string(),
                 postings: vec![
                     Posting {
-                        account: Account::parse("expenses:fast_food", None),
+                        account: Account::parse("expenses/fast_food", None),
                         amount: Some(Amount::from_dollars(10.91, None)),
                         source: None,
                     },
                     Posting {
-                        account: Account::parse("liabilities:my_credit_card", None),
+                        account: Account::parse("liabilities/my_credit_card", None),
                         amount: Some(Amount::from_dollars(-10.91, None)),
                         source: None,
                     },
@@ -82,12 +82,12 @@ mod tests {
                 description: "\"Mcdonald's\"".to_string(),
                 postings: vec![
                     Posting {
-                        account: Account::parse("expenses:fast_food", None),
+                        account: Account::parse("expenses/fast_food", None),
                         amount: Some(Amount::from_dollars(10.91, None)),
                         source: None,
                     },
                     Posting {
-                        account: Account::parse("liabilities:my_credit_card", None),
+                        account: Account::parse("liabilities/my_credit_card", None),
                         amount: None,
                         source: None,
                     },
@@ -108,7 +108,7 @@ mod tests {
                 date: Date::parse("2023-01-01", None).unwrap(),
                 description: "\"Mcdonald's\"".to_string(),
                 postings: vec![Posting {
-                    account: Account::parse("expenses:fast_food", None),
+                    account: Account::parse("expenses/fast_food", None),
                     amount: Some(Amount::from_dollars(10.91, None)),
                     source: None,
                 }],

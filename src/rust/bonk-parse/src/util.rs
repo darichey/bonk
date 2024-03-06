@@ -85,15 +85,15 @@ mod tests {
     #[test]
     fn test_edit() {
         let src = r#"2023-01-01 "Mcdonald's"
-  expenses:fast_food          10.91
-  liabilities:my_credit_card -10.91"#;
+  expenses/fast_food          10.91
+  liabilities/my_credit_card -10.91"#;
 
         let mut ledger = Parser::new().parse(src, None);
 
         let old_src = src;
         let new_src = r#"foo "Mcdonald's"
-  expenses:fast_food          10.91
-  liabilities:my_credit_card -10.91"#;
+  expenses/fast_food          10.91
+  liabilities/my_credit_card -10.91"#;
 
         edit_ledger(&mut ledger, old_src, new_src, 0, 0, 0, 10, 3);
 

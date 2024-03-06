@@ -1,21 +1,21 @@
-account expenses:food
-account expenses:groceries
-account expenses:rent
-account liabilities:credit_card
-account assets:checking
+account expenses/food
+account expenses/groceries
+account expenses/rent
+account liabilities/credit_card
+account assets/checking
 
 2023-01-01 "Food"
-  expenses:food            10.00
-  liabilities:credit_card -10.00
+  expenses/food            10.00
+  liabilities/credit_card -10.00
 
 2023-01-02 "Rent"
-  expenses:rent    500.00
-  assets:checking -500.00
+  expenses/rent    500.00
+  assets/checking -500.00
 
 2023-01-02 "Groceries"
-  expenses:groceries       30.20
-  liabilities:credit_card -30.20
+  expenses/groceries       30.20
+  liabilities/credit_card -30.20
 
 2023-01-03 "Pay credit card"
-  liabilities:credit_card  40.20
-  assets:checking         -40.20
+  liabilities/credit_card  40.20
+  assets/checking         -40.20

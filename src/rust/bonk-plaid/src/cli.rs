@@ -19,7 +19,7 @@ pub struct Args {
     #[arg(long)]
     pub end_date: String,
 
-    /// The Bonk account to associate the converted transactions to (e.g., "assets:my_checking").
+    /// The Bonk account to associate the converted transactions to (e.g., "assets/my_checking").
     #[arg(long)]
     pub account: String,
 

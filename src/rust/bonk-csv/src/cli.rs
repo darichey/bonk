@@ -12,7 +12,7 @@ use crate::do_convert;
 #[derive(Parser, Debug)]
 #[command()]
 pub struct Args {
-    /// The Bonk account to associate the converted transactions to (e.g., "assets:my_checking").
+    /// The Bonk account to associate the converted transactions to (e.g., "assets/my_checking").
     #[arg(short, long)]
     pub account: String,
 

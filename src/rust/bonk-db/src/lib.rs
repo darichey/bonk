@@ -84,7 +84,7 @@ impl Db {
                         account, amount, ..
                     } in postings
                     {
-                        let account = account.path.join(":");
+                        let account = account.path_string();
                         let amount = amount
                             .as_ref()
                             .map(|a| a.cents)
@@ -142,12 +142,12 @@ mod tests {
                     description: "some food".to_string(),
                     postings: vec![
                         Posting {
-                            account: Account::parse("expenses:food", None),
+                            account: Account::parse("expenses/food", None),
                             amount: Some(Amount::from_dollars(12.34, None)),
                             source: None,
                         },
                         Posting {
-                            account: Account::parse("liabilities:my_credit_card", None),
+                            account: Account::parse("liabilities/my_credit_card", None),
                             amount: Some(Amount::from_dollars(-12.34, None)),
                             source: None,
                         },
@@ -159,12 +159,12 @@ mod tests {
                     description: "paying credit card".to_string(),
                     postings: vec![
                         Posting {
-                            account: Account::parse("liabilities:my_credit_card", None),
+                            account: Account::parse("liabilities/my_credit_card", None),
                             amount: Some(Amount::from_dollars(12.34, None)),
                             source: None,
                         },
                         Posting {
-                            account: Account::parse("assets:my_checking", None),
+                            account: Account::parse("assets/my_checking", None),
                             amount: None,
                             source: None,
                         },
@@ -181,10 +181,10 @@ mod tests {
         ];
 
         let expected_postings = [
-            (1, "expenses:food", 1234),
-            (1, "liabilities:my_credit_card", -1234),
-            (2, "liabilities:my_credit_card", 1234),
-            (2, "assets:my_checking", -1234),
+            (1, "expenses/food", 1234),
+            (1, "liabilities/my_credit_card", -1234),
+            (2, "liabilities/my_credit_card", 1234),
+            (2, "assets/my_checking", -1234),
         ];
 
         let db = Db::new(

@@ -56,7 +56,7 @@ mod tests {
 2023-01-01,Salary Deposit,2500.00
 2023-01-02,Grocery Shopping,-120.50"#;
         let mut reader = csv::Reader::from_reader(&input[..]);
-        let ledger = do_convert("assets:my_checking", &mut reader).unwrap();
+        let ledger = do_convert("assets/my_checking", &mut reader).unwrap();
 
         insta::assert_debug_snapshot!(ledger, @r###"
         Ledger {

@@ -260,12 +260,12 @@ mod tests {
     #[test]
     fn test_debug_fmt() {
         let src = r#"2023-01-01 "Mcdonald's"
-  expenses:fast_food         10.91
-  liabilities:my_credit_card -10.91
+  expenses/fast_food         10.91
+  liabilities/my_credit_card -10.91
       
 2023-01-02 "Paying credit card"
-  liabilities:my_credit_card    10.91
-  assets:my_checking           -10.91"#;
+  liabilities/my_credit_card    10.91
+  assets/my_checking           -10.91"#;
 
         let ledger = Parser::new().parse(src, None);
 
@@ -296,17 +296,17 @@ mod tests {
 
     #[test]
     fn test_parse() {
-        let src = r#"account expenses:fast_food
-account liabilities:my_credit_card
-account assets:my_checking
+        let src = r#"account expenses/fast_food
+account liabilities/my_credit_card
+account assets/my_checking
 
 2023-01-01 "Mcdonald's"
-  expenses:fast_food         10.91
-  liabilities:my_credit_card -10.91
+  expenses/fast_food         10.91
+  liabilities/my_credit_card -10.91
       
 2023-01-02 "Paying credit card"
-  liabilities:my_credit_card    10.91
-  assets:my_checking           -10.91"#;
+  liabilities/my_credit_card    10.91
+  assets/my_checking           -10.91"#;
 
         let ledger = Parser::new().parse(src, None);
 
@@ -314,7 +314,7 @@ account assets:my_checking
         assert_eq!(declared_accounts.len(), 3);
         assert_eq!(
             declared_accounts[0].account().map(|a| a.value(src)),
-            Some("expenses:fast_food")
+            Some("expenses/fast_food")
         );
 
         let transactions = ledger.transactions();
@@ -326,13 +326,13 @@ account assets:my_checking
 
         let postings = transaction.postings();
         let posting = postings.get(0).unwrap();
-        assert_eq!(posting.account().unwrap().value(src), "expenses:fast_food");
+        assert_eq!(posting.account().unwrap().value(src), "expenses/fast_food");
         assert_eq!(posting.amount().unwrap().value(src), "10.91");
 
         let posting = postings.get(1).unwrap();
         assert_eq!(
             posting.account().unwrap().value(src),
-            "liabilities:my_credit_card"
+            "liabilities/my_credit_card"
         );
         assert_eq!(posting.amount().unwrap().value(src), "-10.91");
 
@@ -344,12 +344,12 @@ account assets:my_checking
         let posting = postings.get(0).unwrap();
         assert_eq!(
             posting.account().unwrap().value(src),
-            "liabilities:my_credit_card"
+            "liabilities/my_credit_card"
         );
         assert_eq!(posting.amount().unwrap().value(src), "10.91");
 
         let posting = postings.get(1).unwrap();
-        assert_eq!(posting.account().unwrap().value(src), "assets:my_checking");
+        assert_eq!(posting.account().unwrap().value(src), "assets/my_checking");
         assert_eq!(posting.amount().unwrap().value(src), "-10.91");
     }
 }
