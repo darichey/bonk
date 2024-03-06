@@ -2,6 +2,7 @@
 
 mod account_ref;
 mod balance;
+pub mod cli;
 mod single_infer;
 mod syntax;
 mod util;

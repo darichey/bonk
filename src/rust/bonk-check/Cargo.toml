@@ -10,6 +10,8 @@ bonk-ast-errorless = { path = "../bonk-ast-errorless" }
 bonk-parse = { path = "../bonk-parse" }
 bonk-workspace = { path = "../bonk-workspace" }
 itertools = "0.12.0"
+clap = { version = "4.4.13", features = ["derive"] }
+anyhow = "1.0.80"
 
 [dev-dependencies]
 tree-sitter = "~0.20.10"

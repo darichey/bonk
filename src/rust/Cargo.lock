@@ -192,9 +192,11 @@ dependencies = [
 name = "bonk-check"
 version = "0.1.0"
 dependencies = [
+ "anyhow",
  "bonk-ast-errorless",
  "bonk-parse",
  "bonk-workspace",
+ "clap",
  "insta",
  "itertools",
  "tree-sitter",
@@ -205,6 +207,7 @@ name = "bonk-cli"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "bonk-check",
  "bonk-csv",
  "bonk-db",
  "bonk-http",

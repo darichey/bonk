@@ -7,6 +7,7 @@ edition = "2021"
 
 [dependencies]
 anyhow = "1.0.80"
+bonk-check = { path = "../bonk-check" }
 bonk-csv = { path = "../bonk-csv" }
 bonk-db = { path = "../bonk-db" }
 bonk-http = { path = "../bonk-http" }

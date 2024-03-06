@@ -10,9 +10,11 @@ use bonk_workspace::Workspace;
 use sqlite::{Connection, State, Value};
 
 pub fn create_db(cfg: PathBuf, database: PathBuf) -> Result<Db> {
+    // TODO: can we dedupe this with bonk_check::cli::run ?
     let workspace = Workspace::from_cfg(cfg).map_err(|err| anyhow!(err))?;
     let workspace = workspace.parse()?;
     let workspace = workspace.check().map_err(|err| {
+        // TODO: pretty print errors with miette or something like it
         anyhow!(err
             .into_iter()
             .map(|err| format!("{:?}", err))
