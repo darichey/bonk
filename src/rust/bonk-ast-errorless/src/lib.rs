@@ -97,8 +97,40 @@ pub struct Amount {
 impl Amount {
     pub fn from_dollars(dollar_amount: f64, source: Option<Source>) -> Self {
         Self {
-            cents: (dollar_amount * 100.0) as i32,
+            cents: (dollar_amount * 100.0).round() as i32,
             source,
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::Amount;
+
+    #[test]
+    fn test_amount_from_dollars() {
+        assert_eq!(
+            Amount::from_dollars(1.0, None),
+            Amount {
+                cents: 100,
+                source: None
+            }
+        );
+
+        assert_eq!(
+            Amount::from_dollars(100.0, None),
+            Amount {
+                cents: 10_000,
+                source: None
+            }
+        );
+
+        assert_eq!(
+            Amount::from_dollars(34.05, None),
+            Amount {
+                cents: 3405,
+                source: None
+            }
+        );
     }
 }
