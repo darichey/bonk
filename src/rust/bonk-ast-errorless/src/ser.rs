@@ -51,7 +51,7 @@ fn to_string_account(account: &Account) -> String {
 }
 
 fn to_string_amount(amount: &Amount) -> String {
-    format!("{}.{}", amount.cents / 100, (amount.cents % 100).abs())
+    format!("{}.{:02}", amount.cents / 100, (amount.cents % 100).abs())
 }
 
 // TODO: test
@@ -105,7 +105,7 @@ mod tests {
                     postings: vec![
                         Posting {
                             account: Account::parse("liabilities:my_credit_card", None),
-                            amount: Some(Amount::from_dollars(12.34, None)),
+                            amount: Some(Amount::from_dollars(12.05, None)),
                             source: None,
                         },
                         Posting {
@@ -128,7 +128,7 @@ mod tests {
           liabilities:my_credit_card -12.34
 
         2023-01-02 "paying credit card"
-          liabilities:my_credit_card 12.34
+          liabilities:my_credit_card 12.05
           assets:my_checking
         "###
         );
