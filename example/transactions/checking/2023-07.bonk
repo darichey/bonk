@@ -1,65 +1,65 @@
 2023-07-01 "Salary Deposit"
-  assets:my_checking 2500.0
+  assets/my_checking 2500.0
 
 2023-07-02 "Grocery Shopping"
-  assets:my_checking -120.50
+  assets/my_checking -120.50
 
 2023-07-04 "Electric Bill Payment"
-  assets:my_checking -45.0
+  assets/my_checking -45.0
 
 2023-07-05 "Gas Station Purchase"
-  assets:my_checking -30.25
+  assets/my_checking -30.25
 
 2023-07-05 "Restaurant Dinner"
-  assets:my_checking -60.75
+  assets/my_checking -60.75
 
 2023-07-07 "Internet Bill Payment"
-  assets:my_checking -55.0
+  assets/my_checking -55.0
 
 2023-07-08 "Movie Night"
-  assets:my_checking -25.50
+  assets/my_checking -25.50
 
 2023-07-10 "Medical Co-pay"
-  assets:my_checking -15.0
+  assets/my_checking -15.0
 
 2023-07-12 "Coffee Shop"
-  assets:my_checking -5.25
+  assets/my_checking -5.25
 
 2023-07-14 "Bookstore Purchase"
-  assets:my_checking -22.80
+  assets/my_checking -22.80
 
 2023-07-15 "Car Service"
-  assets:my_checking -80.0
+  assets/my_checking -80.0
 
 2023-07-16 "Salary Deposit"
-  assets:my_checking 2500.0
+  assets/my_checking 2500.0
 
 2023-07-18 "Grocery Shopping"
-  assets:my_checking -110.75
+  assets/my_checking -110.75
 
 2023-07-20 "Gas Station Purchase"
-  assets:my_checking -35.50
+  assets/my_checking -35.50
 
 2023-07-20 "Online Shopping"
-  assets:my_checking -75.20
+  assets/my_checking -75.20
 
 2023-07-22 "Utilities Bill Payment"
-  assets:my_checking -80.50
+  assets/my_checking -80.50
 
 2023-07-24 "Dentist Appointment"
-  assets:my_checking -50.0
+  assets/my_checking -50.0
 
 2023-07-25 "Concert Tickets"
-  assets:my_checking -70.0
+  assets/my_checking -70.0
 
 2023-07-27 "Salary Deposit"
-  assets:my_checking 2500.0
+  assets/my_checking 2500.0
 
 2023-07-28 "Grocery Shopping"
-  assets:my_checking -90.30
+  assets/my_checking -90.30
 
 2023-07-30 "Gas Station Purchase"
-  assets:my_checking -28.75
+  assets/my_checking -28.75
 
 2023-07-31 "Phone Bill Payment"
-  assets:my_checking -60.0
+  assets/my_checking -60.0
