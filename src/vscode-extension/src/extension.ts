@@ -23,7 +23,7 @@ export async function activate(_context: vscode.ExtensionContext) {
     output.appendLine(`No path to lsp binary, not activating`);
     return;
   } else {
-    output.appendLine(`Using LSP binary: ${serverCommand}`);
+    output.appendLine(`Using LSP binary: ${JSON.stringify(serverCommand)}`);
   }
 
   const serverOptions: ServerOptions = {
@@ -78,8 +78,8 @@ async function findBonkCfg(): Promise<string> {
 function getServerCommand(): { cmd: string; args: string[] } | undefined {
   const config = vscode.workspace.getConfiguration("bonk");
   const server =
-    config.get<string | undefined>("server") ??
-    process.env["__BONK_LSP_SERVER_DEBUG"];
+    process.env["__BONK_LSP_SERVER_DEBUG"] ??
+    config.get<string | undefined>("server");
 
   if (server) {
     const [cmd, ...args] = server.split(" ");
