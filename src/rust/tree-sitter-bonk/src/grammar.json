@@ -93,7 +93,7 @@
             "members": [
               {
                 "type": "SYMBOL",
-                "name": "amount"
+                "name": "number"
               },
               {
                 "type": "BLANK"
@@ -115,7 +115,7 @@
       "type": "PATTERN",
       "value": "[A-Za-z_][A-Za-z0-9_]*(\\/[A-Za-z_][A-Za-z0-9_]*)*"
     },
-    "amount": {
+    "number": {
       "type": "PATTERN",
       "value": "-?\\d+(\\.\\d+)?"
     }

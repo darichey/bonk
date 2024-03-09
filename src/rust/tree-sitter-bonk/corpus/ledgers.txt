@@ -27,15 +27,15 @@ account assets/my_checking
     (string)
     (posting
       (account)
-      (amount))
+      (number))
     (posting
       (account)
-      (amount)))
+      (number)))
   (transaction
     (date)
     (string)
     (posting
       (account)
-      (amount))
+      (number))
     (posting
       (account))))

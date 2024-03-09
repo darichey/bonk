@@ -106,10 +106,10 @@ mod tests {
             description: (string [0, 4] - [0, 16])
             posting: (posting [1, 2] - [1, 35]
               account: (account [1, 2] - [1, 20])
-              amount: (amount [1, 30] - [1, 35]))
+              amount: (number [1, 30] - [1, 35]))
             posting: (posting [2, 2] - [2, 35]
               account: (account [2, 2] - [2, 28])
-              amount: (amount [2, 29] - [2, 35]))))
+              amount: (number [2, 29] - [2, 35]))))
         "###
         );
     }

@@ -60,7 +60,7 @@
         "required": false,
         "types": [
           {
-            "type": "amount",
+            "type": "number",
             "named": true
           }
         ]
@@ -112,11 +112,11 @@
     "named": false
   },
   {
-    "type": "amount",
+    "type": "date",
     "named": true
   },
   {
-    "type": "date",
+    "type": "number",
     "named": true
   },
   {

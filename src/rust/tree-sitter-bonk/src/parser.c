@@ -21,7 +21,7 @@ enum {
   sym_date = 2,
   sym_string = 3,
   sym_account = 4,
-  sym_amount = 5,
+  sym_number = 5,
   sym_ledger = 6,
   sym_declare_account = 7,
   sym_transaction = 8,
@@ -36,7 +36,7 @@ static const char * const ts_symbol_names[] = {
   [sym_date] = "date",
   [sym_string] = "string",
   [sym_account] = "account",
-  [sym_amount] = "amount",
+  [sym_number] = "number",
   [sym_ledger] = "ledger",
   [sym_declare_account] = "declare_account",
   [sym_transaction] = "transaction",
@@ -51,7 +51,7 @@ static const TSSymbol ts_symbol_map[] = {
   [sym_date] = sym_date,
   [sym_string] = sym_string,
   [sym_account] = sym_account,
-  [sym_amount] = sym_amount,
+  [sym_number] = sym_number,
   [sym_ledger] = sym_ledger,
   [sym_declare_account] = sym_declare_account,
   [sym_transaction] = sym_transaction,
@@ -81,7 +81,7 @@ static const TSSymbolMetadata ts_symbol_metadata[] = {
     .visible = true,
     .named = true,
   },
-  [sym_amount] = {
+  [sym_number] = {
     .visible = true,
     .named = true,
   },
@@ -384,33 +384,33 @@ static bool ts_lex(TSLexer *lexer, TSStateId state) {
           ('a' <= lookahead && lookahead <= 'z')) ADVANCE(34);
       END_STATE();
     case 35:
-      ACCEPT_TOKEN(sym_amount);
+      ACCEPT_TOKEN(sym_number);
       if (lookahead == '-') ADVANCE(15);
       if (lookahead == '.') ADVANCE(12);
       if (('0' <= lookahead && lookahead <= '9')) ADVANCE(39);
       END_STATE();
     case 36:
-      ACCEPT_TOKEN(sym_amount);
+      ACCEPT_TOKEN(sym_number);
       if (lookahead == '.') ADVANCE(12);
       if (('0' <= lookahead && lookahead <= '9')) ADVANCE(35);
       END_STATE();
     case 37:
-      ACCEPT_TOKEN(sym_amount);
+      ACCEPT_TOKEN(sym_number);
       if (lookahead == '.') ADVANCE(12);
       if (('0' <= lookahead && lookahead <= '9')) ADVANCE(36);
       END_STATE();
     case 38:
-      ACCEPT_TOKEN(sym_amount);
+      ACCEPT_TOKEN(sym_number);
       if (lookahead == '.') ADVANCE(12);
       if (('0' <= lookahead && lookahead <= '9')) ADVANCE(37);
       END_STATE();
     case 39:
-      ACCEPT_TOKEN(sym_amount);
+      ACCEPT_TOKEN(sym_number);
       if (lookahead == '.') ADVANCE(12);
       if (('0' <= lookahead && lookahead <= '9')) ADVANCE(39);
       END_STATE();
     case 40:
-      ACCEPT_TOKEN(sym_amount);
+      ACCEPT_TOKEN(sym_number);
       if (('0' <= lookahead && lookahead <= '9')) ADVANCE(40);
       END_STATE();
     default:
@@ -443,7 +443,7 @@ static const uint16_t ts_parse_table[LARGE_STATE_COUNT][SYMBOL_COUNT] = {
     [sym_date] = ACTIONS(1),
     [sym_string] = ACTIONS(1),
     [sym_account] = ACTIONS(1),
-    [sym_amount] = ACTIONS(1),
+    [sym_number] = ACTIONS(1),
   },
   [1] = {
     [sym_ledger] = STATE(14),
@@ -507,7 +507,7 @@ static const uint16_t ts_small_parse_table[] = {
       aux_sym_transaction_repeat1,
   [68] = 3,
     ACTIONS(36), 1,
-      sym_amount,
+      sym_number,
     ACTIONS(32), 2,
       ts_builtin_sym_end,
       sym_date,

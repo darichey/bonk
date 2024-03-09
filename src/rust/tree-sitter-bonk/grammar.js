@@ -21,11 +21,11 @@ module.exports = grammar({
       ),
 
     posting: ($) =>
-      seq(field("account", $.account), field("amount", optional($.amount))),
+      seq(field("account", $.account), field("amount", optional($.number))),
 
     date: ($) => /\d{4}-\d{2}-\d{2}/,
     string: ($) => /"([^"\\]|\\["\\bnfrt])*"/,
     account: ($) => /[A-Za-z_][A-Za-z0-9_]*(\/[A-Za-z_][A-Za-z0-9_]*)*/,
-    amount: ($) => /-?\d+(\.\d+)?/,
+    number: ($) => /-?\d+(\.\d+)?/,
   },
 });
