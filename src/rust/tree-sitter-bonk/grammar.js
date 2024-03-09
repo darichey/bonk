@@ -11,7 +11,19 @@ module.exports = grammar({
         )
       ),
 
-    declare_account: ($) => seq("account", field("account", $.account)),
+    metadata: ($) =>
+      seq(
+        field("key", $.ident),
+        ":",
+        field("value", choice($.date, $.string, $.ident, $.number))
+      ),
+
+    declare_account: ($) =>
+      seq(
+        "account",
+        field("account", $.account),
+        repeat(field("metadata", $.metadata))
+      ),
 
     transaction: ($) =>
       seq(

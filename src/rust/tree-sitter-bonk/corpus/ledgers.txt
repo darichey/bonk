@@ -4,6 +4,7 @@ Ledger
 account expenses/fast_food
 account liabilities/my_credit_card
 account assets/my_checking
+  starting_balance: 12.34
 
 2023-01-01 "Mcdonald's"
   expenses/fast_food          10.91
@@ -27,7 +28,10 @@ account assets/my_checking
   (declare_account
     (account
       (ident)
-      (ident)))
+      (ident))
+    (metadata
+      (ident)
+      (number)))
   (transaction
     (date)
     (string)
