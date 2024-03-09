@@ -23,9 +23,11 @@ module.exports = grammar({
     posting: ($) =>
       seq(field("account", $.account), field("amount", optional($.number))),
 
+    account: ($) => seq($.ident, repeat(seq("/", $.ident))),
+
     date: ($) => /\d{4}-\d{2}-\d{2}/,
     string: ($) => /"([^"\\]|\\["\\bnfrt])*"/,
-    account: ($) => /[A-Za-z_][A-Za-z0-9_]*(\/[A-Za-z_][A-Za-z0-9_]*)*/,
+    ident: ($) => /[A-Za-z_][A-Za-z0-9_]*/,
     number: ($) => /-?\d+(\.\d+)?/,
   },
 });

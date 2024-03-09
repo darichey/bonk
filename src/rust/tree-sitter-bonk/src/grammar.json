@@ -103,6 +103,31 @@
         }
       ]
     },
+    "account": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "SYMBOL",
+          "name": "ident"
+        },
+        {
+          "type": "REPEAT",
+          "content": {
+            "type": "SEQ",
+            "members": [
+              {
+                "type": "STRING",
+                "value": "/"
+              },
+              {
+                "type": "SYMBOL",
+                "name": "ident"
+              }
+            ]
+          }
+        }
+      ]
+    },
     "date": {
       "type": "PATTERN",
       "value": "\\d{4}-\\d{2}-\\d{2}"
@@ -111,9 +136,9 @@
       "type": "PATTERN",
       "value": "\"([^\"\\\\]|\\\\[\"\\\\bnfrt])*\""
     },
-    "account": {
+    "ident": {
       "type": "PATTERN",
-      "value": "[A-Za-z_][A-Za-z0-9_]*(\\/[A-Za-z_][A-Za-z0-9_]*)*"
+      "value": "[A-Za-z_][A-Za-z0-9_]*"
     },
     "number": {
       "type": "PATTERN",

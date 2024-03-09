@@ -277,19 +277,27 @@ mod tests {
             date: (date [0, 0] - [0, 10])
             description: (string [0, 11] - [0, 23])
             posting: (posting [1, 2] - [1, 34]
-              account: (account [1, 2] - [1, 20])
+              account: (account [1, 2] - [1, 20]
+                (ident [1, 2] - [1, 10])
+                (ident [1, 11] - [1, 20]))
               amount: (number [1, 29] - [1, 34]))
             posting: (posting [2, 2] - [2, 35]
-              account: (account [2, 2] - [2, 28])
+              account: (account [2, 2] - [2, 28]
+                (ident [2, 2] - [2, 13])
+                (ident [2, 14] - [2, 28]))
               amount: (number [2, 29] - [2, 35])))
           transaction: (transaction [4, 0] - [6, 37]
             date: (date [4, 0] - [4, 10])
             description: (string [4, 11] - [4, 31])
             posting: (posting [5, 2] - [5, 37]
-              account: (account [5, 2] - [5, 28])
+              account: (account [5, 2] - [5, 28]
+                (ident [5, 2] - [5, 13])
+                (ident [5, 14] - [5, 28]))
               amount: (number [5, 32] - [5, 37]))
             posting: (posting [6, 2] - [6, 37]
-              account: (account [6, 2] - [6, 20])
+              account: (account [6, 2] - [6, 20]
+                (ident [6, 2] - [6, 8])
+                (ident [6, 9] - [6, 20]))
               amount: (number [6, 31] - [6, 37]))))
         "###
         );

@@ -17,25 +17,39 @@ account assets/my_checking
 
 (ledger
   (declare_account
-    (account))
+    (account
+      (ident)
+      (ident)))
   (declare_account
-    (account))
+    (account
+      (ident)
+      (ident)))
   (declare_account
-    (account))
+    (account
+      (ident)
+      (ident)))
   (transaction
     (date)
     (string)
     (posting
-      (account)
+      (account
+        (ident)
+        (ident))
       (number))
     (posting
-      (account)
+      (account
+        (ident)
+        (ident))
       (number)))
   (transaction
     (date)
     (string)
     (posting
-      (account)
+      (account
+        (ident)
+        (ident))
       (number))
     (posting
-      (account))))
+      (account
+        (ident)
+        (ident)))))

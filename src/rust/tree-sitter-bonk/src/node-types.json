@@ -1,5 +1,20 @@
 [
   {
+    "type": "account",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "ident",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
     "type": "declare_account",
     "named": true,
     "fields": {
@@ -104,8 +119,8 @@
     }
   },
   {
-    "type": "account",
-    "named": true
+    "type": "/",
+    "named": false
   },
   {
     "type": "account",
@@ -113,6 +128,10 @@
   },
   {
     "type": "date",
+    "named": true
+  },
+  {
+    "type": "ident",
     "named": true
   },
   {
