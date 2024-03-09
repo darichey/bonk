@@ -16,7 +16,7 @@ module.exports = grammar({
     transaction: ($) =>
       seq(
         field("date", $.date),
-        field("description", $.description),
+        field("description", $.string),
         field("posting", repeat1($.posting))
       ),
 
@@ -24,7 +24,7 @@ module.exports = grammar({
       seq(field("account", $.account), field("amount", optional($.amount))),
 
     date: ($) => /\d{4}-\d{2}-\d{2}/,
-    description: ($) => /"([^"\\]|\\["\\bnfrt])*"/,
+    string: ($) => /"([^"\\]|\\["\\bnfrt])*"/,
     account: ($) => /[A-Za-z_][A-Za-z0-9_]*(\/[A-Za-z_][A-Za-z0-9_]*)*/,
     amount: ($) => /-?\d+(\.\d+)?/,
   },

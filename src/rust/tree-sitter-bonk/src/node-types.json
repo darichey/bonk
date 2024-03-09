@@ -86,7 +86,7 @@
         "required": true,
         "types": [
           {
-            "type": "description",
+            "type": "string",
             "named": true
           }
         ]
@@ -120,7 +120,7 @@
     "named": true
   },
   {
-    "type": "description",
+    "type": "string",
     "named": true
   }
 ]

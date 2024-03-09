@@ -19,7 +19,7 @@
 enum {
   anon_sym_account = 1,
   sym_date = 2,
-  sym_description = 3,
+  sym_string = 3,
   sym_account = 4,
   sym_amount = 5,
   sym_ledger = 6,
@@ -34,7 +34,7 @@ static const char * const ts_symbol_names[] = {
   [ts_builtin_sym_end] = "end",
   [anon_sym_account] = "account",
   [sym_date] = "date",
-  [sym_description] = "description",
+  [sym_string] = "string",
   [sym_account] = "account",
   [sym_amount] = "amount",
   [sym_ledger] = "ledger",
@@ -49,7 +49,7 @@ static const TSSymbol ts_symbol_map[] = {
   [ts_builtin_sym_end] = ts_builtin_sym_end,
   [anon_sym_account] = anon_sym_account,
   [sym_date] = sym_date,
-  [sym_description] = sym_description,
+  [sym_string] = sym_string,
   [sym_account] = sym_account,
   [sym_amount] = sym_amount,
   [sym_ledger] = sym_ledger,
@@ -73,7 +73,7 @@ static const TSSymbolMetadata ts_symbol_metadata[] = {
     .visible = true,
     .named = true,
   },
-  [sym_description] = {
+  [sym_string] = {
     .visible = true,
     .named = true,
   },
@@ -319,7 +319,7 @@ static bool ts_lex(TSLexer *lexer, TSStateId state) {
       ACCEPT_TOKEN(sym_date);
       END_STATE();
     case 27:
-      ACCEPT_TOKEN(sym_description);
+      ACCEPT_TOKEN(sym_string);
       END_STATE();
     case 28:
       ACCEPT_TOKEN(sym_account);
@@ -441,7 +441,7 @@ static const uint16_t ts_parse_table[LARGE_STATE_COUNT][SYMBOL_COUNT] = {
     [ts_builtin_sym_end] = ACTIONS(1),
     [anon_sym_account] = ACTIONS(1),
     [sym_date] = ACTIONS(1),
-    [sym_description] = ACTIONS(1),
+    [sym_string] = ACTIONS(1),
     [sym_account] = ACTIONS(1),
     [sym_amount] = ACTIONS(1),
   },
@@ -547,7 +547,7 @@ static const uint16_t ts_small_parse_table[] = {
       sym_account,
   [119] = 1,
     ACTIONS(52), 1,
-      sym_description,
+      sym_string,
   [123] = 1,
     ACTIONS(54), 1,
       ts_builtin_sym_end,

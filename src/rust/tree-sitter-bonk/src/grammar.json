@@ -58,7 +58,7 @@
           "name": "description",
           "content": {
             "type": "SYMBOL",
-            "name": "description"
+            "name": "string"
           }
         },
         {
@@ -107,7 +107,7 @@
       "type": "PATTERN",
       "value": "\\d{4}-\\d{2}-\\d{2}"
     },
-    "description": {
+    "string": {
       "type": "PATTERN",
       "value": "\"([^\"\\\\]|\\\\[\"\\\\bnfrt])*\""
     },

@@ -24,7 +24,7 @@ account assets/my_checking
     (account))
   (transaction
     (date)
-    (description)
+    (string)
     (posting
       (account)
       (amount))
@@ -33,7 +33,7 @@ account assets/my_checking
       (amount)))
   (transaction
     (date)
-    (description)
+    (string)
     (posting
       (account)
       (amount))
