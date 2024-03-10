@@ -1,6 +1,6 @@
 use std::path::Path;
 
-use bonk_ast_errorless::Date;
+use bonk_ast_errorless::{Date, Metadata};
 use bonk_parse::ast::Source;
 use itertools::Itertools;
 
@@ -231,6 +231,20 @@ fn convert_declared_account(
                 }),
             ])
             .map(|a| convert_account(a, src, path))?,
+        metadata: {
+            Metadata {
+                entries: account
+                    .metadata()
+                    .into_iter()
+                    .filter_map(|m| {
+                        m.key().and_then(|k| {
+                            m.value()
+                                .map(|v| (k.value(src).to_string(), v.value(src).to_string()))
+                        })
+                    })
+                    .collect(),
+            }
+        },
         source: Some(Source {
             path: path.map(Path::to_path_buf),
             span: account.span(),
@@ -280,6 +294,9 @@ mod tests {
                                     },
                                 },
                             ),
+                        },
+                        metadata: Metadata {
+                            entries: {},
                         },
                         source: Some(
                             Source {

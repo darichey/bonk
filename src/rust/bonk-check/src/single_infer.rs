@@ -43,10 +43,12 @@ mod tests {
             declare_accounts: vec![
                 DeclareAccount {
                     account: Account::parse("foo", None),
+                    metadata: Metadata::new(),
                     source: None,
                 },
                 DeclareAccount {
                     account: Account::parse("bar", None),
+                    metadata: Metadata::new(),
                     source: None,
                 },
             ],
@@ -80,10 +82,12 @@ mod tests {
             declare_accounts: vec![
                 DeclareAccount {
                     account: Account::parse("foo", None),
+                    metadata: Metadata::new(),
                     source: None,
                 },
                 DeclareAccount {
                     account: Account::parse("bar", None),
+                    metadata: Metadata::new(),
                     source: None,
                 },
             ],
@@ -116,10 +120,12 @@ mod tests {
             declare_accounts: vec![
                 DeclareAccount {
                     account: Account::parse("foo", None),
+                    metadata: Metadata::new(),
                     source: None,
                 },
                 DeclareAccount {
                     account: Account::parse("bar", None),
+                    metadata: Metadata::new(),
                     source: None,
                 },
             ],

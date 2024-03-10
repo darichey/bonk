@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use bonk_parse::ast::Source;
 
 mod ser;
@@ -12,7 +14,27 @@ pub struct Ledger {
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct DeclareAccount {
     pub account: Account,
+    pub metadata: Metadata,
     pub source: Option<Source>,
+}
+
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct Metadata {
+    pub entries: HashMap<String, String>,
+}
+
+impl Metadata {
+    pub fn new() -> Self {
+        Metadata {
+            entries: HashMap::new(),
+        }
+    }
+}
+
+impl Default for Metadata {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]

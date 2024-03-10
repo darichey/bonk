@@ -62,7 +62,7 @@ fn escape(s: &str) -> String {
 #[cfg(test)]
 mod tests {
 
-    use crate::{Account, Amount, Date, DeclareAccount, Ledger, Posting, Transaction};
+    use crate::{Account, Amount, Date, DeclareAccount, Ledger, Metadata, Posting, Transaction};
 
     #[test]
     fn test() {
@@ -70,14 +70,17 @@ mod tests {
             declare_accounts: vec![
                 DeclareAccount {
                     account: Account::parse("expenses/fast_food", None),
+                    metadata: Metadata::new(),
                     source: None,
                 },
                 DeclareAccount {
                     account: Account::parse("liabilities/my_credit_card", None),
+                    metadata: Metadata::new(),
                     source: None,
                 },
                 DeclareAccount {
                     account: Account::parse("assets/my_checking", None),
+                    metadata: Metadata::new(),
                     source: None,
                 },
             ],
