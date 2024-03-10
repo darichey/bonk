@@ -248,6 +248,58 @@ impl DeclareAccount<'_> {
         self.0.child_by_field_name("account").map(Account)
     }
 
+    pub fn metadata(&self) -> Vec<Metadata> {
+        let mut cursor = self.0.walk();
+        self.0
+            .children_by_field_name("metadata", &mut cursor)
+            .map(Metadata)
+            .collect()
+    }
+
+    pub fn span(&self) -> SourceSpan {
+        self.0.range().into()
+    }
+}
+
+pub struct Metadata<'a>(Node<'a>);
+
+impl Metadata<'_> {
+    pub fn key(&self) -> Option<MetadataKey> {
+        self.0.child_by_field_name("key").map(MetadataKey)
+    }
+
+    pub fn value(&self) -> Option<MetadataValue> {
+        self.0.child_by_field_name("value").map(MetadataValue)
+    }
+
+    pub fn span(&self) -> SourceSpan {
+        self.0.range().into()
+    }
+}
+
+pub struct MetadataKey<'a>(Node<'a>);
+
+impl MetadataKey<'_> {
+    pub fn value<'s>(&self, src: &'s str) -> &'s str {
+        self.0
+            .utf8_text(src.as_bytes())
+            .expect("src is not valid utf-8")
+    }
+
+    pub fn span(&self) -> SourceSpan {
+        self.0.range().into()
+    }
+}
+
+pub struct MetadataValue<'a>(Node<'a>);
+
+impl MetadataValue<'_> {
+    pub fn value<'s>(&self, src: &'s str) -> &'s str {
+        self.0
+            .utf8_text(src.as_bytes())
+            .expect("src is not valid utf-8")
+    }
+
     pub fn span(&self) -> SourceSpan {
         self.0.range().into()
     }
@@ -259,7 +311,10 @@ mod tests {
 
     #[test]
     fn test_debug_fmt() {
-        let src = r#"2023-01-01 "Mcdonald's"
+        let src = r#"account assets/my_checking
+  starting_balance: 5.31
+        
+2023-01-01 "Mcdonald's"
   expenses/fast_food         10.91
   liabilities/my_credit_card -10.91
       
@@ -272,33 +327,40 @@ mod tests {
         insta::assert_debug_snapshot!(
             ledger,
             @r###"
-        (ledger [0, 0] - [6, 37]
-          transaction: (transaction [0, 0] - [2, 35]
-            date: (date [0, 0] - [0, 10])
-            description: (string [0, 11] - [0, 23])
-            posting: (posting [1, 2] - [1, 34]
-              account: (account [1, 2] - [1, 20]
-                (ident [1, 2] - [1, 10])
-                (ident [1, 11] - [1, 20]))
-              amount: (number [1, 29] - [1, 34]))
-            posting: (posting [2, 2] - [2, 35]
-              account: (account [2, 2] - [2, 28]
-                (ident [2, 2] - [2, 13])
-                (ident [2, 14] - [2, 28]))
-              amount: (number [2, 29] - [2, 35])))
-          transaction: (transaction [4, 0] - [6, 37]
-            date: (date [4, 0] - [4, 10])
-            description: (string [4, 11] - [4, 31])
-            posting: (posting [5, 2] - [5, 37]
+        (ledger [0, 0] - [9, 37]
+          declare_account: (declare_account [0, 0] - [1, 24]
+            account: (account [0, 8] - [0, 26]
+              (ident [0, 8] - [0, 14])
+              (ident [0, 15] - [0, 26]))
+            metadata: (metadata [1, 2] - [1, 24]
+              key: (ident [1, 2] - [1, 18])
+              value: (number [1, 20] - [1, 24])))
+          transaction: (transaction [3, 0] - [5, 35]
+            date: (date [3, 0] - [3, 10])
+            description: (string [3, 11] - [3, 23])
+            posting: (posting [4, 2] - [4, 34]
+              account: (account [4, 2] - [4, 20]
+                (ident [4, 2] - [4, 10])
+                (ident [4, 11] - [4, 20]))
+              amount: (number [4, 29] - [4, 34]))
+            posting: (posting [5, 2] - [5, 35]
               account: (account [5, 2] - [5, 28]
                 (ident [5, 2] - [5, 13])
                 (ident [5, 14] - [5, 28]))
-              amount: (number [5, 32] - [5, 37]))
-            posting: (posting [6, 2] - [6, 37]
-              account: (account [6, 2] - [6, 20]
-                (ident [6, 2] - [6, 8])
-                (ident [6, 9] - [6, 20]))
-              amount: (number [6, 31] - [6, 37]))))
+              amount: (number [5, 29] - [5, 35])))
+          transaction: (transaction [7, 0] - [9, 37]
+            date: (date [7, 0] - [7, 10])
+            description: (string [7, 11] - [7, 31])
+            posting: (posting [8, 2] - [8, 37]
+              account: (account [8, 2] - [8, 28]
+                (ident [8, 2] - [8, 13])
+                (ident [8, 14] - [8, 28]))
+              amount: (number [8, 32] - [8, 37]))
+            posting: (posting [9, 2] - [9, 37]
+              account: (account [9, 2] - [9, 20]
+                (ident [9, 2] - [9, 8])
+                (ident [9, 9] - [9, 20]))
+              amount: (number [9, 31] - [9, 37]))))
         "###
         );
     }
@@ -308,6 +370,7 @@ mod tests {
         let src = r#"account expenses/fast_food
 account liabilities/my_credit_card
 account assets/my_checking
+  starting_balance: 5.31
 
 2023-01-01 "Mcdonald's"
   expenses/fast_food         10.91
@@ -325,6 +388,11 @@ account assets/my_checking
             declared_accounts[0].account().map(|a| a.value(src)),
             Some("expenses/fast_food")
         );
+
+        let metadata = declared_accounts[2].metadata();
+        assert_eq!(metadata.len(), 1);
+        assert_eq!(metadata[0].key().unwrap().value(src), "starting_balance");
+        assert_eq!(metadata[0].value().unwrap().value(src), "5.31");
 
         let transactions = ledger.transactions();
         assert_eq!(transactions.len(), 2);
