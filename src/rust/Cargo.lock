@@ -262,6 +262,7 @@ dependencies = [
  "clap",
  "rouille",
  "serde",
+ "sqlite",
 ]
 
 [[package]]

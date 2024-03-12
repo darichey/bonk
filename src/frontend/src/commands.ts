@@ -18,10 +18,17 @@ export function useQueryTransactionsForChart(
 }
 
 export function useQueryTransactions(query: string): SWRResponse<TableData> {
-  return useSWR(
-    "useQueryTransactions",
-    () => ({ column_names: [], data: [] } as TableData)
-  ); // TODO
+  return useSWR(["/queryTransactions", query], async ([_, query]) => {
+    const res = await fetch(`http://localhost:8080/queryTransactions`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ query }),
+    });
+    const json = await res.json();
+    return json as TableData;
+  });
 }
 
 export function useGetDashboardNames(): SWRResponse<string[]> {

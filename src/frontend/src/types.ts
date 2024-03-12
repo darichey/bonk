@@ -12,7 +12,7 @@ interface Posting {
 export type SqlValue = string | number | null;
 
 export interface TableData {
-  column_names: string[]; // todo camelCase
+  columnNames: string[];
   data: SqlValue[][];
 }
 

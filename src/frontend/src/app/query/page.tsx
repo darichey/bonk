@@ -6,7 +6,7 @@ import { useState } from "react";
 import { useDebounce } from "usehooks-ts";
 
 export default function QueryPage() {
-  const [query, setQuery] = useState("select * from transactions\nlimit 10");
+  const [query, setQuery] = useState('select * from "transaction"\nlimit 10');
   const debouncedQuery = useDebounce(query, 500);
   const { data, error, isLoading } = useQueryTransactions(debouncedQuery);
 
@@ -29,14 +29,14 @@ export default function QueryPage() {
       </div>
       <div className="p-2">
         {error ? (
-          <div>Encountered error: {error}</div>
+          <div>Encountered error: {JSON.stringify(error)}</div>
         ) : isLoading || !data ? (
           <div>Loading...</div>
         ) : (
           <table>
             <thead>
               <tr>
-                {data.column_names.map((column, i) => (
+                {data.columnNames.map((column, i) => (
                   <th key={i}>{column}</th>
                 ))}
               </tr>

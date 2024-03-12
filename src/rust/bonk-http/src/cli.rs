@@ -11,7 +11,7 @@ use bonk_workspace::Workspace;
 use clap::Parser;
 use rouille::{router, Response, Server};
 
-use crate::{get_transactions, State};
+use crate::{get_transactions, query_transactions, State};
 
 /// Starts an http server that can be used to interact with the Bonk workspace
 #[derive(Parser, Debug)]
@@ -38,9 +38,17 @@ pub fn run(args: Args) -> Result<()> {
     };
 
     let server = Server::new("localhost:8080", move |request| {
-        let state = state.clone();
+        if request.method() == "OPTIONS" {
+            // TOOD: real cors
+            return Response::empty_204()
+                .with_additional_header("Access-Control-Allow-Origin", "*")
+                .with_additional_header("Access-Control-Allow-Methods", "*")
+                .with_additional_header("Access-Control-Allow-Headers", "*");
+        }
+
         router!(request,
-            (GET) (/transactions) => { get_transactions(request, state) },
+            (GET) (/transactions) => { get_transactions(request, state.clone()) },
+            (POST) (/queryTransactions) => { query_transactions(request, state.clone()) },
             _ => Response::empty_404(),
         )
     })
