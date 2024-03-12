@@ -11,25 +11,39 @@ function TransactionView({ transaction }: { transaction: Transaction }) {
       </div>
       {transaction.postings.map((posting) => (
         <div>
-          {posting.account} {posting.amount}
+          {posting.account} {showAmount(posting.amount)}
         </div>
       ))}
     </div>
   );
 }
 
+function showAmount(amount: number): string {
+  let dollars = Math.round(amount / 100);
+  let cents = Math.abs(amount) % 100;
+  return `${dollars}.${cents.toString().padStart(2, "0")}`;
+}
+
 export default function LogPage() {
-  const { data: transactions, error, isLoading } = useGetAllTransactions();
+  const { data: transactions, error, isLoading } = useGetAllTransactions(); // TODO: paginate
 
   return isLoading || !transactions ? (
     <div>transactions here... loading...</div>
   ) : error ? (
     <div>Encountered error: {error}</div>
   ) : (
-    <div className="flex flex-col gap-2">
-      {transactions.map((transaction) => (
-        <TransactionView transaction={transaction} />
-      ))}
+    <div>
+      <div>
+        <b>{transactions.length} transactions</b>
+      </div>
+      <div className="flex flex-col gap-2">
+        {transactions
+          .toSorted((a, b) => a.date.localeCompare(b.date)) // TODO: sorting should be done on the server
+          .map((transaction, idx) => (
+            <TransactionView transaction={transaction} key={idx} />
+          ))}
+        div
+      </div>
     </div>
   );
 }
