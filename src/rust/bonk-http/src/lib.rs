@@ -61,7 +61,6 @@ fn get_transactions(_request: &Request, state: Arc<Mutex<State>>) -> Response {
     }
 
     Response::json(&transactions.values().collect::<Vec<_>>())
-        .with_additional_header("Access-Control-Allow-Origin", "*") // TODO real cors
 }
 
 #[derive(Deserialize)]
@@ -117,9 +116,7 @@ fn query_transactions(request: &Request, state: Arc<Mutex<State>>) -> Response {
     match data {
         Ok(data) => {
             let response = TableData { column_names, data };
-
-            // TODO real cors
-            Response::json(&response).with_additional_header("Access-Control-Allow-Origin", "*")
+            Response::json(&response)
         }
         Err(err) => Response::json(&err.to_string()).with_status_code(400),
     }

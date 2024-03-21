@@ -46,11 +46,14 @@ pub fn run(args: Args) -> Result<()> {
                 .with_additional_header("Access-Control-Allow-Headers", "*");
         }
 
-        router!(request,
+        let response = router!(request,
             (GET) (/transactions) => { get_transactions(request, state.clone()) },
             (POST) (/queryTransactions) => { query_transactions(request, state.clone()) },
             _ => Response::empty_404(),
-        )
+        );
+
+        // TODO: real cors
+        response.with_additional_header("Access-Control-Allow-Origin", "*")
     })
     .unwrap();
 
