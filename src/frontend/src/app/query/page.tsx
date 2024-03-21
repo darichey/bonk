@@ -29,7 +29,7 @@ export default function QueryPage() {
       </div>
       <div className="p-2">
         {error ? (
-          <div>Encountered error: {JSON.stringify(error)}</div>
+          <div>Encountered error: {error.toString()}</div>
         ) : isLoading || !data ? (
           <div>Loading...</div>
         ) : (

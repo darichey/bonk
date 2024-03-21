@@ -29,6 +29,13 @@ export function useQueryTransactionsForChart(
 
 export function useQueryTransactions(query: string): SWRResponse<TableData> {
   return useSWR(["/queryTransactions", query], async ([_, query]) => {
+    if (!query) {
+      return {
+        columnNames: [],
+        data: [],
+      };
+    }
+
     const res = await fetch(`http://localhost:8080/queryTransactions`, {
       method: "POST",
       headers: {
@@ -36,8 +43,14 @@ export function useQueryTransactions(query: string): SWRResponse<TableData> {
       },
       body: JSON.stringify({ query }),
     });
+
     const json = await res.json();
-    return json as TableData;
+
+    if (res.ok) {
+      return json as TableData;
+    } else {
+      throw new Error(json);
+    }
   });
 }
 
