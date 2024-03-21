@@ -19,11 +19,15 @@ name = "Main"
   xAxis = "date"
   query = """
   SELECT
-      date,
-      (SUM(SUM(amount)) OVER (ORDER BY date)) / 100.0 as total
-  FROM transactions
+    date,
+    (SUM(SUM(amount)) OVER(ORDER BY date)) / 100.0 as total
+  FROM "transaction"
+  INNER JOIN posting
+  ON "transaction".id = posting."transaction"
+  WHERE
+    account = 'assets/my_checking'
   GROUP BY date
-  ORDER BY date
+  ORDER BY date;
   """
   gridColumn = "1 / 3"
   gridRow = "auto"
