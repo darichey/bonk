@@ -200,20 +200,13 @@ fn convert_amount(
     src: &str,
     path: Option<&Path>,
 ) -> Result<bonk_ast_errorless::Amount, Vec<Source>> {
-    Ok(bonk_ast_errorless::Amount {
-        cents: amount.value(src).replace('.', "").parse().map_err(|_| {
-            vec![
-                (Source {
-                    path: path.map(|p| p.to_path_buf()),
-                    span: amount.span(),
-                }),
-            ]
-        })?,
-        source: Some(Source {
-            path: path.map(Path::to_path_buf),
-            span: amount.span(),
-        }),
-    })
+    let source = Source {
+        path: path.map(Path::to_path_buf),
+        span: amount.span(),
+    };
+
+    bonk_ast_errorless::Amount::parse(amount.value(src), Some(source.clone()))
+        .map_err(|_| vec![source])
 }
 
 fn convert_declared_account(

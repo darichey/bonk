@@ -117,6 +117,10 @@ pub struct Amount {
 }
 
 impl Amount {
+    pub fn parse(amount: &str, source: Option<Source>) -> Result<Self, std::num::ParseFloatError> {
+        Ok(Self::from_dollars(amount.parse::<f64>()?, source))
+    }
+
     pub fn from_dollars(dollar_amount: f64, source: Option<Source>) -> Self {
         Self {
             cents: (dollar_amount * 100.0).round() as i32,
@@ -128,6 +132,73 @@ impl Amount {
 #[cfg(test)]
 mod tests {
     use crate::Amount;
+
+    #[test]
+    fn test_amount_parse() {
+        assert_eq!(
+            Amount::parse("3", None),
+            Ok(Amount {
+                cents: 300,
+                source: None,
+            })
+        );
+
+        assert_eq!(
+            Amount::parse("3.0", None),
+            Ok(Amount {
+                cents: 300,
+                source: None,
+            })
+        );
+
+        assert_eq!(
+            Amount::parse("3.00", None),
+            Ok(Amount {
+                cents: 300,
+                source: None,
+            })
+        );
+
+        assert_eq!(
+            Amount::parse("03", None),
+            Ok(Amount {
+                cents: 300,
+                source: None,
+            })
+        );
+
+        assert_eq!(
+            Amount::parse("31.4", None),
+            Ok(Amount {
+                cents: 3140,
+                source: None,
+            })
+        );
+
+        assert_eq!(
+            Amount::parse("3.14", None),
+            Ok(Amount {
+                cents: 314,
+                source: None,
+            })
+        );
+
+        assert_eq!(
+            Amount::parse("30.40", None),
+            Ok(Amount {
+                cents: 3040,
+                source: None,
+            })
+        );
+
+        assert_eq!(
+            Amount::parse("2500.0", None),
+            Ok(Amount {
+                cents: 250000,
+                source: None,
+            })
+        );
+    }
 
     #[test]
     fn test_amount_from_dollars() {
