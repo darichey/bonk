@@ -112,3 +112,16 @@ name = "Main"
   """
   gridColumn = "1 / 3"
   gridRow = "auto"
+
+
+# TODO: table component for displaying stuff like...
+# SELECT
+#     account,
+#     (SUM(amount)) / 100.0 as total
+# FROM "transaction"
+#     INNER JOIN posting
+# ON "transaction".id = posting."transaction"
+# WHERE
+#     account LIKE 'assets/%'
+# GROUP BY account
+# ORDER BY total DESC
