@@ -36,10 +36,11 @@ export function useGetDashboardNames(): SWRResponse<string[]> {
 }
 
 export function useGetDashboard(name: string): SWRResponse<Dashboard> {
-  return useSWR(
-    "useGetDashboard",
-    () => ({ name: "TODO", components: [] } as Dashboard)
-  ); // TODO
+  return useSWR(["/dashboard", name], async ([_, name]) => {
+    const res = await fetch(`http://localhost:8080/dashboard`);
+    const json = await res.json();
+    return json as Dashboard;
+  });
 }
 
 export function useRenderQueryTemplate(
