@@ -2,7 +2,6 @@ use crate::plaid_config;
 use crate::plaid_get_access_token;
 use crate::plaid_get_transactions;
 use crate::PlaidTransaction;
-use anyhow::Result;
 use bonk_ast_errorless::{Account, Amount, Date, Ledger, Posting, Transaction};
 use clap::Parser;
 use std::{fs, path::PathBuf};
@@ -32,7 +31,7 @@ pub struct Args {
     pub access_token: Option<String>,
 }
 
-pub fn run(args: Args) -> Result<()> {
+pub fn run(args: Args) -> anyhow::Result<()> {
     let Args {
         start_date,
         end_date,

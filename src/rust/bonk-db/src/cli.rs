@@ -1,4 +1,3 @@
-use anyhow::Result;
 use clap::Parser;
 use std::path::PathBuf;
 
@@ -17,7 +16,7 @@ pub struct Args {
     pub database: PathBuf,
 }
 
-pub fn run(args: Args) -> Result<()> {
+pub fn run(args: Args) -> anyhow::Result<()> {
     let Args { cfg, database } = args;
     create_db(cfg, database)?;
     Ok(())

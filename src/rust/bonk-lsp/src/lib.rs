@@ -5,7 +5,6 @@ mod go_to_def;
 mod state;
 mod util;
 
-use anyhow::Result;
 use bonk_parse::WorkspaceExt;
 use bonk_workspace::Workspace;
 use lsp_server::{Connection, ExtractError, Message, Notification, Request, RequestId, Response};
@@ -26,7 +25,7 @@ fn main_loop(
     connection: Connection,
     params: serde_json::Value,
     workspace: Workspace,
-) -> Result<()> {
+) -> anyhow::Result<()> {
     let _params: InitializeParams = serde_json::from_value(params).unwrap();
 
     let workspace = workspace.parse().expect("couldn't read ledgers");

@@ -1,4 +1,4 @@
-use anyhow::{anyhow, Result};
+use anyhow::anyhow;
 use bonk_parse::WorkspaceExt as _;
 use bonk_workspace::Workspace;
 use clap::Parser;
@@ -15,7 +15,7 @@ pub struct Args {
     pub cfg: PathBuf,
 }
 
-pub fn run(args: Args) -> Result<()> {
+pub fn run(args: Args) -> anyhow::Result<()> {
     let Args { cfg } = args;
 
     let workspace = Workspace::from_cfg(cfg).map_err(|err| anyhow!(err))?;

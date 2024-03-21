@@ -3,7 +3,6 @@ use std::{
     io::{self, stdin, stdout},
 };
 
-use anyhow::Result;
 use clap::Parser;
 
 use crate::do_convert;
@@ -25,7 +24,7 @@ pub struct Args {
     pub output: Option<String>,
 }
 
-pub fn run(args: Args) -> Result<()> {
+pub fn run(args: Args) -> anyhow::Result<()> {
     let Args {
         account,
         input,

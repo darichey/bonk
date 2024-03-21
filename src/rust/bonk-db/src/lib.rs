@@ -2,14 +2,14 @@ pub mod cli;
 
 use std::path::{Path, PathBuf};
 
-use anyhow::{anyhow, bail, Result};
+use anyhow::{anyhow, bail};
 use bonk_ast_errorless::{Posting, Transaction};
 use bonk_check::{CheckedWorkspace, WorkspaceExt as _};
 use bonk_parse::WorkspaceExt as _;
 use bonk_workspace::Workspace;
 use sqlite::{Connection, State, Value};
 
-pub fn create_db(cfg: PathBuf, database: PathBuf) -> Result<Db> {
+pub fn create_db(cfg: PathBuf, database: PathBuf) -> anyhow::Result<Db> {
     // TODO: can we dedupe this with bonk_check::cli::run ?
     let workspace = Workspace::from_cfg(cfg).map_err(|err| anyhow!(err))?;
     let workspace = workspace.parse()?;
@@ -30,7 +30,7 @@ pub struct Db {
 }
 
 impl Db {
-    pub fn new<T: AsRef<Path>>(workspace: &CheckedWorkspace, path: T) -> Result<Db> {
+    pub fn new<T: AsRef<Path>>(workspace: &CheckedWorkspace, path: T) -> anyhow::Result<Db> {
         let con = Connection::open(path)?;
 
         con.execute(

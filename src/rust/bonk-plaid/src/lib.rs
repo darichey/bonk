@@ -1,6 +1,5 @@
 pub mod cli;
 
-use anyhow::Result;
 use plaid::{
     apis::{configuration::Configuration, plaid_api},
     models::{
@@ -18,7 +17,7 @@ use std::{
     time::Duration,
 };
 
-fn plaid_config() -> Result<Configuration> {
+fn plaid_config() -> anyhow::Result<Configuration> {
     let base_path = env::var("PLAID_ENV")?;
     let client_id = env::var("PLAID_CLIENT_ID")?;
     let secret = env::var("PLAID_SECRET")?;
@@ -49,7 +48,7 @@ fn handle_post(request: &Request, public_token: Arc<Mutex<Option<String>>>) -> R
     Response::empty_204()
 }
 
-fn plaid_get_access_token(config: &Configuration) -> Result<String> {
+fn plaid_get_access_token(config: &Configuration) -> anyhow::Result<String> {
     let link_token = plaid_create_link_token(config)?;
     println!("Got link token: {link_token}");
 
@@ -86,7 +85,7 @@ fn plaid_get_access_token(config: &Configuration) -> Result<String> {
     Ok(access_token)
 }
 
-fn plaid_create_link_token(config: &Configuration) -> Result<String> {
+fn plaid_create_link_token(config: &Configuration) -> anyhow::Result<String> {
     Ok(plaid_api::link_token_create(
         config,
         LinkTokenCreateRequest {
@@ -102,7 +101,10 @@ fn plaid_create_link_token(config: &Configuration) -> Result<String> {
     .link_token)
 }
 
-fn plaid_exchange_public_token(config: &Configuration, public_token: &str) -> Result<String> {
+fn plaid_exchange_public_token(
+    config: &Configuration,
+    public_token: &str,
+) -> anyhow::Result<String> {
     let access_token = plaid_api::item_public_token_exchange(
         config,
         plaid::models::ItemPublicTokenExchangeRequest {
@@ -128,7 +130,7 @@ fn plaid_get_transactions(
     access_token: &str,
     start_date: &str,
     end_date: &str,
-) -> Result<Vec<PlaidTransaction>> {
+) -> anyhow::Result<Vec<PlaidTransaction>> {
     let mut transactions = vec![];
 
     loop {

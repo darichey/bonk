@@ -1,4 +1,3 @@
-use anyhow::Result;
 use bonk_workspace::Workspace;
 use clap::Parser;
 use lsp_types::ServerCapabilities;
@@ -25,7 +24,7 @@ pub struct Args {
     pub stdio: bool,
 }
 
-pub fn run(args: Args) -> Result<()> {
+pub fn run(args: Args) -> anyhow::Result<()> {
     let Args { cfg_path, .. } = args;
 
     let workspace = Workspace::from_cfg(cfg_path).expect("failed to parse workspace");

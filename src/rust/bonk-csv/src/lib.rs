@@ -2,7 +2,7 @@ pub mod cli;
 
 use std::io;
 
-use anyhow::{Context, Result};
+use anyhow::Context;
 use bonk_ast_errorless::{Account, Amount, Date, Ledger, Posting, Transaction};
 use csv::Reader;
 use serde::Deserialize;
@@ -14,7 +14,7 @@ struct CsvTransaction {
     amount: f64,
 }
 
-pub fn do_convert<D: io::Read>(account: &str, reader: &mut Reader<D>) -> Result<Ledger> {
+pub fn do_convert<D: io::Read>(account: &str, reader: &mut Reader<D>) -> anyhow::Result<Ledger> {
     let account = Account::parse(account, None);
 
     let transactions = reader
@@ -37,7 +37,7 @@ pub fn do_convert<D: io::Read>(account: &str, reader: &mut Reader<D>) -> Result<
                 source: None,
             })
         })
-        .collect::<Result<Vec<_>>>()?;
+        .collect::<anyhow::Result<Vec<_>>>()?;
 
     Ok(Ledger {
         declare_accounts: vec![],

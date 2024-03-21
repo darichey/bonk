@@ -1,4 +1,3 @@
-use anyhow::Result;
 use clap::{Parser, Subcommand};
 
 #[derive(Parser)]
@@ -18,7 +17,7 @@ enum Commands {
     Plaid(bonk_plaid::cli::Args),
 }
 
-fn main() -> Result<()> {
+fn main() -> anyhow::Result<()> {
     let Args { command } = Args::parse();
 
     match command {
