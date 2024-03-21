@@ -32,7 +32,11 @@ export function useQueryTransactions(query: string): SWRResponse<TableData> {
 }
 
 export function useGetDashboardNames(): SWRResponse<string[]> {
-  return useSWR("useGetDashboardNames", () => [] as string[]); // TODO
+  return useSWR("/dashboardNames", async (_) => {
+    const res = await fetch(`http://localhost:8080/dashboardNames`);
+    const json = await res.json();
+    return json as string[];
+  });
 }
 
 export function useGetDashboard(name: string): SWRResponse<Dashboard> {
