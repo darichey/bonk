@@ -12,6 +12,7 @@ struct GetDashboardRequest {
     name: String,
 }
 
+// TODO: it's weird that this is a POST with a name in the body. We should just give dashboards IDs and use that as a route param
 pub(crate) fn get_dashboard(request: &Request, state: Arc<Mutex<State>>) -> Response {
     let body = try_or_400!(handle(request, state));
     Response::json(&body)

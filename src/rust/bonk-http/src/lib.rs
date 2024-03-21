@@ -48,7 +48,7 @@ pub fn run(cfg: &Path) -> anyhow::Result<()> {
         let response = router!(request,
             (GET) (/transactions) => { get_transactions(request, state.clone()) },
             (POST) (/queryTransactions) => { query_transactions(request, state.clone()) },
-            (GET) (/dashboard) => { get_dashboard(request, state.clone()) },
+            (POST) (/dashboard) => { get_dashboard(request, state.clone()) },
             (GET) (/dashboardNames) => { get_dashboard_names(request, state.clone()) },
             _ => Response::empty_404(),
         );
