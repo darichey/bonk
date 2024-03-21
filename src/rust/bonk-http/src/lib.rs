@@ -27,3 +27,17 @@ impl Serialize for SqlValue {
         }
     }
 }
+
+// we use this instead of rouille::try_or_400 so we can use anyhow::Result and control the error response
+#[macro_export]
+macro_rules! try_or_400 {
+    ($result:expr) => {
+        match $result {
+            Ok(r) => r,
+            Err(err) => {
+                let json = err.to_string();
+                return rouille::Response::json(&json).with_status_code(400);
+            }
+        }
+    };
+}

@@ -6,7 +6,7 @@ use std::{
 use rouille::{Request, Response};
 use serde::Serialize;
 
-use crate::State;
+use crate::{try_or_400, State};
 
 #[derive(Serialize)]
 struct Transaction {
@@ -21,16 +21,23 @@ struct Posting {
     amount: i32,
 }
 
+pub(crate) fn get_transactions(request: &Request, state: Arc<Mutex<State>>) -> Response {
+    let body = try_or_400!(handle(request, state));
+    Response::json(&body)
+}
+
+const QUERY: &str = r#"SELECT id,date,description,account,amount FROM "transaction" INNER JOIN posting ON "transaction".id = posting."transaction""#;
+
 // TODO: order by date
 // TODO: paginate by date
-pub(crate) fn get_transactions(_request: &Request, state: Arc<Mutex<State>>) -> Response {
+fn handle(_request: &Request, state: Arc<Mutex<State>>) -> anyhow::Result<Vec<Transaction>> {
     let state = state.lock().expect("Couldn't acquire state");
     let con = &state.db.con;
 
     let mut transactions: HashMap<i64, Transaction> = HashMap::new();
 
-    for row in con.prepare(r#"SELECT id,date,description,account,amount FROM "transaction" INNER JOIN posting ON "transaction".id = posting."transaction""#).unwrap().into_iter() {
-        let row = row.unwrap();
+    for row in con.prepare(QUERY)?.into_iter() {
+        let row = row?;
         let id = row.read::<i64, _>("id");
         let date = row.read::<&str, _>("date");
         let description = row.read::<&str, _>("description");
@@ -54,5 +61,5 @@ pub(crate) fn get_transactions(_request: &Request, state: Arc<Mutex<State>>) -> 
         }
     }
 
-    Response::json(&transactions.values().collect::<Vec<_>>())
+    Ok(transactions.into_values().collect::<Vec<_>>())
 }
