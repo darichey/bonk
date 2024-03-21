@@ -14,7 +14,17 @@ export function useGetAllTransactions(): SWRResponse<Transaction[]> {
 export function useQueryTransactionsForChart(
   query: string
 ): SWRResponse<ChartData> {
-  return useSWR("useQueryTransactionsForChart", () => ({} as ChartData)); // TODO
+  return useSWR(["/queryTransactionsForChart", query], async ([_, query]) => {
+    const res = await fetch(`http://localhost:8080/queryTransactionsForChart`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ query }),
+    });
+    const json = await res.json();
+    return json as ChartData;
+  });
 }
 
 export function useQueryTransactions(query: string): SWRResponse<TableData> {
