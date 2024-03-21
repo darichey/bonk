@@ -1,0 +1,14 @@
+account assets/my_checking
+
+account income/acme_corp
+
+account expenses/groceries
+account expenses/home
+account expenses/home/utilities
+account expenses/car
+account expenses/car/gas
+account expenses/fun
+account expenses/health
+account expenses/phone
+account expenses/coffee
+account expenses/food

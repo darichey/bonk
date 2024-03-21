@@ -1,65 +1,87 @@
 2023-01-01 "Salary Deposit"
   assets/my_checking 2500.0
+  income/acme_corp
 
 2023-01-02 "Grocery Shopping"
   assets/my_checking -120.50
+  expenses/groceries
 
 2023-01-04 "Electric Bill Payment"
   assets/my_checking -45.0
+  expenses/home/utilities
 
 2023-01-05 "Gas Station Purchase"
   assets/my_checking -30.25
+  expenses/car/gas
 
 2023-01-05 "Restaurant Dinner"
   assets/my_checking -60.75
+  expenses/food
 
 2023-01-07 "Internet Bill Payment"
   assets/my_checking -55.0
+  expenses/home/utilities
 
 2023-01-08 "Movie Night"
   assets/my_checking -25.50
+  expenses/fun
 
 2023-01-10 "Medical Co-pay"
   assets/my_checking -15.0
+  expenses/health
 
 2023-01-12 "Coffee Shop"
   assets/my_checking -5.25
+  expenses/coffee
 
 2023-01-14 "Bookstore Purchase"
   assets/my_checking -22.80
+  expenses/fun
 
 2023-01-15 "Car Service"
   assets/my_checking -80.0
+  expenses/car
 
 2023-01-16 "Salary Deposit"
   assets/my_checking 2500.0
+  income/acme_corp
 
 2023-01-18 "Grocery Shopping"
   assets/my_checking -110.75
+  expenses/groceries
 
 2023-01-20 "Gas Station Purchase"
   assets/my_checking -35.50
+  expenses/car/gas
 
 2023-01-20 "Online Shopping"
   assets/my_checking -75.20
+  expenses/fun
 
 2023-01-22 "Utilities Bill Payment"
   assets/my_checking -80.50
+  expenses/home/utilities
 
 2023-01-24 "Dentist Appointment"
   assets/my_checking -50.0
+  expenses/health
 
 2023-01-25 "Concert Tickets"
   assets/my_checking -70.0
+  expenses/fun
 
 2023-01-27 "Salary Deposit"
   assets/my_checking 2500.0
+  income/acme_corp
 
 2023-01-28 "Grocery Shopping"
   assets/my_checking -90.30
+  expenses/groceries
 
 2023-01-30 "Gas Station Purchase"
   assets/my_checking -28.75
+  expenses/car/gas
 
 2023-01-31 "Phone Bill Payment"
   assets/my_checking -60.0
+  expenses/phone

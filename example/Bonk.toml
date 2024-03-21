@@ -1,0 +1,95 @@
+include = "**/*.bonk"
+
+[[dashboards]]
+name = "Main"
+
+  [[dashboards.components]]
+  type = "text"
+  template = "Hello, {{a}}!"
+  variables.a = """
+  SELECT 1
+  """
+  gridColumn = "1 / 1"
+  gridRow = "auto"
+  
+  [[dashboards.components]]
+  type = "chart"
+  title = "Daily Total Assets"
+  chartType = "line"
+  xAxis = "date"
+  query = """
+  SELECT
+      date,
+      (SUM(SUM(amount)) OVER (ORDER BY date)) / 100.0 as total
+  FROM transactions
+  GROUP BY date
+  ORDER BY date
+  """
+  gridColumn = "1 / 3"
+  gridRow = "auto"
+  
+#   [[dashboards.components]]
+#   type = "chart"
+#   title = "Monthly Total Assets"
+#   chartType = "line"
+#   xAxis = "month"
+#   query = """
+#   SELECT
+#       STRFTIME('%Y-%m', DATE(date, 'start of month')) as month,
+#       (SUM(SUM(amount)) OVER (ORDER BY date)) / 100.0 as total
+#   FROM transactions
+#   GROUP BY month
+#   ORDER BY month
+#   """
+#   gridColumn = "3 / 5"
+#   gridRow = "auto"
+  
+#   [[dashboards.components]]
+#   type = "chart"
+#   title = "Expenditures per month"
+#   chartType = "bar"
+#   xAxis = "month"
+#   query = """
+#   SELECT
+#       STRFTIME('%Y-%m', DATE(date, 'start of month')) as month,
+#       (SUM(amount)) / 100.0 as total
+#   FROM transactions
+#   WHERE amount < 0
+#   GROUP BY month
+#   ORDER BY month
+#   """
+#   gridColumn = "1 / 3"
+#   gridRow = "auto"
+  
+#   [[dashboards.components]]
+#   type = "chart"
+#   title = "Income per month"
+#   chartType = "bar"
+#   xAxis = "month"
+#   query = """
+#   SELECT
+#       STRFTIME('%Y-%m', DATE(date, 'start of month')) as month,
+#       (SUM(amount)) / 100.0 as total
+#   FROM transactions
+#   WHERE amount > 0
+#   GROUP BY month
+#   ORDER BY month
+#   """
+#   gridColumn = "3 / 5"
+#   gridRow = "auto"
+  
+#   [[dashboards.components]]
+#   type = "chart"
+#   title = "Savings per month"
+#   chartType = "bar"
+#   xAxis = "month"
+#   query = """
+#   SELECT
+#       STRFTIME('%Y-%m', DATE(date, 'start of month')) as month,
+#       (SUM(amount)) / 100.0 as total
+#   FROM transactions
+#   GROUP BY month
+#   ORDER BY month
+#   """
+#   gridColumn = "1 / 3"
+#   gridRow = "auto"
