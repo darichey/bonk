@@ -256,6 +256,7 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "bonk-check",
+ "bonk-dashboard",
  "bonk-db",
  "bonk-parse",
  "bonk-workspace",
@@ -309,6 +310,7 @@ dependencies = [
 name = "bonk-workspace"
 version = "0.1.0"
 dependencies = [
+ "bonk-dashboard",
  "glob",
  "serde",
  "toml",

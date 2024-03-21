@@ -15,3 +15,4 @@ clap.workspace = true
 rouille.workspace = true
 serde.workspace = true
 sqlite.workspace = true # TODO: sqlite should be an implementation detail of bonk-db
+bonk-dashboard.workspace = true

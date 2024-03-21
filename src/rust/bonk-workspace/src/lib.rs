@@ -1,3 +1,4 @@
+use bonk_dashboard::Dashboard;
 use glob::glob;
 use serde::Deserialize;
 use std::{
@@ -9,6 +10,9 @@ use std::{
 #[derive(Deserialize)]
 pub struct BonkCfg {
     include: String,
+
+    #[serde(default)]
+    pub dashboards: Vec<Dashboard>,
 }
 
 impl BonkCfg {
@@ -21,7 +25,7 @@ impl BonkCfg {
 
 pub struct Workspace {
     cfg_path: PathBuf,
-    cfg: BonkCfg,
+    pub cfg: BonkCfg,
     included_paths: OnceCell<Vec<PathBuf>>,
 }
 

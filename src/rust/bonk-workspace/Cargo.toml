@@ -9,3 +9,4 @@ edition = "2021"
 glob.workspace = true
 serde.workspace = true
 toml.workspace = true
+bonk-dashboard.workspace = true

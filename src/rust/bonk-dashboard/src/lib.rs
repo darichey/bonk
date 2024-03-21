@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use serde::Deserialize;
 use serde::Serialize;
 
-#[derive(Clone, Deserialize, Serialize)]
+#[derive(Clone, Deserialize, Serialize, Debug)]
 pub enum ChartType {
     #[serde(rename = "line")]
     Line,
@@ -11,7 +11,7 @@ pub enum ChartType {
     Bar,
 }
 
-#[derive(Clone, Deserialize, Serialize)]
+#[derive(Clone, Deserialize, Serialize, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct Chart {
     pub title: String,
@@ -22,7 +22,7 @@ pub struct Chart {
     pub grid_row: String,
 }
 
-#[derive(Clone, Deserialize, Serialize)]
+#[derive(Clone, Deserialize, Serialize, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct Text {
     pub template: String,
@@ -31,14 +31,14 @@ pub struct Text {
     pub grid_row: String,
 }
 
-#[derive(Clone, Deserialize, Serialize)]
+#[derive(Clone, Deserialize, Serialize, Debug)]
 #[serde(tag = "type", rename_all = "lowercase")]
 pub enum Component {
     Chart(Chart),
     Text(Text),
 }
 
-#[derive(Clone, Deserialize, Serialize)]
+#[derive(Clone, Deserialize, Serialize, Debug)]
 pub struct Dashboard {
     pub name: String,
     pub components: Vec<Component>,

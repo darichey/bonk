@@ -1,4 +1,5 @@
 pub mod cli;
+mod get_dashboard;
 mod get_transactions;
 mod query_transactions;
 
@@ -8,22 +9,27 @@ use std::{
 };
 
 use bonk_check::WorkspaceExt as _;
+use bonk_dashboard::Dashboard;
 use bonk_db::Db;
 use bonk_parse::WorkspaceExt as _;
 use bonk_workspace::Workspace;
 use rouille::{router, Response, Server};
 use serde::Serialize;
 
-use crate::{get_transactions::get_transactions, query_transactions::query_transactions};
+use crate::{
+    get_dashboard::get_dashboard, get_transactions::get_transactions,
+    query_transactions::query_transactions,
+};
 
 pub fn run(cfg: &Path) -> anyhow::Result<()> {
     let state = {
         let workspace = Workspace::from_cfg(cfg).expect("Couldn't read cfg");
-        let workspace = workspace.parse().unwrap();
-        let workspace = workspace.check().unwrap();
+        let parsed_workspace = workspace.parse().unwrap();
+        let checked_workspace = parsed_workspace.check().unwrap();
 
         let state = State {
-            db: Db::new(&workspace, ":memory:").expect("Couldn't create database"),
+            db: Db::new(&checked_workspace, ":memory:").expect("Couldn't create database"),
+            dashboards: workspace.cfg.dashboards,
         };
 
         Arc::new(Mutex::new(state))
@@ -41,6 +47,7 @@ pub fn run(cfg: &Path) -> anyhow::Result<()> {
         let response = router!(request,
             (GET) (/transactions) => { get_transactions(request, state.clone()) },
             (POST) (/queryTransactions) => { query_transactions(request, state.clone()) },
+            (GET) (/dashboard) => { get_dashboard(request, state.clone()) },
             _ => Response::empty_404(),
         );
 
@@ -58,6 +65,7 @@ pub fn run(cfg: &Path) -> anyhow::Result<()> {
 
 struct State {
     db: Db,
+    dashboards: Vec<Dashboard>,
 }
 
 /// A wrapper for seralizing sqlite Values
