@@ -3,6 +3,7 @@ mod get_dashboard;
 mod get_dashboard_names;
 mod get_transactions;
 mod query_transactions;
+mod query_transactions_for_chart;
 
 use std::{
     path::Path,
@@ -20,6 +21,7 @@ use serde::Serialize;
 use crate::{
     get_dashboard::get_dashboard, get_dashboard_names::get_dashboard_names,
     get_transactions::get_transactions, query_transactions::query_transactions,
+    query_transactions_for_chart::query_transactions_for_chart,
 };
 
 pub fn run(cfg: &Path) -> anyhow::Result<()> {
@@ -50,6 +52,7 @@ pub fn run(cfg: &Path) -> anyhow::Result<()> {
             (POST) (/queryTransactions) => { query_transactions(request, state.clone()) },
             (POST) (/dashboard) => { get_dashboard(request, state.clone()) },
             (GET) (/dashboardNames) => { get_dashboard_names(request, state.clone()) },
+            (POST) (/queryTransactionsForChart) => { query_transactions_for_chart(request, state.clone()) },
             _ => Response::empty_404(),
         );
 
