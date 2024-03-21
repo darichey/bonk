@@ -1,5 +1,6 @@
 pub mod cli;
 mod get_dashboard;
+mod get_dashboard_names;
 mod get_transactions;
 mod query_transactions;
 
@@ -17,8 +18,8 @@ use rouille::{router, Response, Server};
 use serde::Serialize;
 
 use crate::{
-    get_dashboard::get_dashboard, get_transactions::get_transactions,
-    query_transactions::query_transactions,
+    get_dashboard::get_dashboard, get_dashboard_names::get_dashboard_names,
+    get_transactions::get_transactions, query_transactions::query_transactions,
 };
 
 pub fn run(cfg: &Path) -> anyhow::Result<()> {
@@ -48,6 +49,7 @@ pub fn run(cfg: &Path) -> anyhow::Result<()> {
             (GET) (/transactions) => { get_transactions(request, state.clone()) },
             (POST) (/queryTransactions) => { query_transactions(request, state.clone()) },
             (GET) (/dashboard) => { get_dashboard(request, state.clone()) },
+            (GET) (/dashboardNames) => { get_dashboard_names(request, state.clone()) },
             _ => Response::empty_404(),
         );
 
