@@ -11,7 +11,7 @@ use bonk_workspace::Workspace;
 use clap::Parser;
 use rouille::{router, Response, Server};
 
-use crate::{get_transactions, query_transactions, State};
+use crate::{get_transactions::get_transactions, query_transactions::query_transactions, State};
 
 /// Starts an http server that can be used to interact with the Bonk workspace
 #[derive(Parser, Debug)]
