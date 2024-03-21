@@ -67,5 +67,18 @@ export function useRenderQueryTemplate(
   template: string,
   variables: Record<string, string>
 ): SWRResponse<string> {
-  return useSWR("useRenderQueryTemplate", () => "TODO"); // TODO
+  return useSWR(
+    ["/renderQueryTemplate", template, variables],
+    async ([_, template, variables]) => {
+      const res = await fetch(`http://localhost:8080/renderQueryTemplate`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ template, variables }),
+      });
+      const json = await res.json();
+      return json as string;
+    }
+  );
 }
