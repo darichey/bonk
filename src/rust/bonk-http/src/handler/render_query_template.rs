@@ -1,30 +1,23 @@
-use std::{
-    collections::HashMap,
-    sync::{Arc, Mutex},
-};
+use std::collections::HashMap;
 
 use anyhow::Context;
-use rouille::{Request, Response};
+use axum::{extract::State, Json};
 use serde::Deserialize;
 
-use crate::{try_or_400, State};
+use crate::{AppJson, BonkHttpResult, BonkHttpState};
 
 #[derive(Deserialize)]
-struct RenderQueryTemplateRequest {
+pub struct RenderQueryTemplateRequest {
     template: String,
     variables: HashMap<String, String>,
 }
 
-pub(crate) fn render_query_template(request: &Request, state: Arc<Mutex<State>>) -> Response {
-    let body = try_or_400!(handle(request, state));
-    Response::json(&body)
-}
-
-fn handle(request: &Request, state: Arc<Mutex<State>>) -> anyhow::Result<String> {
+pub async fn render_query_template(
+    State(state): BonkHttpState,
+    Json(body): Json<RenderQueryTemplateRequest>,
+) -> BonkHttpResult<String> {
     let state = state.lock().expect("Couldn't acquire state");
     let con = &state.db.con;
-
-    let body: RenderQueryTemplateRequest = rouille::input::json_input(request)?;
 
     let evaluated_variables = body
         .variables
@@ -50,7 +43,9 @@ fn handle(request: &Request, state: Arc<Mutex<State>>) -> anyhow::Result<String>
         })
         .collect::<anyhow::Result<HashMap<String, String>>>()?;
 
-    Ok(format_template(&body.template, evaluated_variables))
+    let formatted = format_template(&body.template, evaluated_variables);
+
+    Ok(AppJson(formatted))
 }
 
 fn format_template(template: &str, values: HashMap<String, String>) -> String {

@@ -1,25 +1,28 @@
 pub mod cli;
-mod get_dashboard;
-mod get_dashboard_names;
-mod get_transactions;
-mod query_transactions;
-mod query_transactions_for_chart;
-mod render_query_template;
+mod handler;
 
 use std::{
     path::Path,
     sync::{Arc, Mutex},
 };
 
+use axum::{
+    extract::{FromRequest, State},
+    http::StatusCode,
+    response::{IntoResponse, Response},
+    routing::{get, post},
+    Router,
+};
 use bonk_check::WorkspaceExt as _;
 use bonk_dashboard::Dashboard;
 use bonk_db::Db;
 use bonk_parse::WorkspaceExt as _;
 use bonk_workspace::Workspace;
-use rouille::{router, Response, Server};
 use serde::Serialize;
+use tower::ServiceBuilder;
+use tower_http::cors::CorsLayer;
 
-use crate::{
+use crate::handler::{
     get_dashboard::get_dashboard, get_dashboard_names::get_dashboard_names,
     get_transactions::get_transactions, query_transactions::query_transactions,
     query_transactions_for_chart::query_transactions_for_chart,
@@ -27,12 +30,20 @@ use crate::{
 };
 
 pub fn run(cfg: &Path) -> anyhow::Result<()> {
+    tokio::runtime::Builder::new_multi_thread()
+        .enable_all()
+        .build()
+        .unwrap()
+        .block_on(async { run_async(cfg).await })
+}
+
+async fn run_async(cfg: &Path) -> anyhow::Result<()> {
     let state = {
         let workspace = Workspace::from_cfg(cfg).expect("Couldn't read cfg");
         let parsed_workspace = workspace.parse().unwrap();
         let checked_workspace = parsed_workspace.check().unwrap();
 
-        let state = State {
+        let state = AppState {
             db: Db::new(&checked_workspace, ":memory:").expect("Couldn't create database"),
             dashboards: workspace.cfg.dashboards,
         };
@@ -40,38 +51,32 @@ pub fn run(cfg: &Path) -> anyhow::Result<()> {
         Arc::new(Mutex::new(state))
     };
 
-    let server = Server::new("localhost:8080", move |request| {
-        if request.method() == "OPTIONS" {
-            // TOOD: real cors
-            return Response::empty_204()
-                .with_additional_header("Access-Control-Allow-Origin", "*")
-                .with_additional_header("Access-Control-Allow-Methods", "*")
-                .with_additional_header("Access-Control-Allow-Headers", "*");
-        }
+    let app = Router::new()
+        .route("/transactions", get(get_transactions))
+        .route("/queryTransactions", post(query_transactions))
+        .route("/dashboard", post(get_dashboard))
+        .route("/dashboardNames", get(get_dashboard_names))
+        .route(
+            "/queryTransactionsForChart",
+            post(query_transactions_for_chart),
+        )
+        .route("/renderQueryTemplate", post(render_query_template))
+        .layer(
+            // TODO: real cors
+            ServiceBuilder::new().layer(CorsLayer::permissive()),
+        )
+        .with_state(state);
 
-        let response = router!(request,
-            (GET) (/transactions) => { get_transactions(request, state.clone()) },
-            (POST) (/queryTransactions) => { query_transactions(request, state.clone()) },
-            (POST) (/dashboard) => { get_dashboard(request, state.clone()) },
-            (GET) (/dashboardNames) => { get_dashboard_names(request, state.clone()) },
-            (POST) (/queryTransactionsForChart) => { query_transactions_for_chart(request, state.clone()) },
-            (POST) (/renderQueryTemplate) => { render_query_template(request, state.clone() )},
-            _ => Response::empty_404(),
-        );
+    let listener = tokio::net::TcpListener::bind("localhost:8080").await?;
 
-        // TODO: real cors
-        response.with_additional_header("Access-Control-Allow-Origin", "*")
-    })
-    .unwrap();
+    println!("Listening on {}", listener.local_addr()?);
 
-    println!("Listening on port {}", server.server_addr().port());
-
-    server.run();
+    axum::serve(listener, app).await?;
 
     Ok(())
 }
 
-struct State {
+struct AppState {
     db: Db,
     dashboards: Vec<Dashboard>,
 }
@@ -94,16 +99,40 @@ impl Serialize for SqlValue {
     }
 }
 
-// we use this instead of rouille::try_or_400 so we can use anyhow::Result and control the error response
-#[macro_export]
-macro_rules! try_or_400 {
-    ($result:expr) => {
-        match $result {
-            Ok(r) => r,
-            Err(err) => {
-                let json = err.to_string();
-                return rouille::Response::json(&json).with_status_code(400);
-            }
-        }
-    };
+type BonkHttpState = State<Arc<Mutex<AppState>>>;
+
+type BonkHttpResult<T> = Result<AppJson<T>, AppError>;
+
+#[derive(FromRequest)]
+#[from_request(via(axum::Json), rejection(AppError))]
+struct AppJson<T>(T);
+
+impl<T> IntoResponse for AppJson<T>
+where
+    axum::Json<T>: IntoResponse,
+{
+    fn into_response(self) -> Response {
+        axum::Json(self.0).into_response()
+    }
+}
+
+struct AppError(anyhow::Error);
+
+impl IntoResponse for AppError {
+    fn into_response(self) -> Response {
+        (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            format!("Something went wrong: {}", self.0),
+        )
+            .into_response()
+    }
+}
+
+impl<E> From<E> for AppError
+where
+    E: Into<anyhow::Error>,
+{
+    fn from(err: E) -> Self {
+        Self(err.into())
+    }
 }

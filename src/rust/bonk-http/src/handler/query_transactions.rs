@@ -1,32 +1,26 @@
-use std::sync::{Arc, Mutex};
-
-use rouille::{Request, Response};
+use axum::{extract::State, Json};
 use serde::{Deserialize, Serialize};
 
-use crate::{try_or_400, SqlValue, State};
+use crate::{AppJson, BonkHttpResult, BonkHttpState, SqlValue};
 
 #[derive(Deserialize)]
-struct QueryRequest {
+pub struct QueryRequest {
     query: String,
 }
 
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
-struct TableData {
+pub struct TableData {
     column_names: Vec<String>,
     data: Vec<Vec<SqlValue>>,
 }
 
-pub(crate) fn query_transactions(request: &Request, state: Arc<Mutex<State>>) -> Response {
-    let body = try_or_400!(handle(request, state));
-    Response::json(&body)
-}
-
-fn handle(request: &Request, state: Arc<Mutex<State>>) -> anyhow::Result<TableData> {
+pub async fn query_transactions(
+    State(state): BonkHttpState,
+    Json(body): Json<QueryRequest>,
+) -> BonkHttpResult<TableData> {
     let state = state.lock().expect("Couldn't acquire state");
     let con = &state.db.con;
-
-    let body: QueryRequest = rouille::input::json_input(request)?;
 
     let stmt = con.prepare(body.query)?;
 
@@ -41,5 +35,7 @@ fn handle(request: &Request, state: Arc<Mutex<State>>) -> anyhow::Result<TableDa
         })
         .collect::<anyhow::Result<Vec<Vec<SqlValue>>>>()?;
 
-    Ok(TableData { column_names, data })
+    let table_data = TableData { column_names, data };
+
+    Ok(AppJson(table_data))
 }

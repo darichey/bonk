@@ -1,34 +1,21 @@
-use std::{
-    collections::HashMap,
-    sync::{Arc, Mutex},
-};
+use std::collections::HashMap;
 
-use rouille::{Request, Response};
+use axum::{extract::State, Json};
 use serde::Deserialize;
 
-use crate::{try_or_400, SqlValue, State};
+use crate::{AppJson, BonkHttpResult, BonkHttpState, SqlValue};
 
 #[derive(Deserialize)]
-struct QueryRequest {
+pub struct QueryRequest {
     query: String,
 }
 
-pub(crate) fn query_transactions_for_chart(
-    request: &Request,
-    state: Arc<Mutex<State>>,
-) -> Response {
-    let body = try_or_400!(handle(request, state));
-    Response::json(&body)
-}
-
-fn handle(
-    request: &Request,
-    state: Arc<Mutex<State>>,
-) -> anyhow::Result<HashMap<String, Vec<SqlValue>>> {
+pub async fn query_transactions_for_chart(
+    State(state): BonkHttpState,
+    Json(body): Json<QueryRequest>,
+) -> BonkHttpResult<HashMap<String, Vec<SqlValue>>> {
     let state = state.lock().expect("Couldn't acquire state");
     let con = &state.db.con;
-
-    let body: QueryRequest = rouille::input::json_input(request)?;
 
     let stmt = con.prepare(body.query)?;
 
@@ -49,5 +36,7 @@ fn handle(
         .map(|_| data_iters.iter_mut().map(|it| it.next().unwrap()).collect())
         .collect();
 
-    Ok(column_names.into_iter().zip(columns).collect())
+    let query_result = column_names.into_iter().zip(columns).collect();
+
+    Ok(AppJson(query_result))
 }

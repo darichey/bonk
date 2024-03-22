@@ -7,12 +7,15 @@ edition = "2021"
 
 [dependencies]
 anyhow.workspace = true
+axum.workspace = true
 bonk-check.workspace = true
+bonk-dashboard.workspace = true
 bonk-db.workspace = true
 bonk-parse.workspace = true
 bonk-workspace.workspace = true
 clap.workspace = true
-rouille.workspace = true
 serde.workspace = true
 sqlite.workspace = true # TODO: sqlite should be an implementation detail of bonk-db
-bonk-dashboard.workspace = true
+tokio.workspace = true
+tower.workspace = true
+tower-http.workspace = true

@@ -1,36 +1,28 @@
-use std::{
-    collections::{hash_map::Entry, HashMap},
-    sync::{Arc, Mutex},
-};
+use std::collections::{hash_map::Entry, HashMap};
 
-use rouille::{Request, Response};
+use axum::extract::State;
 use serde::Serialize;
 
-use crate::{try_or_400, State};
+use crate::{AppJson, BonkHttpResult, BonkHttpState};
 
 #[derive(Serialize)]
-struct Transaction {
+pub struct Transaction {
     date: String,
     description: String,
     postings: Vec<Posting>,
 }
 
 #[derive(Serialize)]
-struct Posting {
+pub struct Posting {
     account: String,
     amount: i32,
-}
-
-pub(crate) fn get_transactions(request: &Request, state: Arc<Mutex<State>>) -> Response {
-    let body = try_or_400!(handle(request, state));
-    Response::json(&body)
 }
 
 const QUERY: &str = r#"SELECT id,date,description,account,amount FROM "transaction" INNER JOIN posting ON "transaction".id = posting."transaction""#;
 
 // TODO: order by date
 // TODO: paginate by date
-fn handle(_request: &Request, state: Arc<Mutex<State>>) -> anyhow::Result<Vec<Transaction>> {
+pub async fn get_transactions(State(state): BonkHttpState) -> BonkHttpResult<Vec<Transaction>> {
     let state = state.lock().expect("Couldn't acquire state");
     let con = &state.db.con;
 
@@ -61,5 +53,7 @@ fn handle(_request: &Request, state: Arc<Mutex<State>>) -> anyhow::Result<Vec<Tr
         }
     }
 
-    Ok(transactions.into_values().collect::<Vec<_>>())
+    let transactions = transactions.into_values().collect::<Vec<_>>();
+
+    Ok(AppJson(transactions))
 }
