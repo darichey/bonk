@@ -14,8 +14,7 @@ pub async fn query_transactions_for_chart(
     State(state): BonkHttpState,
     Json(body): Json<QueryRequest>,
 ) -> BonkHttpResult<HashMap<String, Vec<SqlValue>>> {
-    let state = state.lock().expect("Couldn't acquire state");
-    let con = &state.db.con;
+    let con = &state.db.lock().expect("db lock poisoned").con;
 
     let stmt = con.prepare(body.query)?;
 

@@ -44,11 +44,13 @@ async fn run_async(cfg: &Path) -> anyhow::Result<()> {
         let checked_workspace = parsed_workspace.check().unwrap();
 
         let state = AppState {
-            db: Db::new(&checked_workspace, ":memory:").expect("Couldn't create database"),
+            db: Mutex::new(
+                Db::new(&checked_workspace, ":memory:").expect("Couldn't create database"),
+            ),
             dashboards: workspace.cfg.dashboards,
         };
 
-        Arc::new(Mutex::new(state))
+        Arc::new(state)
     };
 
     let app = Router::new()
@@ -77,7 +79,7 @@ async fn run_async(cfg: &Path) -> anyhow::Result<()> {
 }
 
 struct AppState {
-    db: Db,
+    db: Mutex<Db>,
     dashboards: Vec<Dashboard>,
 }
 
@@ -99,7 +101,7 @@ impl Serialize for SqlValue {
     }
 }
 
-type BonkHttpState = State<Arc<Mutex<AppState>>>;
+type BonkHttpState = State<Arc<AppState>>;
 
 type BonkHttpResult<T> = Result<AppJson<T>, AppError>;
 

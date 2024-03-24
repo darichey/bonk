@@ -15,8 +15,6 @@ pub async fn get_dashboard(
     State(state): BonkHttpState,
     Json(body): Json<GetDashboardRequest>,
 ) -> BonkHttpResult<Dashboard> {
-    let state = state.lock().expect("Couldn't acquire state");
-
     let dashboard = state
         .dashboards
         .iter()

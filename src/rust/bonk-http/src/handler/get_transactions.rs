@@ -23,8 +23,7 @@ const QUERY: &str = r#"SELECT id,date,description,account,amount FROM "transacti
 // TODO: order by date
 // TODO: paginate by date
 pub async fn get_transactions(State(state): BonkHttpState) -> BonkHttpResult<Vec<Transaction>> {
-    let state = state.lock().expect("Couldn't acquire state");
-    let con = &state.db.con;
+    let con = &state.db.lock().expect("db lock poisoned").con;
 
     let mut transactions: HashMap<i64, Transaction> = HashMap::new();
 
