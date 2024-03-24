@@ -1,10 +1,10 @@
 use std::collections::HashMap;
 
 use anyhow::Context;
-use axum::{extract::State, Json};
+use axum::{debug_handler, extract::State, Json};
 use serde::Deserialize;
 
-use crate::{AppJson, BonkHttpResult, BonkHttpState};
+use crate::{AppJson, AppState, BonkHttpResult};
 
 #[derive(Deserialize)]
 pub struct RenderQueryTemplateRequest {
@@ -12,8 +12,9 @@ pub struct RenderQueryTemplateRequest {
     variables: HashMap<String, String>,
 }
 
+#[debug_handler(state = AppState)]
 pub async fn render_query_template(
-    State(state): BonkHttpState,
+    State(state): State<AppState>,
     Json(body): Json<RenderQueryTemplateRequest>,
 ) -> BonkHttpResult<String> {
     let con = &state.db.lock().expect("db lock poisoned").con;

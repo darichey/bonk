@@ -1,9 +1,9 @@
 use anyhow::Context;
-use axum::{extract::State, Json};
+use axum::{debug_handler, extract::State, Json};
 use bonk_dashboard::Dashboard;
 use serde::Deserialize;
 
-use crate::{AppJson, BonkHttpResult, BonkHttpState};
+use crate::{AppJson, AppState, BonkHttpResult};
 
 #[derive(Deserialize)]
 pub struct GetDashboardRequest {
@@ -11,8 +11,9 @@ pub struct GetDashboardRequest {
 }
 
 // TODO: it's weird that this is a POST with a name in the body. We should just give dashboards IDs and use that as a route param
+#[debug_handler(state = AppState)]
 pub async fn get_dashboard(
-    State(state): BonkHttpState,
+    State(state): State<AppState>,
     Json(body): Json<GetDashboardRequest>,
 ) -> BonkHttpResult<Dashboard> {
     let dashboard = state

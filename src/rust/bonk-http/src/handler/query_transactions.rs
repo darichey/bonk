@@ -1,7 +1,7 @@
-use axum::{extract::State, Json};
+use axum::{debug_handler, extract::State, Json};
 use serde::{Deserialize, Serialize};
 
-use crate::{AppJson, BonkHttpResult, BonkHttpState, SqlValue};
+use crate::{AppJson, AppState, BonkHttpResult, SqlValue};
 
 #[derive(Deserialize)]
 pub struct QueryRequest {
@@ -15,8 +15,9 @@ pub struct TableData {
     data: Vec<Vec<SqlValue>>,
 }
 
+#[debug_handler(state = AppState)]
 pub async fn query_transactions(
-    State(state): BonkHttpState,
+    State(state): State<AppState>,
     Json(body): Json<QueryRequest>,
 ) -> BonkHttpResult<TableData> {
     let con = &state.db.lock().expect("db lock poisoned").con;

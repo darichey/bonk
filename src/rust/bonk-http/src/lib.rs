@@ -3,12 +3,13 @@ mod handler;
 mod watch;
 
 use std::{
+    ops::Deref,
     path::Path,
     sync::{Arc, Mutex},
 };
 
 use axum::{
-    extract::{FromRequest, State},
+    extract::FromRequest,
     http::StatusCode,
     response::{IntoResponse, Response},
     routing::{get, post},
@@ -48,15 +49,13 @@ async fn run_async(cfg: &Path) -> anyhow::Result<()> {
         let parsed_workspace = workspace.parse().unwrap();
         let checked_workspace = parsed_workspace.check().unwrap();
 
-        let state = AppState {
+        AppState(Arc::new(InnerAppState {
             db: Mutex::new(
                 Db::new(&checked_workspace, ":memory:").expect("Couldn't create database"),
             ),
             dashboards: workspace.cfg.dashboards,
             watcher: Watcher::new(cfg)?,
-        };
-
-        Arc::new(state)
+        }))
     };
 
     let app = Router::new()
@@ -85,7 +84,18 @@ async fn run_async(cfg: &Path) -> anyhow::Result<()> {
     Ok(())
 }
 
-struct AppState {
+#[derive(Clone)]
+struct AppState(Arc<InnerAppState>);
+
+impl Deref for AppState {
+    type Target = InnerAppState;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
+struct InnerAppState {
     db: Mutex<Db>,
     dashboards: Vec<Dashboard>,
     watcher: Watcher,
@@ -108,8 +118,6 @@ impl Serialize for SqlValue {
         }
     }
 }
-
-type BonkHttpState = State<Arc<AppState>>;
 
 type BonkHttpResult<T> = Result<AppJson<T>, AppError>;
 

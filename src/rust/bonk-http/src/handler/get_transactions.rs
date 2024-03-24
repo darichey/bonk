@@ -1,9 +1,9 @@
 use std::collections::{hash_map::Entry, HashMap};
 
-use axum::extract::State;
+use axum::{debug_handler, extract::State};
 use serde::Serialize;
 
-use crate::{AppJson, BonkHttpResult, BonkHttpState};
+use crate::{AppJson, AppState, BonkHttpResult};
 
 #[derive(Serialize)]
 pub struct Transaction {
@@ -22,7 +22,8 @@ const QUERY: &str = r#"SELECT id,date,description,account,amount FROM "transacti
 
 // TODO: order by date
 // TODO: paginate by date
-pub async fn get_transactions(State(state): BonkHttpState) -> BonkHttpResult<Vec<Transaction>> {
+#[debug_handler(state = AppState)]
+pub async fn get_transactions(State(state): State<AppState>) -> BonkHttpResult<Vec<Transaction>> {
     let con = &state.db.lock().expect("db lock poisoned").con;
 
     let mut transactions: HashMap<i64, Transaction> = HashMap::new();

@@ -1,17 +1,18 @@
 use std::collections::HashMap;
 
-use axum::{extract::State, Json};
+use axum::{debug_handler, extract::State, Json};
 use serde::Deserialize;
 
-use crate::{AppJson, BonkHttpResult, BonkHttpState, SqlValue};
+use crate::{AppJson, AppState, BonkHttpResult, SqlValue};
 
 #[derive(Deserialize)]
 pub struct QueryRequest {
     query: String,
 }
 
+#[debug_handler(state = AppState)]
 pub async fn query_transactions_for_chart(
-    State(state): BonkHttpState,
+    State(state): State<AppState>,
     Json(body): Json<QueryRequest>,
 ) -> BonkHttpResult<HashMap<String, Vec<SqlValue>>> {
     let con = &state.db.lock().expect("db lock poisoned").con;
