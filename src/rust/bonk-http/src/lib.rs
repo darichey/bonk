@@ -15,7 +15,7 @@ use axum::{
     routing::{get, post},
     Router,
 };
-use bonk_check::{CheckedWorkspace, WorkspaceExt as _};
+use bonk_check::WorkspaceExt as _;
 use bonk_dashboard::Dashboard;
 use bonk_db::Db;
 use bonk_parse::WorkspaceExt as _;
@@ -102,15 +102,17 @@ impl MutableAppState {
 }
 
 struct InnerAppState {
-    mutable: Mutex<MutableAppState>,
+    mutable: Arc<Mutex<MutableAppState>>,
     watcher: Watcher,
 }
 
 impl AppState {
     fn new(cfg: &Path) -> anyhow::Result<Self> {
+        let mutable = Arc::new(Mutex::new(MutableAppState::new(cfg)));
+
         let state = AppState(Arc::new(InnerAppState {
-            mutable: Mutex::new(MutableAppState::new(cfg)),
-            watcher: Watcher::new(cfg)?,
+            mutable: mutable.clone(),
+            watcher: Watcher::new(cfg, mutable)?,
         }));
 
         Ok(state)

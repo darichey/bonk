@@ -1,10 +1,16 @@
-use std::{path::Path, time::Duration};
+use std::{
+    path::Path,
+    sync::{Arc, Mutex},
+    time::Duration,
+};
 
 use notify_debouncer_full::{
     notify::{RecommendedWatcher, RecursiveMode, Watcher as _},
     DebounceEventResult, Debouncer, FileIdMap,
 };
 use tokio::sync::broadcast::Sender;
+
+use crate::MutableAppState;
 
 pub(crate) struct Watcher {
     #[allow(unused)] // this is just here so it doesn't get dropped
@@ -13,7 +19,9 @@ pub(crate) struct Watcher {
 }
 
 impl Watcher {
-    pub(crate) fn new(cfg: &Path) -> anyhow::Result<Self> {
+    pub(crate) fn new(cfg: &Path, mutable: Arc<Mutex<MutableAppState>>) -> anyhow::Result<Self> {
+        let cfg_for_callback = cfg.to_path_buf().clone();
+
         let (tx, _) = tokio::sync::broadcast::channel(16); // TODO capacity?
         let events_tx = tx.clone();
 
@@ -22,6 +30,11 @@ impl Watcher {
             None,
             move |res: DebounceEventResult| {
                 if res.is_ok() {
+                    // rebuild mutable state
+                    let new_mutable_state = MutableAppState::new(&cfg_for_callback);
+                    *mutable.lock().expect("mutable state lock poisoned") = new_mutable_state;
+
+                    // notify listeners of state change
                     let _ = tx.send(());
                 }
             },
