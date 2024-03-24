@@ -1,7 +1,8 @@
 "use client";
 
-import useSWR, { SWRResponse } from "swr";
+import useSWR, { SWRResponse, useSWRConfig } from "swr";
 import { ChartData, Dashboard, TableData, Transaction } from "./types";
+import { useEffect } from "react";
 
 export function useGetAllTransactions(): SWRResponse<Transaction[]> {
   return useSWR("/transactions", async () => {
@@ -94,4 +95,21 @@ export function useRenderQueryTemplate(
       return json as string;
     }
   );
+}
+
+// FIXME: causes two reloads
+export function useLiveReload() {
+  const { mutate } = useSWRConfig();
+
+  useEffect(() => {
+    const eventSource = new EventSource(`http://localhost:8080/liveReload`);
+
+    eventSource.addEventListener("message", (_event) => {
+      mutate(() => true, undefined, { revalidate: true });
+    });
+
+    return () => {
+      eventSource.close();
+    };
+  }, []);
 }

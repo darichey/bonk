@@ -1,6 +1,6 @@
 "use client";
 
-import { useGetDashboard } from "@/commands";
+import { useGetDashboard, useLiveReload } from "@/commands";
 import DashboardText from "@/components/DashboardText";
 import QueryChart from "@/components/chart/QueryChart";
 
@@ -9,6 +9,7 @@ export default function DashboardPage({
 }: {
   params: { name: string };
 }) {
+  useLiveReload();
   const { data: dashboard, isLoading, error } = useGetDashboard(name);
 
   return error ? (
