@@ -1,5 +1,6 @@
 pub mod cli;
 mod handler;
+mod watch;
 
 use std::{
     path::Path,
@@ -22,11 +23,15 @@ use serde::Serialize;
 use tower::ServiceBuilder;
 use tower_http::cors::CorsLayer;
 
-use crate::handler::{
-    get_dashboard::get_dashboard, get_dashboard_names::get_dashboard_names,
-    get_transactions::get_transactions, query_transactions::query_transactions,
-    query_transactions_for_chart::query_transactions_for_chart,
-    render_query_template::render_query_template,
+use crate::{
+    handler::{
+        get_dashboard::get_dashboard, get_dashboard_names::get_dashboard_names,
+        get_transactions::get_transactions, live_reload::live_reload,
+        query_transactions::query_transactions,
+        query_transactions_for_chart::query_transactions_for_chart,
+        render_query_template::render_query_template,
+    },
+    watch::Watcher,
 };
 
 pub fn run(cfg: &Path) -> anyhow::Result<()> {
@@ -48,6 +53,7 @@ async fn run_async(cfg: &Path) -> anyhow::Result<()> {
                 Db::new(&checked_workspace, ":memory:").expect("Couldn't create database"),
             ),
             dashboards: workspace.cfg.dashboards,
+            watcher: Watcher::new(cfg)?,
         };
 
         Arc::new(state)
@@ -63,6 +69,7 @@ async fn run_async(cfg: &Path) -> anyhow::Result<()> {
             post(query_transactions_for_chart),
         )
         .route("/renderQueryTemplate", post(render_query_template))
+        .route("/liveReload", get(live_reload))
         .layer(
             // TODO: real cors
             ServiceBuilder::new().layer(CorsLayer::permissive()),
@@ -81,6 +88,7 @@ async fn run_async(cfg: &Path) -> anyhow::Result<()> {
 struct AppState {
     db: Mutex<Db>,
     dashboards: Vec<Dashboard>,
+    watcher: Watcher,
 }
 
 /// A wrapper for seralizing sqlite Values
