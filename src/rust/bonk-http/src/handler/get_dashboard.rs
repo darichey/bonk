@@ -16,8 +16,13 @@ pub async fn get_dashboard(
     State(state): State<AppState>,
     Json(body): Json<GetDashboardRequest>,
 ) -> BonkHttpResult<Dashboard> {
-    let dashboard = state
-        .dashboards
+    let dashboards = &state
+        .mutable
+        .lock()
+        .expect("mutable state lock poisoned")
+        .dashboards;
+
+    let dashboard = dashboards
         .iter()
         .find(|dashboard| dashboard.name == body.name)
         .cloned()

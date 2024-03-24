@@ -15,7 +15,12 @@ pub async fn query_transactions_for_chart(
     State(state): State<AppState>,
     Json(body): Json<QueryRequest>,
 ) -> BonkHttpResult<HashMap<String, Vec<SqlValue>>> {
-    let con = &state.db.lock().expect("db lock poisoned").con;
+    let con = &state
+        .mutable
+        .lock()
+        .expect("mutable state lock poisoned")
+        .db
+        .con;
 
     let stmt = con.prepare(body.query)?;
 

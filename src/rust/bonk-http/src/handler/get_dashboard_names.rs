@@ -4,8 +4,13 @@ use crate::{AppJson, AppState, BonkHttpResult};
 
 #[debug_handler(state = AppState)]
 pub async fn get_dashboard_names(State(state): State<AppState>) -> BonkHttpResult<Vec<String>> {
-    let dashboard_names = state
-        .dashboards
+    let dashboards = &state
+        .mutable
+        .lock()
+        .expect("mutable state lock poisoned")
+        .dashboards;
+
+    let dashboard_names = dashboards
         .iter()
         .map(|dashboard| dashboard.name.clone())
         .collect();

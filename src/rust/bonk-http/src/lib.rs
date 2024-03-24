@@ -15,7 +15,7 @@ use axum::{
     routing::{get, post},
     Router,
 };
-use bonk_check::WorkspaceExt as _;
+use bonk_check::{CheckedWorkspace, WorkspaceExt as _};
 use bonk_dashboard::Dashboard;
 use bonk_db::Db;
 use bonk_parse::WorkspaceExt as _;
@@ -44,19 +44,7 @@ pub fn run(cfg: &Path) -> anyhow::Result<()> {
 }
 
 async fn run_async(cfg: &Path) -> anyhow::Result<()> {
-    let state = {
-        let workspace = Workspace::from_cfg(cfg).expect("Couldn't read cfg");
-        let parsed_workspace = workspace.parse().unwrap();
-        let checked_workspace = parsed_workspace.check().unwrap();
-
-        AppState(Arc::new(InnerAppState {
-            db: Mutex::new(
-                Db::new(&checked_workspace, ":memory:").expect("Couldn't create database"),
-            ),
-            dashboards: workspace.cfg.dashboards,
-            watcher: Watcher::new(cfg)?,
-        }))
-    };
+    let state = AppState::new(cfg)?;
 
     let app = Router::new()
         .route("/transactions", get(get_transactions))
@@ -95,10 +83,38 @@ impl Deref for AppState {
     }
 }
 
-struct InnerAppState {
-    db: Mutex<Db>,
+struct MutableAppState {
+    db: Db,
     dashboards: Vec<Dashboard>,
+}
+
+impl MutableAppState {
+    fn new(cfg: &Path) -> Self {
+        let workspace = Workspace::from_cfg(cfg).expect("Couldn't read cfg");
+        let parsed_workspace = workspace.parse().unwrap();
+        let checked_workspace = parsed_workspace.check().unwrap();
+
+        MutableAppState {
+            db: Db::new(&checked_workspace, ":memory:").expect("Couldn't create database"),
+            dashboards: workspace.cfg.dashboards,
+        }
+    }
+}
+
+struct InnerAppState {
+    mutable: Mutex<MutableAppState>,
     watcher: Watcher,
+}
+
+impl AppState {
+    fn new(cfg: &Path) -> anyhow::Result<Self> {
+        let state = AppState(Arc::new(InnerAppState {
+            mutable: Mutex::new(MutableAppState::new(cfg)),
+            watcher: Watcher::new(cfg)?,
+        }));
+
+        Ok(state)
+    }
 }
 
 /// A wrapper for seralizing sqlite Values

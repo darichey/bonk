@@ -17,7 +17,12 @@ pub async fn render_query_template(
     State(state): State<AppState>,
     Json(body): Json<RenderQueryTemplateRequest>,
 ) -> BonkHttpResult<String> {
-    let con = &state.db.lock().expect("db lock poisoned").con;
+    let con = &state
+        .mutable
+        .lock()
+        .expect("mutable state lock poisoned")
+        .db
+        .con;
 
     let evaluated_variables = body
         .variables

@@ -20,7 +20,12 @@ pub async fn query_transactions(
     State(state): State<AppState>,
     Json(body): Json<QueryRequest>,
 ) -> BonkHttpResult<TableData> {
-    let con = &state.db.lock().expect("db lock poisoned").con;
+    let con = &state
+        .mutable
+        .lock()
+        .expect("mutable state lock poisoned")
+        .db
+        .con;
 
     let stmt = con.prepare(body.query)?;
 

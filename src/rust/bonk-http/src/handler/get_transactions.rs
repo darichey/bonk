@@ -24,7 +24,12 @@ const QUERY: &str = r#"SELECT id,date,description,account,amount FROM "transacti
 // TODO: paginate by date
 #[debug_handler(state = AppState)]
 pub async fn get_transactions(State(state): State<AppState>) -> BonkHttpResult<Vec<Transaction>> {
-    let con = &state.db.lock().expect("db lock poisoned").con;
+    let con = &state
+        .mutable
+        .lock()
+        .expect("mutable state lock poisoned")
+        .db
+        .con;
 
     let mut transactions: HashMap<i64, Transaction> = HashMap::new();
 
