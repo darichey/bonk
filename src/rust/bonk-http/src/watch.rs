@@ -19,12 +19,13 @@ pub(crate) struct Watcher {
 }
 
 impl Watcher {
-    pub(crate) fn new(cfg: &Path, mutable: Arc<Mutex<MutableAppState>>) -> anyhow::Result<Self> {
+    pub(crate) fn new(cfg: &Path, state: Arc<Mutex<MutableAppState>>) -> anyhow::Result<Self> {
         let cfg_for_callback = cfg.to_path_buf().clone();
 
         let (tx, _) = tokio::sync::broadcast::channel(16); // TODO capacity?
         let events_tx = tx.clone();
 
+        let s = state.clone();
         let mut debouncer = notify_debouncer_full::new_debouncer(
             Duration::from_secs(2),
             None,
@@ -33,7 +34,7 @@ impl Watcher {
                     // rebuild mutable state
                     match MutableAppState::new(&cfg_for_callback) {
                         Ok(new_state) => {
-                            *mutable.lock().expect("mutable state lock poisoned") = new_state;
+                            *s.lock().expect("mutable state lock poisoned") = new_state;
                             // notify listeners of state change
                             let _ = tx.send(());
                         }
@@ -49,6 +50,18 @@ impl Watcher {
         debouncer
             .watcher()
             .watch(cfg, RecursiveMode::NonRecursive)?;
+
+        // FIXME: we don't support changing `include` for live reload. The initial set of watched files is all we will ever watch.
+        for path in state
+            .lock()
+            .expect("mutable state lock poisoned")
+            .workspace
+            .included_paths()
+        {
+            debouncer
+                .watcher()
+                .watch(path, RecursiveMode::NonRecursive)?;
+        }
 
         Ok(Self {
             debouncer,
