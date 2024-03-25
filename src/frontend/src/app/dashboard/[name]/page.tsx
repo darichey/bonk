@@ -21,7 +21,7 @@ export default function DashboardPage({
       <h1 className="font-extrabold text-2xl border-b p-1 mb-4">
         {dashboard.name}
       </h1>
-      <div className="grid grid-cols-5 gap-4">
+      <div className="grid grid-cols-6 gap-4">
         {dashboard.components.map((component, i) => (
           <div
             style={{
