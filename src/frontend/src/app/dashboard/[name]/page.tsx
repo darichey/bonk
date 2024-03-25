@@ -1,6 +1,7 @@
 "use client";
 
 import { useGetDashboard, useLiveReload } from "@/commands";
+import DashboardTable from "@/components/DashboardTable";
 import DashboardText from "@/components/DashboardText";
 import QueryChart from "@/components/chart/QueryChart";
 
@@ -34,6 +35,8 @@ export default function DashboardPage({
               <QueryChart chart={component} />
             ) : component.type === "text" ? (
               <DashboardText text={component} />
+            ) : component.type === "table" ? (
+              <DashboardTable table={component}></DashboardTable>
             ) : (
               <div>Unknown component type</div>
             )}

@@ -38,7 +38,15 @@ export interface Text {
   gridRow: string;
 }
 
-export type Component = Chart | Text;
+export interface Table {
+  type: "table";
+  title: string;
+  query: string;
+  gridColumn: string;
+  gridRow: string;
+}
+
+export type Component = Chart | Text | Table;
 
 export interface Dashboard {
   name: string;
