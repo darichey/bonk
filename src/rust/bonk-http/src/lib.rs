@@ -8,6 +8,7 @@ use std::{
     sync::{Arc, Mutex},
 };
 
+use anyhow::anyhow;
 use axum::{
     extract::FromRequest,
     http::StatusCode,
@@ -89,15 +90,17 @@ struct MutableAppState {
 }
 
 impl MutableAppState {
-    fn new(cfg: &Path) -> Self {
-        let workspace = Workspace::from_cfg(cfg).expect("Couldn't read cfg");
-        let parsed_workspace = workspace.parse().unwrap();
-        let checked_workspace = parsed_workspace.check().unwrap();
+    fn new(cfg: &Path) -> anyhow::Result<Self> {
+        let workspace = Workspace::from_cfg(cfg).map_err(|err| anyhow!(err))?;
+        let parsed_workspace = workspace.parse()?;
+        let checked_workspace = parsed_workspace
+            .check()
+            .map_err(|_| anyhow!("check failed"))?;
 
-        MutableAppState {
+        Ok(MutableAppState {
             db: Db::new(&checked_workspace, ":memory:").expect("Couldn't create database"),
             dashboards: workspace.cfg.dashboards,
-        }
+        })
     }
 }
 
@@ -108,7 +111,7 @@ struct InnerAppState {
 
 impl AppState {
     fn new(cfg: &Path) -> anyhow::Result<Self> {
-        let mutable = Arc::new(Mutex::new(MutableAppState::new(cfg)));
+        let mutable = Arc::new(Mutex::new(MutableAppState::new(cfg)?));
 
         let state = AppState(Arc::new(InnerAppState {
             mutable: mutable.clone(),

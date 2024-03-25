@@ -31,11 +31,16 @@ impl Watcher {
             move |res: DebounceEventResult| {
                 if res.is_ok() {
                     // rebuild mutable state
-                    let new_mutable_state = MutableAppState::new(&cfg_for_callback);
-                    *mutable.lock().expect("mutable state lock poisoned") = new_mutable_state;
-
-                    // notify listeners of state change
-                    let _ = tx.send(());
+                    match MutableAppState::new(&cfg_for_callback) {
+                        Ok(new_state) => {
+                            *mutable.lock().expect("mutable state lock poisoned") = new_state;
+                            // notify listeners of state change
+                            let _ = tx.send(());
+                        }
+                        Err(err) => {
+                            eprintln!("error updating state, not reloading: {}", err)
+                        }
+                    }
                 }
             },
         )
