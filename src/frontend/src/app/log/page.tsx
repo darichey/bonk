@@ -9,8 +9,8 @@ function TransactionView({ transaction }: { transaction: Transaction }) {
       <div>
         {transaction.date} {transaction.description}
       </div>
-      {transaction.postings.map((posting) => (
-        <div>
+      {transaction.postings.map((posting, idx) => (
+        <div key={idx}>
           {posting.account} {showAmount(posting.amount)}
         </div>
       ))}

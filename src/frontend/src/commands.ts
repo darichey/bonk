@@ -111,5 +111,5 @@ export function useLiveReload() {
     return () => {
       eventSource.close();
     };
-  }, []);
+  }, [mutate]);
 }
