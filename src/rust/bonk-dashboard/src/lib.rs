@@ -32,10 +32,20 @@ pub struct Text {
 }
 
 #[derive(Clone, Deserialize, Serialize, Debug)]
+#[serde(rename_all = "camelCase")]
+pub struct Table {
+    pub title: String,
+    pub query: String,
+    pub grid_column: String,
+    pub grid_row: String,
+}
+
+#[derive(Clone, Deserialize, Serialize, Debug)]
 #[serde(tag = "type", rename_all = "lowercase")]
 pub enum Component {
     Chart(Chart),
     Text(Text),
+    Table(Table),
 }
 
 #[derive(Clone, Deserialize, Serialize, Debug)]
