@@ -20,6 +20,8 @@ pub async fn get_dashboard(
         .mutable
         .lock()
         .expect("mutable state lock poisoned")
+        .workspace
+        .cfg
         .dashboards;
 
     let dashboard = dashboards

@@ -17,7 +17,6 @@ use axum::{
     Router,
 };
 use bonk_check::WorkspaceExt as _;
-use bonk_dashboard::Dashboard;
 use bonk_db::Db;
 use bonk_parse::WorkspaceExt as _;
 use bonk_workspace::Workspace;
@@ -86,7 +85,7 @@ impl Deref for AppState {
 
 struct MutableAppState {
     db: Db,
-    dashboards: Vec<Dashboard>,
+    workspace: Workspace,
 }
 
 impl MutableAppState {
@@ -99,7 +98,7 @@ impl MutableAppState {
 
         Ok(MutableAppState {
             db: Db::new(&checked_workspace, ":memory:").expect("Couldn't create database"),
-            dashboards: workspace.cfg.dashboards,
+            workspace,
         })
     }
 }

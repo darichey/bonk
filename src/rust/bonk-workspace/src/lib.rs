@@ -24,7 +24,7 @@ impl BonkCfg {
 }
 
 pub struct Workspace {
-    cfg_path: PathBuf,
+    pub cfg_path: PathBuf,
     pub cfg: BonkCfg,
     included_paths: OnceCell<Vec<PathBuf>>,
 }

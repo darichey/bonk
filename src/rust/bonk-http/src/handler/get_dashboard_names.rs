@@ -8,6 +8,8 @@ pub async fn get_dashboard_names(State(state): State<AppState>) -> BonkHttpResul
         .mutable
         .lock()
         .expect("mutable state lock poisoned")
+        .workspace
+        .cfg
         .dashboards;
 
     let dashboard_names = dashboards
