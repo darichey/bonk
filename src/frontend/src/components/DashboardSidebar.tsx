@@ -16,7 +16,7 @@ export default function DashboardSidebar() {
       ) : (
         <ul>
           {dashboardNames.map((name, i) => (
-            <Link href={`/dashboard/${name}`} key={i}>
+            <Link href={`/dashboard?name=${name}`} key={i}>
               {name}
             </Link>
           ))}

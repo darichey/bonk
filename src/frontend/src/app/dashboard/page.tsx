@@ -4,13 +4,12 @@ import { useGetDashboard, useLiveReload } from "@/commands";
 import DashboardTable from "@/components/DashboardTable";
 import DashboardText from "@/components/DashboardText";
 import QueryChart from "@/components/chart/QueryChart";
+import { useSearchParams } from "next/navigation";
 
-export default function DashboardPage({
-  params: { name },
-}: {
-  params: { name: string };
-}) {
+export default function DashboardPage() {
   useLiveReload();
+  const searchParams = useSearchParams();
+  const name = searchParams.get("name") ?? "";
   const { data: dashboard, isLoading, error } = useGetDashboard(name);
 
   return error ? (
