@@ -97,7 +97,6 @@ export function useRenderQueryTemplate(
   );
 }
 
-// FIXME: causes two reloads
 export function useLiveReload() {
   const { mutate } = useSWRConfig();
 
