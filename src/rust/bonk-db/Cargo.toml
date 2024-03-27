@@ -12,5 +12,6 @@ bonk-check.workspace = true
 bonk-parse.workspace = true
 bonk-workspace.workspace = true
 clap.workspace = true
+serde.workspace = true
 sqlite.workspace = true
 sqlite3-sys.workspace = true

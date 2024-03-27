@@ -325,6 +325,7 @@ dependencies = [
  "bonk-parse",
  "bonk-workspace",
  "clap",
+ "serde",
  "sqlite",
  "sqlite3-sys",
 ]

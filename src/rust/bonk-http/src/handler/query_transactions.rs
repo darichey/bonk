@@ -1,7 +1,8 @@
 use axum::{debug_handler, extract::State, Json};
+use bonk_db::SqlValue;
 use serde::{Deserialize, Serialize};
 
-use crate::{AppJson, AppState, BonkHttpResult, SqlValue};
+use crate::{AppJson, AppState, BonkHttpResult};
 
 #[derive(Deserialize)]
 pub struct QueryRequest {
