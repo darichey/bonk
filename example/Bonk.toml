@@ -1,5 +1,20 @@
 include = "**/*.bonk"
 
+[[queries]]
+name = "Monthly Account Balance"
+query = """
+SELECT
+    STRFTIME('%Y-%m', DATE(date, 'start of month')) as month,
+    (SUM(SUM(amount)) OVER (ORDER BY date)) / 100.0 as total
+FROM "transaction"
+INNER JOIN posting
+ON "transaction".id = posting."transaction"
+WHERE
+  account = 'account' -- replace with desired account
+GROUP BY month
+ORDER BY month;
+"""
+
 [[dashboards]]
 name = "Main"
 

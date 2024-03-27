@@ -1,9 +1,11 @@
 use std::{fs, path::Path};
 
 use dashboard::Dashboard;
+use query::Query;
 use serde::Deserialize;
 
 pub mod dashboard;
+pub mod query;
 
 #[derive(Deserialize)]
 pub struct BonkCfg {
@@ -11,6 +13,9 @@ pub struct BonkCfg {
 
     #[serde(default)]
     pub dashboards: Vec<Dashboard>,
+
+    #[serde(default)]
+    pub queries: Vec<Query>,
 }
 
 impl BonkCfg {
