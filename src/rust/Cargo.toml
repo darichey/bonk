@@ -10,6 +10,7 @@ members = [
     "bonk-lsp",
     "bonk-parse",
     "bonk-plaid",
+    "bonk-test",
     "bonk-workspace",
     "plaid",
     "tree-sitter-bonk",
@@ -29,6 +30,7 @@ sqlite3-sys = "0.15.2"
 rouille = "3.6.2"
 lsp-server = "0.7.6"
 lsp-types = "0.95.0"
+prettytable-rs = "0.10.0"
 tree-sitter = "~0.20.10"
 reqwest = "~0.9"
 webbrowser = "0.8.12"
@@ -51,6 +53,7 @@ bonk-http = { path = "./bonk-http" }
 bonk-lsp = { path = "./bonk-lsp" }
 bonk-parse = { path = "./bonk-parse" }
 bonk-plaid = { path = "./bonk-plaid" }
+bonk-test = { path = "./bonk-test" }
 bonk-workspace = { path = "./bonk-workspace" }
 plaid = { path = "./plaid" }
 tree-sitter-bonk = { path = "./tree-sitter-bonk" }

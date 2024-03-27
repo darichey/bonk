@@ -15,6 +15,7 @@ enum Commands {
     Http(bonk_http::cli::Args),
     Lsp(bonk_lsp::cli::Args),
     Plaid(bonk_plaid::cli::Args),
+    Test(bonk_test::cli::Args),
 }
 
 fn main() -> anyhow::Result<()> {
@@ -27,6 +28,7 @@ fn main() -> anyhow::Result<()> {
         Commands::Http(args) => bonk_http::cli::run(args)?,
         Commands::Lsp(args) => bonk_lsp::cli::run(args)?,
         Commands::Plaid(args) => bonk_plaid::cli::run(args)?,
+        Commands::Test(args) => bonk_test::cli::run(args)?,
     };
 
     Ok(())

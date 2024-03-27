@@ -1,5 +1,6 @@
 pub mod cli;
 
+use core::fmt;
 use std::path::{Path, PathBuf};
 
 use anyhow::{anyhow, bail};
@@ -140,6 +141,18 @@ impl serde::Serialize for SqlValue {
             sqlite::Value::Integer(i) => serializer.serialize_i64(*i),
             sqlite::Value::String(s) => serializer.serialize_str(s),
             sqlite::Value::Null => serializer.serialize_unit(),
+        }
+    }
+}
+
+impl fmt::Display for SqlValue {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match &self.0 {
+            Value::Binary(b) => write!(f, "{:?}", b),
+            Value::Float(fl) => write!(f, "{}", fl),
+            Value::Integer(i) => write!(f, "{}", i),
+            Value::String(s) => write!(f, "{}", s),
+            Value::Null => write!(f, "null"),
         }
     }
 }

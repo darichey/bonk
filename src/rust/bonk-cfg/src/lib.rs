@@ -1,21 +1,32 @@
-use std::{fs, path::Path};
+use std::{
+    fs,
+    path::{Path, PathBuf},
+};
 
 use dashboard::Dashboard;
 use query::Query;
 use serde::Deserialize;
+use test::Test;
 
 pub mod dashboard;
 pub mod query;
+pub mod test;
 
 #[derive(Deserialize)]
 pub struct BonkCfg {
     pub include: String,
 
     #[serde(default)]
+    pub snapshot_dir: Option<PathBuf>,
+
+    #[serde(default)]
     pub dashboards: Vec<Dashboard>,
 
     #[serde(default)]
     pub queries: Vec<Query>,
+
+    #[serde(default)]
+    pub tests: Vec<Test>,
 }
 
 impl BonkCfg {
