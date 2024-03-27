@@ -1,5 +1,7 @@
 pub(crate) mod get_dashboard;
 pub(crate) mod get_dashboard_names;
+pub(crate) mod get_query;
+pub(crate) mod get_query_names;
 pub(crate) mod get_transactions;
 pub(crate) mod live_reload;
 pub(crate) mod query_transactions;

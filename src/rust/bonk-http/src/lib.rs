@@ -27,8 +27,8 @@ use tower_http::cors::CorsLayer;
 use crate::{
     handler::{
         get_dashboard::get_dashboard, get_dashboard_names::get_dashboard_names,
-        get_transactions::get_transactions, live_reload::live_reload,
-        query_transactions::query_transactions,
+        get_query::get_query, get_query_names::get_query_names, get_transactions::get_transactions,
+        live_reload::live_reload, query_transactions::query_transactions,
         query_transactions_for_chart::query_transactions_for_chart,
         render_query_template::render_query_template,
     },
@@ -57,6 +57,8 @@ async fn run_async(cfg: &Path) -> anyhow::Result<()> {
         )
         .route("/renderQueryTemplate", post(render_query_template))
         .route("/liveReload", get(live_reload))
+        .route("/queryNames", get(get_query_names))
+        .route("/query", post(get_query))
         .layer(
             // TODO: real cors
             ServiceBuilder::new().layer(CorsLayer::permissive()),
