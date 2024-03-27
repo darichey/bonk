@@ -1,7 +1,7 @@
 "use client";
 
 import useSWR, { SWRResponse, useSWRConfig } from "swr";
-import { ChartData, Dashboard, TableData, Transaction } from "./types";
+import { ChartData, Dashboard, Query, TableData, Transaction } from "./types";
 import { useEffect } from "react";
 
 export function useGetAllTransactions(): SWRResponse<Transaction[]> {
@@ -111,4 +111,26 @@ export function useLiveReload() {
       eventSource.close();
     };
   }, [mutate]);
+}
+
+export function useGetQueryNames(): SWRResponse<string[]> {
+  return useSWR("/queryNames", async (_) => {
+    const res = await fetch(`http://localhost:8080/queryNames`);
+    const json = await res.json();
+    return json as string[];
+  });
+}
+
+export function useGetQuery(name: string): SWRResponse<Query> {
+  return useSWR(name ? ["/query", name] : null, async ([_, name]) => {
+    const res = await fetch(`http://localhost:8080/query`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ name }),
+    });
+    const json = await res.json();
+    return json as Query;
+  });
 }

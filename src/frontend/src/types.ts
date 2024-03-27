@@ -52,3 +52,8 @@ export interface Dashboard {
   name: string;
   components: Component[];
 }
+
+export interface Query {
+  name: string;
+  query: string;
+}
