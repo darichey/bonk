@@ -1,6 +1,6 @@
 use anyhow::Context;
 use axum::{debug_handler, extract::State, Json};
-use bonk_dashboard::Dashboard;
+use bonk_cfg::dashboard::Dashboard;
 use serde::Deserialize;
 
 use crate::{AppJson, AppState, BonkHttpResult};

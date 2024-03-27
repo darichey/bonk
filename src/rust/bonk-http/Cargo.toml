@@ -8,8 +8,8 @@ edition = "2021"
 [dependencies]
 anyhow.workspace = true
 axum.workspace = true
+bonk-cfg.workspace = true
 bonk-check.workspace = true
-bonk-dashboard.workspace = true
 bonk-db.workspace = true
 bonk-parse.workspace = true
 bonk-workspace.workspace = true
