@@ -196,12 +196,20 @@
     "number": {
       "type": "PATTERN",
       "value": "-?\\d+(\\.\\d+)?"
+    },
+    "comment": {
+      "type": "PATTERN",
+      "value": "#.*"
     }
   },
   "extras": [
     {
+      "type": "SYMBOL",
+      "name": "comment"
+    },
+    {
       "type": "PATTERN",
-      "value": "\\s"
+      "value": "[\\s\\f\\uFEFF\\u2060\\u200B]|\\r?\\n"
     }
   ],
   "conflicts": [],

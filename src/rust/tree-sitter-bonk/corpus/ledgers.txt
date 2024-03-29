@@ -1,26 +1,36 @@
 ================================================================================
 Ledger
 ================================================================================
-account expenses/fast_food
+# comment
+
+account expenses/fast_food # comment at the end of a line
 account liabilities/my_credit_card
 account assets/my_checking
   starting_balance: 12.34
 
+# comment with a date 2023-01-01
+
 2023-01-01 "Mcdonald's"
-  expenses/fast_food          10.91
+  expenses/fast_food          10.91 # comment at the end of a line
   liabilities/my_credit_card -10.91
+
+# comment with an amount 12.34
 
 2023-01-02 "Paying credit card"
   liabilities/my_credit_card    10.91
   assets/my_checking
 
+# comment with an account expenses/fast_food
+
 --------------------------------------------------------------------------------
 
 (ledger
+  (comment)
   (declare_account
     (account
       (ident)
       (ident)))
+  (comment)
   (declare_account
     (account
       (ident)
@@ -32,6 +42,7 @@ account assets/my_checking
     (metadata
       (ident)
       (number)))
+  (comment)
   (transaction
     (date)
     (string)
@@ -40,11 +51,13 @@ account assets/my_checking
         (ident)
         (ident))
       (number))
+    (comment)
     (posting
       (account
         (ident)
         (ident))
       (number)))
+  (comment)
   (transaction
     (date)
     (string)
@@ -56,4 +69,5 @@ account assets/my_checking
     (posting
       (account
         (ident)
-        (ident)))))
+        (ident))))
+  (comment))

@@ -2,6 +2,8 @@
 module.exports = grammar({
   name: "bonk",
 
+  extras: ($) => [$.comment, /[\s\f\uFEFF\u2060\u200B]|\r?\n/],
+
   rules: {
     ledger: ($) =>
       repeat(
@@ -41,5 +43,6 @@ module.exports = grammar({
     string: ($) => /"([^"\\]|\\["\\bnfrt])*"/,
     ident: ($) => /[A-Za-z_][A-Za-z0-9_]*/,
     number: ($) => /-?\d+(\.\d+)?/,
+    comment: ($) => /#.*/,
   },
 });
