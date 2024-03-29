@@ -16,6 +16,9 @@
     },
     {
       "include": "#accounts"
+    },
+    {
+      "include": "#comments"
     }
   ],
   "repository": {
@@ -45,6 +48,10 @@
     "accounts": {
       "name": "variable.account.bonk",
       "match": "[A-Za-z_][A-Za-z0-9_]*(/[A-Za-z_][A-Za-z0-9_]*)*"
+    },
+    "comments": {
+      "name": "comment.line.number-sign.bonk",
+      "match": "#.*"
     }
   },
   "scopeName": "source.bonk"
