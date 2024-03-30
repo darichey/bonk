@@ -1,4 +1,5 @@
 pub mod cli;
+mod code_actions;
 mod complete;
 mod diagnostic;
 mod go_to_def;
@@ -11,15 +12,19 @@ use bonk_parse::WorkspaceExt;
 use bonk_workspace::Workspace;
 use lsp_server::{Connection, ExtractError, Message, Notification, Request, RequestId, Response};
 use lsp_types::notification::{DidChangeTextDocument, DidOpenTextDocument};
-use lsp_types::request::{Completion, DocumentDiagnosticRequest, GotoDefinition};
+use lsp_types::request::{
+    CodeActionRequest, Completion, DocumentDiagnosticRequest, GotoDefinition,
+};
 use lsp_types::{
-    CompletionList, CompletionOptions, DiagnosticOptions, DiagnosticServerCapabilities,
-    DocumentDiagnosticReport, FullDocumentDiagnosticReport, GotoDefinitionResponse,
-    RelatedFullDocumentDiagnosticReport, ServerCapabilities, TextDocumentSyncCapability,
-    TextDocumentSyncKind, TextDocumentSyncOptions, WorkDoneProgressOptions,
+    CodeActionProviderCapability, CompletionList, CompletionOptions, DiagnosticOptions,
+    DiagnosticServerCapabilities, DocumentDiagnosticReport, FullDocumentDiagnosticReport,
+    GotoDefinitionResponse, RelatedFullDocumentDiagnosticReport, ServerCapabilities,
+    TextDocumentSyncCapability, TextDocumentSyncKind, TextDocumentSyncOptions,
+    WorkDoneProgressOptions,
 };
 use lsp_types::{InitializeParams, OneOf};
 
+use crate::code_actions::get_code_actions;
 use crate::complete::get_completion_results;
 use crate::diagnostic::get_doc_diagnostics;
 use crate::go_to_def::get_go_to_def_result;
@@ -57,6 +62,7 @@ fn run_server(cfg_path: PathBuf) -> anyhow::Result<()> {
             ..Default::default()
         }),
         definition_provider: Some(OneOf::Left(true)),
+        code_action_provider: Some(CodeActionProviderCapability::Simple(true)),
         ..Default::default()
     })
     .unwrap();
@@ -149,7 +155,7 @@ fn main_loop(
                     Err(ExtractError::MethodMismatch(req)) => req,
                 };
 
-                let _req = match cast_req::<Completion>(req) {
+                let req = match cast_req::<Completion>(req) {
                     Ok((id, params)) => {
                         let params = params.text_document_position;
                         let doc = state
@@ -163,6 +169,27 @@ fn main_loop(
                             is_incomplete: false,
                             items,
                         };
+                        let result = serde_json::to_value(&result).unwrap();
+                        let resp = Response {
+                            id,
+                            result: Some(result),
+                            error: None,
+                        };
+                        connection.sender.send(Message::Response(resp))?;
+                        continue;
+                    }
+                    Err(err @ ExtractError::JsonError { .. }) => panic!("{err:?}"),
+                    Err(ExtractError::MethodMismatch(req)) => req,
+                };
+
+                let _req = match cast_req::<CodeActionRequest>(req) {
+                    Ok((id, params)) => {
+                        let doc = state
+                            .get_ledger(&params.text_document.uri)
+                            .expect("we don't know about this file");
+
+                        let result = get_code_actions(&state, &doc.ledger, &doc.src, params.range);
+
                         let result = serde_json::to_value(&result).unwrap();
                         let resp = Response {
                             id,
