@@ -5,7 +5,7 @@ use lsp_types::{Location, Position, Url};
 
 use crate::{
     state::State,
-    util::{find_account, SourceSpanExt},
+    util::{find_account_in_postings, SourceSpanExt},
 };
 
 pub fn get_go_to_def_result(
@@ -14,7 +14,7 @@ pub fn get_go_to_def_result(
     src: &str,
     pos: Position,
 ) -> Option<Location> {
-    let goto_account_name = find_account(ledger, src, pos)?;
+    let goto_account_name = find_account_in_postings(ledger, src, pos)?;
 
     // TODO: there should probably be a standard way to get all of the declared accounts. We also do this in the account_ref check. But there's not a clear way to share between here and there
     let declared_accounts = state

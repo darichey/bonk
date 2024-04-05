@@ -20,18 +20,35 @@ impl SourceSpanExt for SourceSpan {
     }
 }
 
-pub fn find_account<'s>(
+// TODO: replace with a generic "find the most specific node covered by pos" algorithm
+pub fn find_account_in_postings<'s>(
     ledger: &bonk_parse::ast::Ledger,
     src: &'s str,
     pos: Position,
 ) -> Option<&'s str> {
-    // TODO: replace with a generic "find the most specific node covered by pos" algorithm
     for transaction in ledger.transactions() {
         for posting in transaction.postings() {
             if let Some(acc) = posting.account() {
                 if span_covers(acc.span(), pos) {
                     return Some(acc.value(src));
                 }
+            }
+        }
+    }
+
+    None
+}
+
+// TODO: replace with a generic "find the most specific node covered by pos" algorithm
+pub fn find_declared_account<'s>(
+    ledger: &bonk_parse::ast::Ledger,
+    src: &'s str,
+    pos: Position,
+) -> Option<&'s str> {
+    for declare_account in ledger.declare_accounts() {
+        if let Some(acc) = declare_account.account() {
+            if span_covers(acc.span(), pos) {
+                return Some(acc.value(src));
             }
         }
     }
