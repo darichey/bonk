@@ -1,6 +1,6 @@
 use axum::{debug_handler, extract::State, Json};
-use bonk_db::SqlValue;
-use serde::{Deserialize, Serialize};
+use bonk_db::QueryOutput;
+use serde::{ser::SerializeStruct, Deserialize, Serialize};
 
 use crate::{AppJson, AppState, BonkHttpResult};
 
@@ -9,11 +9,18 @@ pub struct QueryRequest {
     query: String,
 }
 
-#[derive(Serialize)]
-#[serde(rename_all = "camelCase")]
-pub struct TableData {
-    column_names: Vec<String>,
-    data: Vec<Vec<SqlValue>>,
+pub struct TableData(pub QueryOutput);
+
+impl Serialize for TableData {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        let mut table_data = serializer.serialize_struct("TableData", 2)?;
+        table_data.serialize_field("columnNames", &self.0.column_names)?;
+        table_data.serialize_field("data", &self.0.data)?;
+        table_data.end()
+    }
 }
 
 #[debug_handler(state = AppState)]
@@ -21,27 +28,14 @@ pub async fn query_transactions(
     State(state): State<AppState>,
     Json(body): Json<QueryRequest>,
 ) -> BonkHttpResult<TableData> {
-    let con = &state
+    let db = &state
         .mutable
         .lock()
         .expect("mutable state lock poisoned")
-        .db
-        .con;
+        .db;
 
-    let stmt = con.prepare(body.query)?;
-
-    let column_names = stmt.column_names().to_vec();
-
-    let data = stmt
-        .into_iter()
-        .map(|row| {
-            let values: Vec<sqlite::Value> = row?.into();
-            let values: Vec<SqlValue> = values.into_iter().map(SqlValue).collect();
-            Ok(values)
-        })
-        .collect::<anyhow::Result<Vec<Vec<SqlValue>>>>()?;
-
-    let table_data = TableData { column_names, data };
+    let output = db.query(&body.query)?;
+    let table_data = TableData(output);
 
     Ok(AppJson(table_data))
 }

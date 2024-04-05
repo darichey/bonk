@@ -6,7 +6,7 @@ use std::{
 
 use anyhow::{anyhow, Context};
 use bonk_check::WorkspaceExt as _;
-use bonk_db::{Db, SqlValue};
+use bonk_db::{Db, QueryOutput};
 use bonk_parse::WorkspaceExt as _;
 use bonk_workspace::Workspace;
 use prettytable::{format, Table};
@@ -34,19 +34,7 @@ pub fn run_tests(cfg: PathBuf, update: bool) -> anyhow::Result<()> {
         .context("must configure snapshot_dir to run tests")?;
 
     for test in workspace.cfg.tests {
-        // TODO: dedupe with bonk-http query_transactions
-        let stmt = db.con.prepare(test.query)?;
-
-        let column_names = stmt.column_names().to_vec();
-
-        let data = stmt
-            .into_iter()
-            .map(|row| {
-                let values: Vec<sqlite::Value> = row?.into();
-                let values: Vec<SqlValue> = values.into_iter().map(SqlValue).collect();
-                Ok(values)
-            })
-            .collect::<anyhow::Result<Vec<Vec<SqlValue>>>>()?;
+        let QueryOutput { column_names, data } = db.query(&test.query)?;
 
         let mut table = Table::new();
         table.set_format(*format::consts::FORMAT_NO_BORDER_LINE_SEPARATOR);

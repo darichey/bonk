@@ -116,8 +116,26 @@ impl Db {
 
         Ok(Self { con })
     }
+
+    pub fn query(&self, query: &str) -> anyhow::Result<QueryOutput> {
+        let stmt = self.con.prepare(query)?;
+
+        let column_names = stmt.column_names().to_vec();
+
+        let data = stmt
+            .into_iter()
+            .map(|row| {
+                let values: Vec<sqlite::Value> = row?.into();
+                let values: Vec<SqlValue> = values.into_iter().map(SqlValue).collect();
+                Ok(values)
+            })
+            .collect::<anyhow::Result<Vec<Vec<SqlValue>>>>()?;
+
+        Ok(QueryOutput { column_names, data })
+    }
 }
 
+// TODO: this shouldn't live here. There should be a phase in checking that infers amounts
 fn infer_amount(postings: &[Posting]) -> i32 {
     let sum: i32 = postings
         .iter()
@@ -125,6 +143,11 @@ fn infer_amount(postings: &[Posting]) -> i32 {
         .sum();
 
     -sum
+}
+
+pub struct QueryOutput {
+    pub column_names: Vec<String>,
+    pub data: Vec<Vec<SqlValue>>,
 }
 
 /// A wrapper for seralizing sqlite Values

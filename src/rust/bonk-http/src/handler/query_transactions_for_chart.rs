@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
 use axum::{debug_handler, extract::State, Json};
-use bonk_db::SqlValue;
+use bonk_db::{QueryOutput, SqlValue};
 use serde::Deserialize;
 
 use crate::{AppJson, AppState, BonkHttpResult};
@@ -16,25 +16,13 @@ pub async fn query_transactions_for_chart(
     State(state): State<AppState>,
     Json(body): Json<QueryRequest>,
 ) -> BonkHttpResult<HashMap<String, Vec<SqlValue>>> {
-    let con = &state
+    let db = &state
         .mutable
         .lock()
         .expect("mutable state lock poisoned")
-        .db
-        .con;
+        .db;
 
-    let stmt = con.prepare(body.query)?;
-
-    let column_names = stmt.column_names().to_vec();
-
-    let data = stmt
-        .into_iter()
-        .map(|row| {
-            let values: Vec<sqlite::Value> = row?.into();
-            let values: Vec<SqlValue> = values.into_iter().map(SqlValue).collect();
-            Ok(values)
-        })
-        .collect::<anyhow::Result<Vec<Vec<SqlValue>>>>()?;
+    let QueryOutput { column_names, data } = db.query(&body.query)?;
 
     let mut data_iters: Vec<_> = data.into_iter().map(Vec::into_iter).collect();
 
