@@ -300,6 +300,7 @@ dependencies = [
  "bonk-http",
  "bonk-lsp",
  "bonk-plaid",
+ "bonk-query",
  "bonk-test",
  "clap",
 ]
@@ -391,6 +392,19 @@ dependencies = [
  "rouille",
  "serde",
  "webbrowser",
+]
+
+[[package]]
+name = "bonk-query"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "bonk-check",
+ "bonk-db",
+ "bonk-parse",
+ "bonk-workspace",
+ "clap",
+ "prettytable-rs",
 ]
 
 [[package]]

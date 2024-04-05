@@ -1,5 +1,5 @@
 [package]
-name = "bonk-cli"
+name = "bonk-query"
 version = "0.1.0"
 edition = "2021"
 
@@ -8,11 +8,8 @@ edition = "2021"
 [dependencies]
 anyhow.workspace = true
 bonk-check.workspace = true
-bonk-csv.workspace = true
 bonk-db.workspace = true
-bonk-http.workspace = true
-bonk-lsp.workspace = true
-bonk-plaid.workspace = true
-bonk-test.workspace = true
-bonk-query.workspace = true
+bonk-parse.workspace = true
+bonk-workspace.workspace = true
 clap.workspace = true
+prettytable-rs.workspace = true

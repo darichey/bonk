@@ -16,6 +16,7 @@ enum Commands {
     Lsp(bonk_lsp::cli::Args),
     Plaid(bonk_plaid::cli::Args),
     Test(bonk_test::cli::Args),
+    Query(bonk_query::cli::Args),
 }
 
 fn main() -> anyhow::Result<()> {
@@ -29,6 +30,7 @@ fn main() -> anyhow::Result<()> {
         Commands::Lsp(args) => bonk_lsp::cli::run(args)?,
         Commands::Plaid(args) => bonk_plaid::cli::run(args)?,
         Commands::Test(args) => bonk_test::cli::run(args)?,
+        Commands::Query(args) => bonk_query::cli::run(args)?,
     };
 
     Ok(())
