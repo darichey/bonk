@@ -1,17 +1,19 @@
 {
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/23.05";
+    nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
     rust-overlay.url = "github:oxalica/rust-overlay";
     flake-utils.url  = "github:numtide/flake-utils";
   };
 
-  outputs = { self, nixpkgs, rust-overlay, flake-utils, ... }:
+  outputs = { self, nixpkgs, nixpkgs-unstable, rust-overlay, flake-utils, ... }:
     flake-utils.lib.eachDefaultSystem (system:
       let
         overlays = [ (import rust-overlay) ];
         pkgs = import nixpkgs {
           inherit system overlays;
         };
+        pkgs-unstable = nixpkgs-unstable.legacyPackages.${system};
       in
       with pkgs;
       {
@@ -39,6 +41,11 @@
             # just for debugging
             sqlite
             rlwrap
+
+            # *AI*
+            (pkgs-unstable.ollama.override { # TODO: using unstable until rocm 6 is in stable
+              acceleration = "rocm"; # TODO: configurable
+            })
           ];
         };
       }
