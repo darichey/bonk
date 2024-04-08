@@ -57,3 +57,7 @@ export interface Query {
   name: string;
   query: string;
 }
+
+export interface ChatResponse {
+  response: string;
+}

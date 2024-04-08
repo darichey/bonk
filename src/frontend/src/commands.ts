@@ -1,8 +1,16 @@
 "use client";
 
-import useSWR, { SWRResponse, useSWRConfig } from "swr";
-import { ChartData, Dashboard, Query, TableData, Transaction } from "./types";
+import useSWR, { Key, SWRResponse, useSWRConfig } from "swr";
+import {
+  ChartData,
+  ChatResponse,
+  Dashboard,
+  Query,
+  TableData,
+  Transaction,
+} from "./types";
 import { useEffect } from "react";
+import useSWRMutation, { SWRMutationResponse } from "swr/mutation";
 
 export function useGetAllTransactions(): SWRResponse<Transaction[]> {
   return useSWR("/transactions", async () => {
@@ -133,4 +141,28 @@ export function useGetQuery(name: string): SWRResponse<Query> {
     const json = await res.json();
     return json as Query;
   });
+}
+
+export function useGetChatResponse(): SWRMutationResponse<
+  string,
+  any,
+  Key,
+  { prompt: string }
+> {
+  return useSWRMutation(
+    "/chat",
+    async (_, { arg: { prompt } }: { arg: { prompt: string } }) => {
+      // const res = await fetch(`http://localhost:8080/chat`, {
+      //   method: "POST",
+      //   headers: {
+      //     "Content-Type": "application/json",
+      //   },
+      //   body: JSON.stringify({ prompt }),
+      // });
+      // const json = await res.json();
+      // return (json as ChatResponse).response;
+
+      return `response: ${prompt}`;
+    }
+  );
 }

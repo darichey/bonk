@@ -26,13 +26,16 @@ export default function RootLayout({
             />
             <ul className="mb-5">
               <li>
-                <Link href="/">Home</Link>
+                <Link href="/">🏠 Home</Link>
               </li>
               <li>
-                <Link href="/log">Log</Link>
+                <Link href="/log">📝 Log</Link>
               </li>
               <li>
-                <Link href="/query">Query</Link>
+                <Link href="/query">❓ Query</Link>
+              </li>
+              <li>
+                <Link href="/chat">✨ Chat</Link>
               </li>
             </ul>
             <div className="mb-5">
