@@ -1,3 +1,9 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@import url('highlight.js/styles/github.css');
+
+.hljs {
+  @apply bg-zinc-50; /* modified to give code blocks some background color */
+}

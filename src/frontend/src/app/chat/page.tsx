@@ -2,6 +2,8 @@
 
 import { useGetChatResponse } from "@/commands";
 import { useState } from "react";
+import Markdown from "react-markdown";
+import rehypeHighlight from "rehype-highlight";
 
 export default function ChatPage() {
   const [prompt, setPrompt] = useState("");
@@ -41,7 +43,7 @@ export default function ChatPage() {
           ) : !response ? (
             <></>
           ) : (
-            response
+            <Markdown rehypePlugins={[rehypeHighlight]}>{response}</Markdown>
           )}
         </div>
       </div>
