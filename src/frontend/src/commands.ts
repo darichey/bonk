@@ -48,12 +48,12 @@ export function useQueryTransactions(query: string): SWRResponse<TableData> {
         body: JSON.stringify({ query }),
       });
 
-      const json = await res.json();
-
       if (res.ok) {
+        const json = await res.json();
         return json as TableData;
       } else {
-        throw new Error(json);
+        const body = await res.text();
+        throw new Error(body);
       }
     }
   );
