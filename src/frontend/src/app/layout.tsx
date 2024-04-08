@@ -2,7 +2,6 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import Link from "next/link";
 import DashboardSidebar from "@/components/DashboardSidebar";
-import NavButton from "@/components/NavButton";
 import Image from "next/image";
 import financeAppSvg from "../../public/finance-app.svg";
 
@@ -43,10 +42,6 @@ export default function RootLayout({
             </div>
           </div>
           <div className="flex flex-col flex-grow">
-            <div className="flex flex-row border-b-2">
-              <NavButton dir="back" className="border-r-2" />
-              <NavButton dir="forward" className="border-r-2" />
-            </div>
             <main className="h-full overflow-y-auto p-4">{children}</main>
           </div>
         </div>
