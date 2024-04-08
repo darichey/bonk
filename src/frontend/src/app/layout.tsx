@@ -6,6 +6,7 @@ import Image from "next/image";
 import financeAppSvg from "../../public/finance-app.svg";
 
 const inter = Inter({ subsets: ["latin"] });
+const demoMode = process.env.BONK_DEMO_MODE ? true : false;
 
 export default function RootLayout({
   children,
@@ -15,6 +16,14 @@ export default function RootLayout({
   return (
     <html lang="en" className="w-full h-full">
       <body className={`w-full h-full ${inter.className}`}>
+        {demoMode ? (
+          <div className="bg-yellow-100 text-center p-1">
+            Demo mode: fake data
+          </div>
+        ) : (
+          <></>
+        )}
+
         <div className="flex flex-row h-full w-full px-2">
           <div className="flex flex-col border-r-2 w-1/12 px-2">
             <Image
