@@ -37,30 +37,26 @@ export function useQueryTransactionsForChart(
 }
 
 export function useQueryTransactions(query: string): SWRResponse<TableData> {
-  return useSWR(["/queryTransactions", query], async ([_, query]) => {
-    if (!query) {
-      return {
-        columnNames: [],
-        data: [],
-      };
+  return useSWR(
+    query ? ["/queryTransactions", query] : null,
+    async ([_, query]) => {
+      const res = await fetch(`http://localhost:8080/queryTransactions`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ query }),
+      });
+
+      const json = await res.json();
+
+      if (res.ok) {
+        return json as TableData;
+      } else {
+        throw new Error(json);
+      }
     }
-
-    const res = await fetch(`http://localhost:8080/queryTransactions`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ query }),
-    });
-
-    const json = await res.json();
-
-    if (res.ok) {
-      return json as TableData;
-    } else {
-      throw new Error(json);
-    }
-  });
+  );
 }
 
 export function useGetDashboardNames(): SWRResponse<string[]> {
