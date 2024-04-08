@@ -16,6 +16,7 @@ use axum::{
     routing::{get, post},
     Router,
 };
+use bonk_chat::ChatBot;
 use bonk_check::WorkspaceExt as _;
 use bonk_db::Db;
 use bonk_parse::WorkspaceExt as _;
@@ -25,7 +26,7 @@ use tower_http::cors::CorsLayer;
 
 use crate::{
     handler::{
-        get_dashboard::get_dashboard, get_dashboard_names::get_dashboard_names,
+        chat::chat, get_dashboard::get_dashboard, get_dashboard_names::get_dashboard_names,
         get_query::get_query, get_query_names::get_query_names, get_transactions::get_transactions,
         live_reload::live_reload, query_transactions::query_transactions,
         query_transactions_for_chart::query_transactions_for_chart,
@@ -58,6 +59,7 @@ async fn run_async(cfg: &Path) -> anyhow::Result<()> {
         .route("/liveReload", get(live_reload))
         .route("/queryNames", get(get_query_names))
         .route("/query", post(get_query))
+        .route("/chat", post(chat))
         .layer(
             // TODO: real cors
             ServiceBuilder::new().layer(CorsLayer::permissive()),
@@ -107,6 +109,7 @@ impl MutableAppState {
 struct InnerAppState {
     mutable: Arc<Mutex<MutableAppState>>,
     watcher: Watcher,
+    chat_bot: ChatBot,
 }
 
 impl AppState {
@@ -116,6 +119,7 @@ impl AppState {
         let state = AppState(Arc::new(InnerAppState {
             mutable: mutable.clone(),
             watcher: Watcher::new(cfg, mutable)?,
+            chat_bot: ChatBot::new(),
         }));
 
         Ok(state)

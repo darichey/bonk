@@ -9,6 +9,7 @@ edition = "2021"
 anyhow.workspace = true
 axum.workspace = true
 bonk-cfg.workspace = true
+bonk-chat.workspace = true
 bonk-check.workspace = true
 bonk-db.workspace = true
 bonk-parse.workspace = true

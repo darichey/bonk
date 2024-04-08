@@ -1,3 +1,4 @@
+pub(crate) mod chat;
 pub(crate) mod get_dashboard;
 pub(crate) mod get_dashboard_names;
 pub(crate) mod get_query;

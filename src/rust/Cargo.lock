@@ -353,6 +353,7 @@ dependencies = [
  "anyhow",
  "axum",
  "bonk-cfg",
+ "bonk-chat",
  "bonk-check",
  "bonk-db",
  "bonk-parse",

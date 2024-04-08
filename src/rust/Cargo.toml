@@ -48,6 +48,7 @@ ollama-rs = "0.1.8"
 
 bonk-ast-errorless = { path = "./bonk-ast-errorless" }
 bonk-cfg = { path = "./bonk-cfg" }
+bonk-chat = { path = "./bonk-chat" }
 bonk-check = { path = "./bonk-check" }
 bonk-cli = { path = "./bonk-cli" }
 bonk-csv = { path = "./bonk-csv" }
