@@ -14,7 +14,7 @@ export default function DashboardSidebar() {
       ) : isLoading || !dashboardNames ? (
         <div>Loading...</div>
       ) : (
-        <ul>
+        <ul className="flex flex-col">
           {dashboardNames.map((name, i) => (
             <Link href={`/dashboard?name=${name}`} key={i}>
               {name}
