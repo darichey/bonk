@@ -28,9 +28,8 @@ name = "Main"
   gridRow = "auto"
   
   [[dashboards.components]]
-  type = "chart"
+  type = "lineChart"
   title = "Daily Total Assets"
-  chartType = "line"
   xAxis = "date"
   query = """
   SELECT
@@ -48,9 +47,8 @@ name = "Main"
   gridRow = "auto"
   
   [[dashboards.components]]
-  type = "chart"
+  type = "lineChart"
   title = "Monthly Total Assets"
-  chartType = "line"
   xAxis = "month"
   query = """
   SELECT
@@ -68,9 +66,8 @@ name = "Main"
   gridRow = "auto"
   
   [[dashboards.components]]
-  type = "chart"
+  type = "barChart"
   title = "Expenditures per month"
-  chartType = "bar"
   xAxis = "month"
   query = """
   SELECT
@@ -88,9 +85,8 @@ name = "Main"
   gridRow = "auto"
   
   [[dashboards.components]]
-  type = "chart"
+  type = "barChart"
   title = "Income per month"
-  chartType = "bar"
   xAxis = "month"
   query = """
   SELECT
@@ -108,9 +104,8 @@ name = "Main"
   gridRow = "auto"
   
   [[dashboards.components]]
-  type = "chart"
+  type = "barChart"
   title = "Savings per month"
-  chartType = "bar"
   xAxis = "month"
   query = """
   SELECT

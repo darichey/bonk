@@ -4,18 +4,19 @@ use serde::Deserialize;
 use serde::Serialize;
 
 #[derive(Clone, Deserialize, Serialize, Debug)]
-pub enum ChartType {
-    #[serde(rename = "line")]
-    Line,
-    #[serde(rename = "bar")]
-    Bar,
+#[serde(rename_all = "camelCase")]
+pub struct BarChart {
+    pub title: String,
+    pub x_axis: String,
+    pub query: String,
+    pub grid_column: String,
+    pub grid_row: String,
 }
 
 #[derive(Clone, Deserialize, Serialize, Debug)]
 #[serde(rename_all = "camelCase")]
-pub struct Chart {
+pub struct LineChart {
     pub title: String,
-    pub chart_type: ChartType,
     pub x_axis: String,
     pub query: String,
     pub grid_column: String,
@@ -41,9 +42,10 @@ pub struct Table {
 }
 
 #[derive(Clone, Deserialize, Serialize, Debug)]
-#[serde(tag = "type", rename_all = "lowercase")]
+#[serde(tag = "type", rename_all = "camelCase")]
 pub enum Component {
-    Chart(Chart),
+    BarChart(BarChart),
+    LineChart(LineChart),
     Text(Text),
     Table(Table),
 }

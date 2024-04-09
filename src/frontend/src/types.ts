@@ -18,12 +18,18 @@ export interface TableData {
 
 export type ChartData = Record<string, SqlValue[]>;
 
-export type ChartType = "line" | "bar";
-
-export interface Chart {
-  type: "chart";
+export interface BarChart {
+  type: "barChart";
   title: string;
-  chartType: ChartType;
+  xAxis: string;
+  query: string;
+  gridColumn: string;
+  gridRow: string;
+}
+
+export interface LineChart {
+  type: "lineChart";
+  title: string;
   xAxis: string;
   query: string;
   gridColumn: string;
@@ -46,7 +52,7 @@ export interface Table {
   gridRow: string;
 }
 
-export type Component = Chart | Text | Table;
+export type Component = BarChart | LineChart | Text | Table;
 
 export interface Dashboard {
   name: string;

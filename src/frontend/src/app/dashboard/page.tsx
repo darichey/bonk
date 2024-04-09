@@ -3,7 +3,8 @@
 import { useGetDashboard, useLiveReload } from "@/commands";
 import DashboardTable from "@/components/DashboardTable";
 import DashboardText from "@/components/DashboardText";
-import QueryChart from "@/components/chart/QueryChart";
+import QueryBarChart from "@/components/chart/QueryBarChart";
+import QueryLineChart from "@/components/chart/QueryLineChart";
 import { useSearchParams } from "next/navigation";
 
 export default function DashboardPage() {
@@ -30,8 +31,18 @@ export default function DashboardPage() {
             }}
             key={i}
           >
-            {component.type === "chart" ? (
-              <QueryChart chart={component} />
+            {component.type === "barChart" ? (
+              <QueryBarChart
+                title={component.title}
+                xAxis={component.xAxis}
+                query={component.query}
+              />
+            ) : component.type === "lineChart" ? (
+              <QueryLineChart
+                title={component.title}
+                xAxis={component.xAxis}
+                query={component.query}
+              />
             ) : component.type === "text" ? (
               <DashboardText text={component} />
             ) : component.type === "table" ? (
