@@ -3,7 +3,7 @@
 Bonk is a personal accounting tool for understanding the state of your finances. At its core, it is a declarative language for recording financial transactions based on the idea of double-entry bookkeeping. Using this data, you can define queries and dashboards/visualizations to help you answer questions about your finances.
 
 Bonk has many features such as...
-* A web-based frontend for visualizing data
+* A web-based frontend for visualizing data with customizable dashboards
 * The ability to import transactions via Plaid
 * An LLM-powered query generator
 * A snapshot-testing tool for your transaction data
@@ -28,10 +28,10 @@ For example, a ledger may contain transactions like...
 
 The [example ledger](./example) contains a full example that ultimately looks like this:
 
-| | |
-| - | - |
-| ![dashboard](./docs/screenshots/dashboard.png) | ![log](./docs/screenshots/log.png) |
-| ![query](./docs/screenshots/query.png) | ![chat](./docs/screenshots/chat.png) |
+![dashboard](./docs/screenshots/dashboard.png)
+![log](./docs/screenshots/log.png)
+![query](./docs/screenshots/query.png)
+![chat](./docs/screenshots/chat.png)
 
 ## Similar Projects
 Bonk is heavily inspired by [ledger](https://ledger-cli.org/), [hledger](https://hledger.org/), and especially [beancount](https://beancount.github.io/) and its [fava](https://beancount.github.io/fava/) frontend.
