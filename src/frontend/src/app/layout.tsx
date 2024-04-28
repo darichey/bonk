@@ -3,7 +3,7 @@ import "./globals.css";
 import Link from "next/link";
 import DashboardSidebar from "@/components/DashboardSidebar";
 import Image from "next/image";
-import financeAppSvg from "../../public/finance-app.svg";
+import bonkSvg from "../../public/bonk.svg";
 
 const inter = Inter({ subsets: ["latin"] });
 const demoMode = process.env.BONK_DEMO_MODE ? true : false;
@@ -26,12 +26,7 @@ export default function RootLayout({
 
         <div className="flex flex-row h-full w-full px-2">
           <div className="flex flex-col border-r-2 w-1/12 px-2">
-            <Image
-              src={financeAppSvg}
-              alt="finance-app logo"
-              className="py-4"
-              width={400}
-            />
+            <Image src={bonkSvg} alt="bonk logo" className="py-4" width={100} />
             <ul className="mb-5">
               <li>
                 <Link href="/">🏠 Home</Link>

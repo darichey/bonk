@@ -91,7 +91,7 @@ fn plaid_create_link_token(config: &Configuration) -> anyhow::Result<String> {
         LinkTokenCreateRequest {
             products: Some(Some(vec![Products::Transactions])),
             ..LinkTokenCreateRequest::new(
-                "finance-app".to_string(),
+                "bonk".to_string(),
                 "en".to_string(),
                 vec![CountryCode::Us],
                 LinkTokenCreateRequestUser::new("user-id".to_string()),
