@@ -36,6 +36,16 @@ export interface LineChart {
   gridRow: string;
 }
 
+export interface StackedBarChart {
+  type: "stackedBarChart";
+  title: string;
+  xAxis: string;
+  stackKey: string;
+  query: string;
+  gridColumn: string;
+  gridRow: string;
+}
+
 export interface Text {
   type: "text";
   template: string;
@@ -52,7 +62,7 @@ export interface Table {
   gridRow: string;
 }
 
-export type Component = BarChart | LineChart | Text | Table;
+export type Component = BarChart | LineChart | StackedBarChart | Text | Table;
 
 export interface Dashboard {
   name: string;

@@ -25,6 +25,17 @@ pub struct LineChart {
 
 #[derive(Clone, Deserialize, Serialize, Debug)]
 #[serde(rename_all = "camelCase")]
+pub struct StackedBarChart {
+    pub title: String,
+    pub x_axis: String,
+    pub stack_key: String,
+    pub query: String,
+    pub grid_column: String,
+    pub grid_row: String,
+}
+
+#[derive(Clone, Deserialize, Serialize, Debug)]
+#[serde(rename_all = "camelCase")]
 pub struct Text {
     pub template: String,
     pub variables: HashMap<String, String>,
@@ -46,6 +57,7 @@ pub struct Table {
 pub enum Component {
     BarChart(BarChart),
     LineChart(LineChart),
+    StackedBarChart(StackedBarChart),
     Text(Text),
     Table(Table),
 }

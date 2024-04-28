@@ -5,6 +5,7 @@ import DashboardTable from "@/components/DashboardTable";
 import DashboardText from "@/components/DashboardText";
 import QueryBarChart from "@/components/chart/QueryBarChart";
 import QueryLineChart from "@/components/chart/QueryLineChart";
+import QueryStackedBarChart from "@/components/chart/QueryStackedBarChart";
 import { useSearchParams } from "next/navigation";
 
 export default function DashboardPage() {
@@ -41,6 +42,13 @@ export default function DashboardPage() {
               <QueryLineChart
                 title={component.title}
                 xAxis={component.xAxis}
+                query={component.query}
+              />
+            ) : component.type === "stackedBarChart" ? (
+              <QueryStackedBarChart
+                title={component.title}
+                xAxis={component.xAxis}
+                stackKey={component.stackKey}
                 query={component.query}
               />
             ) : component.type === "text" ? (
