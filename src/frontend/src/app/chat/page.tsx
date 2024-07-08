@@ -56,7 +56,7 @@ function RunCodeBlockButton({
 }) {
   const onClick = useCallback(() => {
     setShouldRunQueries((prevState) => [...prevState, n]);
-  }, []);
+  }, [setShouldRunQueries, n]);
 
   return (
     <button

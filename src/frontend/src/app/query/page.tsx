@@ -39,7 +39,9 @@ export default function QueryPage() {
         >
           <option value=""></option>
           {queryNames.map((name) => (
-            <option value={name}>{name}</option>
+            <option key={name} value={name}>
+              {name}
+            </option>
           ))}
         </select>
       )}
