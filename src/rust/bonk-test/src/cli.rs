@@ -9,7 +9,7 @@ use crate::run_tests;
 #[command()]
 pub struct Args {
     /// Path to the Bonk workspace config.
-    #[arg(short, long)]
+    #[arg(short, long, default_value = "./Bonk.toml")]
     pub cfg: PathBuf,
 
     /// Whether to update snapshots on mismatch.
