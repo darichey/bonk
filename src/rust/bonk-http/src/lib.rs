@@ -35,15 +35,15 @@ use crate::{
     watch::Watcher,
 };
 
-pub fn run(cfg: &Path) -> anyhow::Result<()> {
+pub fn run(cfg: &Path, host: &str, port: u16) -> anyhow::Result<()> {
     tokio::runtime::Builder::new_multi_thread()
         .enable_all()
         .build()
         .unwrap()
-        .block_on(async { run_async(cfg).await })
+        .block_on(async { run_async(cfg, host, port).await })
 }
 
-async fn run_async(cfg: &Path) -> anyhow::Result<()> {
+async fn run_async(cfg: &Path, host: &str, port: u16) -> anyhow::Result<()> {
     let state = AppState::new(cfg)?;
 
     let app = Router::new()
@@ -66,7 +66,8 @@ async fn run_async(cfg: &Path) -> anyhow::Result<()> {
         )
         .with_state(state);
 
-    let listener = tokio::net::TcpListener::bind("localhost:8080").await?;
+    let addr = format!("{}:{}", host, port);
+    let listener = tokio::net::TcpListener::bind(&addr).await?;
 
     println!("Listening on {}", listener.local_addr()?);
 
