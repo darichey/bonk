@@ -12,9 +12,13 @@ import {
 import { useEffect } from "react";
 import useSWRMutation, { SWRMutationResponse } from "swr/mutation";
 
+const API_HOST = process.env.NEXT_PUBLIC_API_HOST || "localhost";
+const API_PORT = process.env.NEXT_PUBLIC_API_PORT || "8080";
+const BASE_URL = `http://${API_HOST}:${API_PORT}`;
+
 export function useGetAllTransactions(): SWRResponse<Transaction[]> {
   return useSWR("/transactions", async () => {
-    const res = await fetch(`http://localhost:8080/transactions`);
+    const res = await fetch(`${BASE_URL}/transactions`);
     const json = await res.json();
     return json as Transaction[];
   });
@@ -24,7 +28,7 @@ export function useQueryTransactionsForChart(
   query: string
 ): SWRResponse<ChartData> {
   return useSWR(["/queryTransactionsForChart", query], async ([_, query]) => {
-    const res = await fetch(`http://localhost:8080/queryTransactionsForChart`, {
+    const res = await fetch(`${BASE_URL}/queryTransactionsForChart`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -40,7 +44,7 @@ export function useQueryTransactions(query: string): SWRResponse<TableData> {
   return useSWR(
     query ? ["/queryTransactions", query] : null,
     async ([_, query]) => {
-      const res = await fetch(`http://localhost:8080/queryTransactions`, {
+      const res = await fetch(`${BASE_URL}/queryTransactions`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -61,7 +65,7 @@ export function useQueryTransactions(query: string): SWRResponse<TableData> {
 
 export function useGetDashboardNames(): SWRResponse<string[]> {
   return useSWR("/dashboardNames", async (_) => {
-    const res = await fetch(`http://localhost:8080/dashboardNames`);
+    const res = await fetch(`${BASE_URL}/dashboardNames`);
     const json = await res.json();
     return json as string[];
   });
@@ -69,7 +73,7 @@ export function useGetDashboardNames(): SWRResponse<string[]> {
 
 export function useGetDashboard(name: string): SWRResponse<Dashboard> {
   return useSWR(["/dashboard", name], async ([_, name]) => {
-    const res = await fetch(`http://localhost:8080/dashboard`, {
+    const res = await fetch(`${BASE_URL}/dashboard`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -88,7 +92,7 @@ export function useRenderQueryTemplate(
   return useSWR(
     ["/renderQueryTemplate", template, variables],
     async ([_, template, variables]) => {
-      const res = await fetch(`http://localhost:8080/renderQueryTemplate`, {
+      const res = await fetch(`${BASE_URL}/renderQueryTemplate`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -105,7 +109,7 @@ export function useLiveReload() {
   const { mutate } = useSWRConfig();
 
   useEffect(() => {
-    const eventSource = new EventSource(`http://localhost:8080/liveReload`);
+    const eventSource = new EventSource(`${BASE_URL}/liveReload`);
 
     eventSource.addEventListener("message", (_event) => {
       mutate(() => true, undefined, { revalidate: true });
@@ -119,7 +123,7 @@ export function useLiveReload() {
 
 export function useGetQueryNames(): SWRResponse<string[]> {
   return useSWR("/queryNames", async (_) => {
-    const res = await fetch(`http://localhost:8080/queryNames`);
+    const res = await fetch(`${BASE_URL}/queryNames`);
     const json = await res.json();
     return json as string[];
   });
@@ -127,7 +131,7 @@ export function useGetQueryNames(): SWRResponse<string[]> {
 
 export function useGetQuery(name: string): SWRResponse<Query> {
   return useSWR(name ? ["/query", name] : null, async ([_, name]) => {
-    const res = await fetch(`http://localhost:8080/query`, {
+    const res = await fetch(`${BASE_URL}/query`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -148,7 +152,7 @@ export function useGetChatResponse(): SWRMutationResponse<
   return useSWRMutation(
     "/chat",
     async (_, { arg: { prompt } }: { arg: { prompt: string } }) => {
-      const res = await fetch(`http://localhost:8080/chat`, {
+      const res = await fetch(`${BASE_URL}/chat`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
