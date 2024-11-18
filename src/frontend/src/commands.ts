@@ -16,9 +16,23 @@ const API_HOST = process.env.NEXT_PUBLIC_API_HOST || "localhost";
 const API_PORT = process.env.NEXT_PUBLIC_API_PORT || "8080";
 const BASE_URL = `http://${API_HOST}:${API_PORT}`;
 
-export function useGetAllTransactions(): SWRResponse<Transaction[]> {
-  return useSWR("/transactions", async () => {
-    const res = await fetch(`${BASE_URL}/transactions`);
+export function useGetAllTransactions(
+  pageDate:
+    | { type: "before"; beforeDate: string }
+    | { type: "after"; afterDate: string },
+  limit: number
+): SWRResponse<Transaction[]> {
+  const query = new URLSearchParams({
+    limit: limit.toString(),
+  });
+  if (pageDate.type === "before") {
+    query.set("before_date", pageDate.beforeDate);
+  } else if (pageDate.type === "after") {
+    query.set("after_date", pageDate.afterDate);
+  }
+
+  return useSWR(`/transactions?${query.toString()}`, async () => {
+    const res = await fetch(`${BASE_URL}/transactions?${query.toString()}`);
     const json = await res.json();
     return json as Transaction[];
   });
