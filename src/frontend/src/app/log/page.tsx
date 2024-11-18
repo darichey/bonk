@@ -5,15 +5,19 @@ import { Transaction } from "@/types";
 
 function TransactionView({ transaction }: { transaction: Transaction }) {
   return (
-    <div className="border-b-black border-b-2">
-      <div>
-        {transaction.date} {transaction.description}
+    <div className="border-b-2 border-gray-300 p-4">
+      <div className="font-bold text-lg mb-2 flex justify-between">
+        <span>{transaction.description}</span>
+        <span>{transaction.date}</span>
       </div>
-      {transaction.postings.map((posting, idx) => (
-        <div key={idx}>
-          {posting.account} {showAmount(posting.amount)}
-        </div>
-      ))}
+      <div className="pl-4 font-mono">
+        {transaction.postings.map((posting, idx) => (
+          <div key={idx} className="flex justify-between py-1">
+            <span className="text-gray-700">{posting.account}</span>
+            <span className="text-gray-900">{showAmount(posting.amount)}</span>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
@@ -32,17 +36,13 @@ export default function LogPage() {
   ) : error ? (
     <div>Encountered error: {error}</div>
   ) : (
-    <div>
-      <div>
-        <b>{transactions.length} transactions</b>
-      </div>
-      <div className="flex flex-col gap-2">
+    <div className="p-6">
+      <div className="flex flex-col gap-4">
         {transactions
           .toSorted((a, b) => a.date.localeCompare(b.date)) // TODO: sorting should be done on the server
           .map((transaction, idx) => (
             <TransactionView transaction={transaction} key={idx} />
           ))}
-        div
       </div>
     </div>
   );
