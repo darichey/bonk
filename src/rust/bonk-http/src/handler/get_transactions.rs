@@ -1,5 +1,3 @@
-use std::collections::{hash_map::Entry, HashMap};
-
 use axum::{debug_handler, extract::State};
 use serde::Serialize;
 
@@ -18,9 +16,23 @@ pub struct Posting {
     amount: i32,
 }
 
-const QUERY: &str = r#"SELECT id,date,description,account,amount FROM "transaction" INNER JOIN posting ON "transaction".id = posting."transaction""#;
+const QUERY: &str = r#"
+    SELECT
+        id,
+        date,
+        description,
+        account,
+        amount
+    FROM
+        "transaction"
+    INNER JOIN
+        posting
+    ON
+        "transaction".id = posting."transaction"
+    ORDER BY
+        date DESC
+"#;
 
-// TODO: order by date
 // TODO: paginate by date
 #[debug_handler(state = AppState)]
 pub async fn get_transactions(State(state): State<AppState>) -> BonkHttpResult<Vec<Transaction>> {
@@ -31,7 +43,7 @@ pub async fn get_transactions(State(state): State<AppState>) -> BonkHttpResult<V
         .db
         .con;
 
-    let mut transactions: HashMap<i64, Transaction> = HashMap::new();
+    let mut transactions: Vec<(i64, Transaction)> = vec![];
 
     for row in con.prepare(QUERY)?.into_iter() {
         let row = row?;
@@ -46,19 +58,27 @@ pub async fn get_transactions(State(state): State<AppState>) -> BonkHttpResult<V
             amount,
         };
 
-        match transactions.entry(id) {
-            Entry::Occupied(mut entry) => entry.get_mut().postings.push(posting),
-            Entry::Vacant(entry) => {
-                entry.insert(Transaction {
-                    date: date.to_string(),
-                    description: description.to_string(),
-                    postings: vec![posting],
-                });
+        match transactions.last_mut() {
+            Some((last_id, transaction)) if *last_id == id => {
+                transaction.postings.push(posting);
+            }
+            _ => {
+                transactions.push((
+                    id,
+                    Transaction {
+                        date: date.to_string(),
+                        description: description.to_string(),
+                        postings: vec![posting],
+                    },
+                ));
             }
         }
     }
 
-    let transactions = transactions.into_values().collect::<Vec<_>>();
+    let transactions = transactions
+        .into_iter()
+        .map(|(_, transaction)| transaction)
+        .collect();
 
     Ok(AppJson(transactions))
 }

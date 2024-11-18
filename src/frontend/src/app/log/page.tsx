@@ -38,11 +38,9 @@ export default function LogPage() {
   ) : (
     <div className="p-6">
       <div className="flex flex-col gap-4">
-        {transactions
-          .toSorted((a, b) => a.date.localeCompare(b.date)) // TODO: sorting should be done on the server
-          .map((transaction, idx) => (
-            <TransactionView transaction={transaction} key={idx} />
-          ))}
+        {transactions.map((transaction, idx) => (
+          <TransactionView transaction={transaction} key={idx} />
+        ))}
       </div>
     </div>
   );
