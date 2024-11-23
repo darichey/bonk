@@ -25,7 +25,7 @@ export default function RootLayout({
         )}
 
         <div className="flex flex-row h-full w-full px-2">
-          <div className="flex flex-col border-r-2 w-1/12 px-2">
+          <div className="flex flex-col border-r-2 min-w-fit px-2">
             <Image src={bonkSvg} alt="bonk logo" className="py-4" width={100} />
             <ul className="mb-5">
               <li>
