@@ -102,7 +102,8 @@ fn plaid_create_link_token(config: &Configuration) -> anyhow::Result<String> {
                 LinkTokenCreateRequestUser::new("user-id".to_string()),
             )
         },
-    )?
+    )
+    .context("create link token")?
     .link_token)
 }
 
@@ -117,7 +118,8 @@ fn plaid_exchange_public_token(
             client_id: None,
             secret: None,
         },
-    )?
+    )
+    .context("exchange public token")?
     .access_token;
 
     Ok(access_token)
