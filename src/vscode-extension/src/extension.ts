@@ -1,5 +1,4 @@
 import * as vscode from "vscode";
-import * as fs from "fs/promises";
 
 import {
   LanguageClient,
@@ -16,7 +15,6 @@ export async function activate(_context: vscode.ExtensionContext) {
     vscode.window.createOutputChannel("Bonk LSP Trace");
 
   // TODO: track changes to the Bonk.toml and workspaces
-  const bonkCfg = await findBonkCfg();
 
   const serverCommand = getServerCommand();
   if (!serverCommand) {
@@ -29,12 +27,12 @@ export async function activate(_context: vscode.ExtensionContext) {
   const serverOptions: ServerOptions = {
     run: {
       command: serverCommand.cmd,
-      args: [...serverCommand.args, bonkCfg],
+      args: serverCommand.args,
       transport: TransportKind.stdio,
     },
     debug: {
       command: serverCommand.cmd,
-      args: [...serverCommand.args, bonkCfg],
+      args: serverCommand.args,
       transport: TransportKind.stdio,
     },
   };
@@ -59,20 +57,6 @@ export function deactivate(): Thenable<void> | undefined {
     return undefined;
   }
   return client.stop();
-}
-
-async function findBonkCfg(): Promise<string> {
-  const workspace = vscode.workspace.workspaceFolders?.[0];
-  if (!workspace) {
-    // TODO: support cases where Bonk.toml is not in root of the current workspace
-    throw new Error("must have a workspace with Bonk.toml in root open");
-  }
-
-  const bonkCfg = `${workspace.uri.fsPath}/Bonk.toml`;
-
-  await fs.access(bonkCfg, fs.constants.F_OK);
-
-  return bonkCfg;
 }
 
 function getServerCommand(): { cmd: string; args: string[] } | undefined {

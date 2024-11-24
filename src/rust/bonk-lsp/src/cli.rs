@@ -9,14 +9,16 @@ use crate::run_server;
 #[command()]
 pub struct Args {
     /// Path to the Bonk workspace config.
-    pub cfg_path: PathBuf,
+    #[arg(short, long, default_value = "./Bonk.toml")]
+    pub cfg: PathBuf,
 
-    #[arg(long)]
+    /// vscode-languageserver-node passes --stdio when starting the server.
+    #[arg(long, hide = true)]
     pub stdio: bool,
 }
 
 pub fn run(args: Args) -> anyhow::Result<()> {
-    let Args { cfg_path, .. } = args;
-    run_server(cfg_path)?;
+    let Args { cfg, .. } = args;
+    run_server(cfg)?;
     Ok(())
 }
