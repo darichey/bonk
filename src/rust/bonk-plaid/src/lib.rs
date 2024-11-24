@@ -1,5 +1,6 @@
 pub mod cli;
 
+use anyhow::Context;
 use plaid::{
     apis::{configuration::Configuration, plaid_api},
     models::{
@@ -17,11 +18,15 @@ use std::{
     time::Duration,
 };
 
+fn env_var(name: &str) -> anyhow::Result<String> {
+    env::var(name).with_context(|| format!("{} not set", name))
+}
+
 fn plaid_config() -> anyhow::Result<Configuration> {
-    let base_path = env::var("PLAID_ENV")?;
-    let client_id = env::var("PLAID_CLIENT_ID")?;
-    let secret = env::var("PLAID_SECRET")?;
-    let version = env::var("PLAID_VERSION")?;
+    let base_path = env_var("PLAID_ENV")?;
+    let client_id = env_var("PLAID_CLIENT_ID")?;
+    let secret = env_var("PLAID_SECRET")?;
+    let version = env_var("PLAID_VERSION")?;
 
     let mut headers = HeaderMap::new();
     headers.insert("Plaid-Client-Id", client_id.parse()?);
