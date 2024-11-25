@@ -15,4 +15,5 @@ bonk-lsp.workspace = true
 bonk-plaid.workspace = true
 bonk-test.workspace = true
 bonk-query.workspace = true
+bonk-sort.workspace = true
 clap.workspace = true

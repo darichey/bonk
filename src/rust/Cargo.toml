@@ -12,6 +12,7 @@ members = [
     "bonk-parse",
     "bonk-plaid",
     "bonk-query",
+    "bonk-sort",
     "bonk-test",
     "bonk-workspace",
     "plaid",
@@ -58,6 +59,7 @@ bonk-lsp = { path = "./bonk-lsp" }
 bonk-parse = { path = "./bonk-parse" }
 bonk-plaid = { path = "./bonk-plaid" }
 bonk-query = { path = "./bonk-query" }
+bonk-sort = { path = "./bonk-sort" }
 bonk-test = { path = "./bonk-test" }
 bonk-workspace = { path = "./bonk-workspace" }
 plaid = { path = "./plaid" }

@@ -17,6 +17,7 @@ enum Commands {
     Plaid(bonk_plaid::cli::Args),
     Test(bonk_test::cli::Args),
     Query(bonk_query::cli::Args),
+    Sort(bonk_sort::cli::Args),
 }
 
 fn main() -> anyhow::Result<()> {
@@ -40,6 +41,7 @@ fn try_main() -> anyhow::Result<()> {
         Commands::Plaid(args) => bonk_plaid::cli::run(args)?,
         Commands::Test(args) => bonk_test::cli::run(args)?,
         Commands::Query(args) => bonk_query::cli::run(args)?,
+        Commands::Sort(args) => bonk_sort::cli::run(args)?,
     };
 
     Ok(())

@@ -178,6 +178,12 @@ impl Transaction<'_> {
             .collect()
     }
 
+    pub fn value<'s>(&self, src: &'s str) -> &'s str {
+        self.0
+            .utf8_text(src.as_bytes())
+            .expect("src is not valid utf-8")
+    }
+
     pub fn span(&self) -> SourceSpan {
         self.0.range().into()
     }
@@ -254,6 +260,12 @@ impl DeclareAccount<'_> {
             .children_by_field_name("metadata", &mut cursor)
             .map(Metadata)
             .collect()
+    }
+
+    pub fn value<'s>(&self, src: &'s str) -> &'s str {
+        self.0
+            .utf8_text(src.as_bytes())
+            .expect("src is not valid utf-8")
     }
 
     pub fn span(&self) -> SourceSpan {

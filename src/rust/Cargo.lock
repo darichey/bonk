@@ -315,6 +315,7 @@ dependencies = [
  "bonk-lsp",
  "bonk-plaid",
  "bonk-query",
+ "bonk-sort",
  "bonk-test",
  "clap",
 ]
@@ -420,6 +421,15 @@ dependencies = [
  "bonk-workspace",
  "clap",
  "prettytable-rs",
+]
+
+[[package]]
+name = "bonk-sort"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "bonk-parse",
+ "clap",
 ]
 
 [[package]]
