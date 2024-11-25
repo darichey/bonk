@@ -4,8 +4,8 @@ use anyhow::Context;
 use plaid::{
     apis::{configuration::Configuration, plaid_api},
     models::{
-        CountryCode, LinkTokenCreateRequest, LinkTokenCreateRequestUser, Products,
-        TransactionsGetRequest, TransactionsGetRequestOptions,
+        CountryCode, LinkTokenCreateRequest, LinkTokenCreateRequestUser, LinkTokenTransactions,
+        Products, TransactionsGetRequest, TransactionsGetRequestOptions,
     },
 };
 use reqwest::header::HeaderMap;
@@ -95,6 +95,9 @@ fn plaid_create_link_token(config: &Configuration) -> anyhow::Result<String> {
         config,
         LinkTokenCreateRequest {
             products: Some(Some(vec![Products::Transactions])),
+            transactions: Some(Box::new(LinkTokenTransactions {
+                days_requested: Some(730), // request max number of days
+            })),
             ..LinkTokenCreateRequest::new(
                 "bonk".to_string(),
                 "en".to_string(),
