@@ -57,16 +57,22 @@ pub fn run(args: Args) -> anyhow::Result<()> {
 
     let transactions = transactions
         .into_iter()
-        .map(|PlaidTransaction { amount, date, name }| Transaction {
-            date: Date::parse(&date, None).unwrap(),
-            description: name,
-            postings: vec![Posting {
-                account: account.clone(),
-                amount: Some(Amount::from_dollars(-amount, None)), // flip sign
+        .map(
+            |PlaidTransaction {
+                 amount,
+                 date,
+                 description,
+             }| Transaction {
+                date: Date::parse(&date, None).unwrap(),
+                description,
+                postings: vec![Posting {
+                    account: account.clone(),
+                    amount: Some(Amount::from_dollars(-amount, None)), // flip sign
+                    source: None,
+                }],
                 source: None,
-            }],
-            source: None,
-        })
+            },
+        )
         .collect();
 
     let ledger = Ledger {

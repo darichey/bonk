@@ -132,7 +132,7 @@ fn plaid_exchange_public_token(
 struct PlaidTransaction {
     amount: f64,
     date: String,
-    name: String,
+    description: String,
 }
 
 fn plaid_get_transactions(
@@ -160,7 +160,7 @@ fn plaid_get_transactions(
                     account_ids: None,
                     count: Some(500), // hardcode to the max allowed value
                     offset: Some(offset as i32),
-                    include_original_description: None,
+                    include_original_description: Some(Some(true)),
                     include_personal_finance_category_beta: None,
                     include_personal_finance_category: None,
                     include_logo_and_counterparty_beta: None,
@@ -174,7 +174,10 @@ fn plaid_get_transactions(
             PlaidTransaction {
                 amount: transaction.amount,
                 date: transaction.date,
-                name: transaction.name,
+                description: transaction
+                    .original_description
+                    .flatten()
+                    .unwrap_or(transaction.name),
             }
         }));
 
