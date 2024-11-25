@@ -19,11 +19,13 @@ enum Commands {
     Query(bonk_query::cli::Args),
 }
 
-fn main() {
-    if let Err(err) = try_main() {
+fn main() -> anyhow::Result<()> {
+    let result = try_main();
+    if let Err(err) = &result {
+        // also print the alternate Result display because it has more info
         eprintln!("Error: {:#?}", err);
-        std::process::exit(1);
     }
+    result
 }
 
 fn try_main() -> anyhow::Result<()> {
