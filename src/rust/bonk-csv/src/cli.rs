@@ -3,6 +3,7 @@ use std::{
     io::{self, stdin, stdout},
 };
 
+use anyhow::Context as _;
 use clap::Parser;
 
 use crate::do_convert;
@@ -34,7 +35,10 @@ pub fn run(args: Args) -> anyhow::Result<()> {
     let mut reader = {
         let r: Box<dyn io::Read> = match input.as_deref() {
             Some("-") | None => Box::new(stdin().lock()),
-            Some(input) => Box::new(File::open(input)?),
+            Some(input) => Box::new(
+                File::open(input)
+                    .with_context(|| format!("couldn't open input file: {}", input))?,
+            ),
         };
         csv::Reader::from_reader(r)
     };
@@ -43,7 +47,10 @@ pub fn run(args: Args) -> anyhow::Result<()> {
 
     let mut w: Box<dyn io::Write> = match output.as_deref() {
         Some("-") | None => Box::new(stdout().lock()),
-        Some(output) => Box::new(File::open(output)?),
+        Some(output) => Box::new(
+            File::create(output)
+                .with_context(|| format!("couldn't create output file: {}", output))?,
+        ),
     };
 
     w.write_fmt(format_args!("{}", ledger))?;
