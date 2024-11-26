@@ -29,11 +29,22 @@ pub fn do_convert<D: io::Read>(account: &str, reader: &mut Reader<D>) -> anyhow:
             Ok(Transaction {
                 date: Date::parse(&date, None).context("Couldn't parse date")?,
                 description,
-                postings: vec![Posting {
-                    account: account.clone(),
-                    amount: Some(Amount::from_dollars(amount, None)),
-                    source: None,
-                }],
+                postings: vec![
+                    Posting {
+                        account: account.clone(),
+                        amount: Some(Amount::from_dollars(amount, None)),
+                        source: None,
+                    },
+                    Posting {
+                        // TODO: this should use a built-in constant shared from somewhere
+                        account: Account {
+                            path: vec!["todo".to_string()],
+                            source: None,
+                        },
+                        amount: None,
+                        source: None,
+                    },
+                ],
                 source: None,
             })
         })
@@ -87,6 +98,16 @@ mod tests {
                             ),
                             source: None,
                         },
+                        Posting {
+                            account: Account {
+                                path: [
+                                    "todo",
+                                ],
+                                source: None,
+                            },
+                            amount: None,
+                            source: None,
+                        },
                     ],
                     source: None,
                 },
@@ -113,6 +134,16 @@ mod tests {
                                     source: None,
                                 },
                             ),
+                            source: None,
+                        },
+                        Posting {
+                            account: Account {
+                                path: [
+                                    "todo",
+                                ],
+                                source: None,
+                            },
+                            amount: None,
                             source: None,
                         },
                     ],

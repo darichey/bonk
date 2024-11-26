@@ -8,7 +8,7 @@ use clap::Parser;
 
 use crate::do_convert;
 
-/// Produces a partial Bonk ledger by converting transactions from a csv file with the header `date,description,amount`.
+/// Produces a Bonk ledger by converting transactions from a csv file with the header `date,description,amount`.
 #[derive(Parser, Debug)]
 #[command()]
 pub struct Args {
@@ -20,7 +20,7 @@ pub struct Args {
     #[arg(short, long)]
     pub input: Option<String>,
 
-    /// The path to output the ledger to (e.g., "./foo.partial.bonk"). If not given, or "-" is given, write to stdout.
+    /// The path to output the ledger to (e.g., "./foo.bonk"). If not given, or "-" is given, write to stdout.
     #[arg(short, long)]
     pub output: Option<String>,
 }
