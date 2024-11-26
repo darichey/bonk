@@ -40,6 +40,7 @@ pub fn get_diagnostics(workspace: &ParsedWorkspace) -> HashMap<PathBuf, Vec<Diag
                         CheckErrorCode::BuiltinAccount => {
                             "can't redeclare builtin account".to_string()
                         }
+                        CheckErrorCode::Todo => "todo account".to_string(),
                     },
                     related_information: None,
                     tags: None,

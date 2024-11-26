@@ -7,6 +7,7 @@ pub mod cli;
 mod declare_account;
 mod single_infer;
 mod syntax;
+mod todo;
 mod util;
 
 use bonk_parse::{ast::Source, ParsedLedger, ParsedWorkspace};
@@ -21,6 +22,7 @@ pub enum CheckErrorCode {
     SyntaxError,
     UnknownAccount,
     BuiltinAccount,
+    Todo,
 }
 
 #[derive(Clone, Debug, Hash, PartialEq, Eq)]
@@ -98,6 +100,9 @@ impl CheckUnit<&bonk_parse::ast::Ledger> {
         if let Err(errors) = errorless.check_declare_accounts() {
             all_errors.extend(errors);
         }
+        if let Err(errors) = errorless.check_todo() {
+            all_errors.extend(errors);
+        }
 
         if !all_errors.is_empty() {
             Err(all_errors)
@@ -165,6 +170,23 @@ impl CheckUnit<bonk_ast_errorless::Ledger> {
 
         for (_, ledger) in self.ledgers() {
             match declare_account::check_declare_accounts(ledger) {
+                Ok(_) => {}
+                Err(errs) => errors.extend(errs),
+            }
+        }
+
+        if errors.is_empty() {
+            Ok(())
+        } else {
+            Err(errors)
+        }
+    }
+
+    fn check_todo(&self) -> Result<(), Vec<CheckError>> {
+        let mut errors = vec![];
+
+        for (_, ledger) in self.ledgers() {
+            match todo::check_todo(ledger) {
                 Ok(_) => {}
                 Err(errs) => errors.extend(errs),
             }
