@@ -65,11 +65,22 @@ pub fn run(args: Args) -> anyhow::Result<()> {
              }| Transaction {
                 date: Date::parse(&date, None).unwrap(),
                 description,
-                postings: vec![Posting {
-                    account: account.clone(),
-                    amount: Some(Amount::from_dollars(-amount, None)), // flip sign
-                    source: None,
-                }],
+                postings: vec![
+                    Posting {
+                        account: account.clone(),
+                        amount: Some(Amount::from_dollars(-amount, None)), // flip sign
+                        source: None,
+                    },
+                    Posting {
+                        // TODO: this should use a built-in constant shared from somewhere
+                        account: Account {
+                            path: vec!["todo".to_string()],
+                            source: None,
+                        },
+                        amount: None,
+                        source: None,
+                    },
+                ],
                 source: None,
             },
         )
