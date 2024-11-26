@@ -24,7 +24,7 @@
   "repository": {
     "keywords": {
       "name": "keyword.bonk",
-      "match": "\\baccount\\b"
+      "match": "\\baccount|todo\\b"
     },
     "strings": {
       "name": "string.quoted.double.bonk",

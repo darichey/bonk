@@ -2,7 +2,9 @@
 
 mod account_ref;
 mod balance;
+mod builtins;
 pub mod cli;
+mod declare_account;
 mod single_infer;
 mod syntax;
 mod util;
@@ -18,6 +20,7 @@ pub enum CheckErrorCode {
     NoBalance,
     SyntaxError,
     UnknownAccount,
+    BuiltinAccount,
 }
 
 #[derive(Clone, Debug, Hash, PartialEq, Eq)]
@@ -85,6 +88,7 @@ impl CheckUnit<&bonk_parse::ast::Ledger> {
         errorless.check_single_infer()?;
         errorless.check_account_refs()?;
         errorless.check_balance()?;
+        errorless.check_declare_accounts()?;
 
         Ok(errorless)
     }
@@ -131,6 +135,23 @@ impl CheckUnit<bonk_ast_errorless::Ledger> {
 
         for (_, ledger) in self.ledgers() {
             match balance::check_balance(ledger) {
+                Ok(_) => {}
+                Err(errs) => errors.extend(errs),
+            }
+        }
+
+        if errors.is_empty() {
+            Ok(())
+        } else {
+            Err(errors)
+        }
+    }
+
+    fn check_declare_accounts(&self) -> Result<(), Vec<CheckError>> {
+        let mut errors = vec![];
+
+        for (_, ledger) in self.ledgers() {
+            match declare_account::check_declare_accounts(ledger) {
                 Ok(_) => {}
                 Err(errs) => errors.extend(errs),
             }

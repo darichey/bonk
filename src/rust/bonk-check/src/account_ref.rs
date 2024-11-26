@@ -1,6 +1,6 @@
 use std::collections::HashSet;
 
-use crate::{CheckError, CheckErrorCode, CheckUnit};
+use crate::{builtins, CheckError, CheckErrorCode, CheckUnit};
 
 pub fn check_account_refs(
     ledger: &bonk_ast_errorless::Ledger,
@@ -16,6 +16,7 @@ pub fn check_account_refs(
                 .iter()
                 .map(|a| a.account.path_string())
         })
+        .chain(builtins::accounts())
         .collect::<HashSet<String>>();
 
     for transaction in &ledger.transactions {

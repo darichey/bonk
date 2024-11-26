@@ -37,6 +37,9 @@ pub fn get_diagnostics(workspace: &ParsedWorkspace) -> HashMap<PathBuf, Vec<Diag
                         CheckErrorCode::NoBalance => "transaction doesn't balance".to_string(),
                         CheckErrorCode::SyntaxError => "syntax error".to_string(),
                         CheckErrorCode::UnknownAccount => "unknown account".to_string(),
+                        CheckErrorCode::BuiltinAccount => {
+                            "can't redeclare builtin account".to_string()
+                        }
                     },
                     related_information: None,
                     tags: None,
