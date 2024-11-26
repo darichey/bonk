@@ -85,12 +85,25 @@ impl CheckUnit<&bonk_parse::ast::Ledger> {
         let errorless = self.check_syntax(srcs)?;
 
         // FIXME: don't short-circuit, these errors should accumulate
-        errorless.check_single_infer()?;
-        errorless.check_account_refs()?;
-        errorless.check_balance()?;
-        errorless.check_declare_accounts()?;
+        let mut all_errors: Vec<CheckError> = vec![];
+        if let Err(errors) = errorless.check_single_infer() {
+            all_errors.extend(errors);
+        }
+        if let Err(errors) = errorless.check_account_refs() {
+            all_errors.extend(errors);
+        }
+        if let Err(errors) = errorless.check_balance() {
+            all_errors.extend(errors);
+        }
+        if let Err(errors) = errorless.check_declare_accounts() {
+            all_errors.extend(errors);
+        }
 
-        Ok(errorless)
+        if !all_errors.is_empty() {
+            Err(all_errors)
+        } else {
+            Ok(errorless)
+        }
     }
 }
 
