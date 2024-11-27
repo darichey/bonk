@@ -35,7 +35,7 @@ fn plaid_config() -> anyhow::Result<Configuration> {
 
     Ok(Configuration {
         base_path,
-        client: reqwest::Client::builder()
+        client: reqwest::blocking::Client::builder()
             .default_headers(headers)
             .build()?,
         ..Default::default()
