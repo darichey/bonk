@@ -12,11 +12,8 @@ src/models/account_filter.rs
 src/models/account_filters_response.rs
 src/models/account_holder_category.rs
 src/models/account_identity.rs
-src/models/account_identity_all_of.rs
 src/models/account_identity_document_upload.rs
-src/models/account_identity_document_upload_all_of.rs
 src/models/account_identity_match_score.rs
-src/models/account_identity_match_score_all_of.rs
 src/models/account_product_access.rs
 src/models/account_product_access_nullable.rs
 src/models/account_selection_cardinality.rs
@@ -237,7 +234,6 @@ src/models/category.rs
 src/models/category_insight_details.rs
 src/models/category_insights.rs
 src/models/cause.rs
-src/models/cause_all_of.rs
 src/models/client_provided_enhanced_transaction.rs
 src/models/client_provided_enriched_transaction.rs
 src/models/client_provided_raw_transaction.rs
@@ -557,7 +553,6 @@ src/models/entity_watchlist_screening_search_terms.rs
 src/models/entity_watchlist_search_terms.rs
 src/models/expiration_date.rs
 src/models/extended_recipient_metadata.rs
-src/models/extended_recipient_metadata_all_of.rs
 src/models/external_payment_initiation_consent_options.rs
 src/models/external_payment_options.rs
 src/models/external_payment_refund_details.rs
@@ -776,7 +771,6 @@ src/models/item_status_transactions.rs
 src/models/item_webhook_update_request.rs
 src/models/item_webhook_update_response.rs
 src/models/item_with_consent_fields.rs
-src/models/item_with_consent_fields_all_of.rs
 src/models/jwk_public_key.rs
 src/models/jwt_header.rs
 src/models/kyc_check_address_summary.rs
@@ -926,7 +920,6 @@ src/models/numbers_bacs.rs
 src/models/numbers_bacs_nullable.rs
 src/models/numbers_eft.rs
 src/models/numbers_eft_nullable.rs
-src/models/numbers_iban_nullable.rs
 src/models/numbers_international.rs
 src/models/numbers_international_iban.rs
 src/models/numbers_international_nullable.rs
@@ -968,7 +961,6 @@ src/models/partner_end_customer_secrets.rs
 src/models/partner_end_customer_status.rs
 src/models/partner_end_customer_technical_contact.rs
 src/models/partner_end_customer_with_secrets.rs
-src/models/partner_end_customer_with_secrets_all_of.rs
 src/models/party.rs
 src/models/party_individual.rs
 src/models/party_role_type.rs
@@ -1033,7 +1025,6 @@ src/models/payment_initiation_recipient_create_request.rs
 src/models/payment_initiation_recipient_create_response.rs
 src/models/payment_initiation_recipient_get_request.rs
 src/models/payment_initiation_recipient_get_response.rs
-src/models/payment_initiation_recipient_get_response_all_of.rs
 src/models/payment_initiation_recipient_list_request.rs
 src/models/payment_initiation_recipient_list_response.rs
 src/models/payment_initiation_standing_order_metadata.rs
@@ -1361,7 +1352,6 @@ src/models/total_outflow_amount30d.rs
 src/models/total_outflow_amount60d.rs
 src/models/total_outflow_amount90d.rs
 src/models/transaction.rs
-src/models/transaction_all_of.rs
 src/models/transaction_base.rs
 src/models/transaction_code.rs
 src/models/transaction_counterparty.rs

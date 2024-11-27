@@ -5,13 +5,12 @@ authors = ["OpenAPI Generator team and contributors"]
 description = "The Plaid REST API. Please see https://plaid.com/docs/api for more details."
 # Override this license by providing a License Object in the OpenAPI.
 license = "Unlicense"
-edition = "2018"
+edition = "2021"
 
 [dependencies]
-serde = "^1.0"
-serde_derive = "^1.0"
-serde_with = "^2.0"
+serde = { version = "^1.0", features = ["derive"] }
+serde_with = { version = "^3.8", default-features = false, features = ["base64", "std", "macros"] }
 serde_json = "^1.0"
-url = "^2.2"
-uuid = { version = "^1.0", features = ["serde"] }
-reqwest = "~0.9"
+url = "^2.5"
+uuid = { version = "^1.8", features = ["serde", "v4"] }
+reqwest = { version = "^0.12", features = ["json", "blocking", "multipart"] }
